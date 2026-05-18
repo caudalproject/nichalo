@@ -33,7 +33,7 @@ export default async function AnalizarPage() {
         <div className="mx-auto max-w-2xl">
           <h1 className="text-2xl font-bold">Nuevo análisis</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Ingresá los datos básicos y te devolvemos un veredicto en segundos.
+            Analizamos publicaciones reales de Mercado Libre y te decimos si vale la pena venderlo — antes de que inviertas un peso.
           </p>
           <div className="mt-6">
             <AnalizarForm

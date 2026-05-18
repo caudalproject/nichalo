@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
+import { FAQSection } from "@/components/FAQSection";
 
 const FEATURES = [
   {
@@ -89,15 +90,15 @@ export default function LandingPage() {
       <Navbar />
       <main>
         {/* Hero */}
-        <section className="container py-24 md:py-32">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-[#0A0A0A] md:text-6xl leading-tight">
+        <section className="py-16 md:py-32">
+          <div className="max-w-6xl mx-auto px-6 text-center">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#0A0A0A] leading-tight max-w-4xl mx-auto">
               ¿Tu producto va a vender en{" "}
-              <span className="text-[#16A34A]">Mercado Libre</span>?
+              <span className="text-[#16A34A] whitespace-nowrap">Mercado Libre</span>?
             </h1>
-            <p className="mt-6 text-lg text-[#6B7280] max-w-2xl mx-auto leading-relaxed">
-              Analizamos competencia, precios y márgenes con IA. Te damos un
-              veredicto claro antes de que inviertas un peso.
+            <p className="mt-6 text-lg text-[#6B7280] leading-relaxed max-w-xl mx-auto">
+              Antes de comprar stock, sabé exactamente si el mercado tiene
+              espacio para vos. Análisis real con datos de ML en segundos.
             </p>
             <HeroSection />
           </div>
@@ -256,6 +257,9 @@ export default function LandingPage() {
             ))}
           </div>
         </section>
+
+        {/* FAQ */}
+        <FAQSection />
       </main>
 
       {/* Footer */}

@@ -24,13 +24,20 @@ export function DashboardList({ initialList, userId }: Props) {
 
   async function handleDelete(id: string) {
     const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase
+    const { error, count } = await supabase
       .from("analyses")
-      .delete()
+      .delete({ count: "exact" })
       .eq("id", id)
       .eq("user_id", userId);
 
     if (error) {
+      console.error("[delete] Supabase error:", error);
+      setDeleteError("No se pudo eliminar el análisis. Intentá de nuevo.");
+      return;
+    }
+
+    if (count === 0) {
+      console.warn("[delete] 0 rows deleted — likely missing RLS DELETE policy");
       setDeleteError("No se pudo eliminar el análisis. Intentá de nuevo.");
       return;
     }
