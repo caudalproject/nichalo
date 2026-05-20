@@ -81,6 +81,16 @@ function sellerDisplayName(nombre: string, index: number): string {
   return nombre;
 }
 
+function formatLocalPrice(value: number, currencyCode: string | undefined): string {
+  if (!currencyCode) return formatCurrency(value, "USD");
+  const locale = currencyCode === "MXN" ? "es-MX" : currencyCode === "COP" ? "es-CO" : "es-AR";
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currencyCode,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 const SCORE_PILLS = [
   {
     label: "0–49",
@@ -141,10 +151,12 @@ export default async function ResultadoPage({ params }: Params) {
   const styles = veredictoStyles(analysis.veredicto);
 
   const costo = Number(analysis.costo_estimado);
-  const precioVenta = result.margen.precio_sugerido_venta;
-  const margenBruto =
-    precioVenta > 0 ? ((precioVenta - costo) / precioVenta) * 100 : 0;
-  const roi = costo > 0 ? ((precioVenta - costo) / costo) * 100 : 0;
+  const moneda = result.moneda;
+  const tasaCambio = result.tasa_cambio ?? 1400;
+  const precioVentaLocal = result.margen.precio_sugerido_venta;
+  const precioVentaUsd = moneda ? (tasaCambio > 0 ? precioVentaLocal / tasaCambio : 0) : precioVentaLocal;
+  const margenBruto = precioVentaUsd > 0 ? ((precioVentaUsd - costo) / precioVentaUsd) * 100 : 0;
+  const roi = costo > 0 ? ((precioVentaUsd - costo) / costo) * 100 : 0;
   const fecha = new Date(analysis.created_at).toLocaleString("es-AR", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -231,10 +243,10 @@ export default async function ResultadoPage({ params }: Params) {
           {/* CAPA 2: Resumen ejecutivo */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {[
-              { label: "Precio promedio", value: formatCurrency(result.competencia.precio_promedio) },
+              { label: "Precio promedio", value: formatLocalPrice(result.competencia.precio_promedio, moneda) },
               { label: "Margen bruto", value: `${margenBruto.toFixed(1)}%` },
               { label: "Vendedores relevados", value: String(result.competencia.cantidad_vendedores) },
-              { label: "Precio sugerido", value: formatCurrency(result.margen.precio_sugerido_venta) },
+              { label: "Precio sugerido", value: formatLocalPrice(result.margen.precio_sugerido_venta, moneda) },
             ].map((m) => (
               <div key={m.label} className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
                 <div className="text-xs text-[#6B7280]">{m.label}</div>
@@ -298,13 +310,13 @@ export default async function ResultadoPage({ params }: Params) {
                   {result.competencia.cantidad_vendedores}
                 </Row>
                 <Row label="Precio mínimo">
-                  {formatCurrency(result.competencia.precio_minimo)}
+                  {formatLocalPrice(result.competencia.precio_minimo, moneda)}
                 </Row>
                 <Row label="Precio promedio">
-                  {formatCurrency(result.competencia.precio_promedio)}
+                  {formatLocalPrice(result.competencia.precio_promedio, moneda)}
                 </Row>
                 <Row label="Precio máximo">
-                  {formatCurrency(result.competencia.precio_maximo)}
+                  {formatLocalPrice(result.competencia.precio_maximo, moneda)}
                 </Row>
               </CardContent>
             </Card>
@@ -317,10 +329,12 @@ export default async function ResultadoPage({ params }: Params) {
                 <div>
                   <div className="flex items-center justify-between border-b pb-1.5">
                     <span className="text-muted-foreground">Precio sugerido de venta</span>
-                    <span>{formatCurrency(result.margen.precio_sugerido_venta)}</span>
+                    <span>{formatLocalPrice(result.margen.precio_sugerido_venta, moneda)}</span>
                   </div>
                   <p className="mt-1 text-xs text-[#6B7280]">
-                    Calculado en el percentil 30 del mercado con margen mínimo garantizado
+                    {moneda
+                      ? `≈ ${formatCurrency(precioVentaUsd, "USD")} · Percentil según perfil con margen mínimo garantizado`
+                      : "Calculado en el percentil 30 del mercado con margen mínimo garantizado"}
                   </p>
                 </div>
                 <Row label="Comisión ML estimada">
@@ -390,7 +404,7 @@ export default async function ResultadoPage({ params }: Params) {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-muted-foreground">Precio</span>
-                          <span>{formatCurrency(v.precio)}</span>
+                          <span>{formatLocalPrice(v.precio, moneda)}</span>
                         </div>
                         {v.ventas > 0 && (
                           <div className="flex items-center justify-between">

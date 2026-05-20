@@ -66,14 +66,14 @@ function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, c
 
 Producto: "${producto}" | País: ${pais} (${scrape.domain}) | Costo/unidad USD: ${costoEstimadoUsd} | Publicaciones: ${scrape.totalListings}
 
-MONEDA LOCAL DEL MERCADO: ${currencyName} (${currencyCode})
+MONEDA LOCAL: ${currencyName} (${currencyCode})
 TASA DE CAMBIO HOY: 1 USD = ${rate} ${currencyCode}
-CRÍTICO — CONVERSIÓN DE PRECIOS:
-- Los precios del scraping de Mercado Libre están en ${currencyCode} (moneda local)
-- Dividí cada precio por ${rate} para convertir a USD
-- Ejemplo: si un producto cuesta ${Math.round(rate * 25)} ${currencyCode} = 25 USD
-- NUNCA reportes precios en ${currencyCode} en el JSON — siempre en USD usando esta tasa
-- El costo_estimado del usuario (${costoEstimadoUsd} USD) ya está en USD, no convertir
+REGLA DE PRECIOS CRÍTICA:
+- Todos los precios del scraping ya están en ${currencyCode} (moneda local)
+- Reportá precio_promedio, precio_minimo, precio_maximo y precio_sugerido en ${currencyCode} (moneda local) — NO convertir a USD
+- SOLO el costo_estimado y la ganancia_estimada van en USD (porque el usuario los ingresó en USD)
+- Para calcular margen: convertí el precio_sugerido de ${currencyCode} a USD usando la tasa (dividir por ${rate}), luego restá el costo en USD
+- Ejemplo: si precio_sugerido = ${Math.round(rate * 25)} ${currencyCode} y costo = 10 USD → precio en USD = 25 → ganancia = 25 - 10 - comision = X USD
 
 PERFIL DEL VENDEDOR: ${perfil}
 Reglas según perfil:
@@ -81,11 +81,24 @@ Reglas según perfil:
 - Si es "intermedio": Usar precio del percentil 25-30. Score normal según competencia. Recomendación enfocada en diferenciación y optimización.
 - Si es "experto": Usar precio del percentil 40-50 (puede entrar al promedio). Score puede ser más alto en mercados competidos. Recomendación enfocada en escala y volumen.
 
+REGLA DURA DE PRECIO SUGERIDO:
+- Para "principiante": el precio_sugerido NUNCA puede ser mayor al precio_minimo del mercado. Debe estar entre precio_minimo y precio_minimo * 1.05 (hasta 5% sobre el mínimo). Objetivo: conseguir las primeras ventas y reputación, no maximizar margen.
+- Para "intermedio": precio_sugerido entre percentil 20 y percentil 35 del mercado.
+- Para "experto": precio_sugerido en el percentil 30-50 del mercado.
+
 Datos (${sample.length} items):
 ${JSON.stringify(sample)}
 
 Respondé SOLO con JSON válido (sin markdown):
-{"veredicto":"VIABLE"|"SATURADO"|"MARGINAL","score":0-100,"resumen":"4-5 líneas de análisis real","competencia":{"cantidad_vendedores":int,"precio_minimo":USD,"precio_maximo":USD,"precio_promedio":USD,"top_vendedores":[{"nombre":"","precio":USD,"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"margen":{"precio_sugerido_venta":USD,"comision_ml_estimada":USD,"ganancia_estimada":USD,"margen_porcentaje":número,"costo_evaluacion":"COMPETITIVO"|"ALTO"|"MUY_ALTO"},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"USD/unidad","evaluacion":""}}
+{"veredicto":"VIABLE"|"SATURADO"|"MARGINAL","score":0-100,"resumen":"4-5 líneas de análisis real","competencia":{"cantidad_vendedores":int,"precio_minimo":${currencyCode},"precio_maximo":${currencyCode},"precio_promedio":${currencyCode},"top_vendedores":[{"nombre":"","precio":${currencyCode},"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"margen":{"precio_sugerido_venta":${currencyCode},"comision_ml_estimada":USD,"ganancia_estimada":USD,"margen_porcentaje":número,"costo_evaluacion":"COMPETITIVO"|"ALTO"|"MUY_ALTO"},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"USD/unidad","evaluacion":""}}
+
+REGLA DE TENDENCIA Y ESTACIONALIDAD:
+- Si no hay datos de ventas en el scraping, inferí la tendencia basándote en: a) La categoría del producto (electrónica, hogar, moda, etc.) b) El país (Argentina, México, Colombia) c) El contexto general del mercado de e-commerce latinoamericano
+- NUNCA devuelvas "No hay datos suficientes" — siempre inferí algo útil
+- Ejemplos válidos: "Crecimiento sostenido en electrónica de consumo en Argentina 2024-2026", "Demanda estable con picos en Hot Sale y Navidad", "Categoría en expansión post-pandemia en LATAM"
+- Para estacionalidad, si es electrónica: mencionar Hot Sale (mayo), CyberMonday (noviembre), Navidad
+- Si es hogar/electrodomésticos: mencionar inicio de año (enero-febrero) y Hot Sale
+- Si es moda: temporadas + Hot Sale
 
 REGLAS DE SCORE:
 - Si no hay datos de ventas registradas en las publicaciones: máximo score 65
@@ -98,8 +111,8 @@ Reglas generales:
 - VIABLE score 75-100 (>25% margen, poca competencia) | MARGINAL 50-74 (10-25% margen) | SATURADO 0-49 (<10% margen)
 - costo_evaluacion: COMPETITIVO=similar/menor a importación directa; ALTO=20-50% mayor; MUY_ALTO=>50% mayor
 - top_vendedores: los 3 mejores por ventas; distribucion_precios: al menos 2 rangos
-- precio_sugerido: según perfil vendedor (ver reglas arriba), verificando costo + 15% comisión ML + 25% margen mínimo; si no cubre, subí al mínimo que cubra
-- Todos los precios en USD.`;
+- precio_sugerido: según perfil vendedor y REGLA DURA arriba, en ${currencyCode}; comision_ml_estimada y ganancia_estimada en USD
+- Precios de mercado en ${currencyCode}; comision y ganancia en USD.`;
 }
 
 function extractJson(text: string): unknown | null {
@@ -198,6 +211,8 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
         ? analisisCosto.evaluacion
         : "No disponible",
     },
+    moneda: args.currency?.code ?? "ARS",
+    tasa_cambio: args.exchangeRate ?? 1400,
   };
 }
 
