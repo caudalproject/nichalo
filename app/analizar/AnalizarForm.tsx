@@ -22,16 +22,18 @@ interface Props {
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // 4 MB
 
-const LOADING_MESSAGES = [
-  "Buscando publicaciones en Mercado Libre...",
-  "Analizando precios y competencia...",
-  "Procesando datos con IA...",
-  "Casi listo...",
-];
+const PROGRESS: Record<string, number> = {
+  pending: 15,
+  scraping: 33,
+  analyzing: 66,
+  done: 100,
+};
 
 export function AnalizarForm({ creditsLeft, plan }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const [producto, setProducto] = useState("");
   const [pais, setPais] = useState<"AR" | "MX" | "CO">("AR");
   const [costo, setCosto] = useState("");
@@ -40,21 +42,18 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+  const [stepMessage, setStepMessage] = useState("Iniciando análisis...");
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const noCredits = creditsLeft <= 0;
 
+  // Cleanup polling on unmount
   useEffect(() => {
-    if (!loading) {
-      setLoadingMsgIdx(0);
-      return;
-    }
-    const interval = setInterval(() => {
-      setLoadingMsgIdx((prev) => (prev + 1) % LOADING_MESSAGES.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [loading]);
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, []);
 
   function handleFile(file: File) {
     if (file.size > MAX_IMAGE_BYTES) {
@@ -93,6 +92,31 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
+  function startPolling(jobId: string) {
+    pollingRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/analizar/status?id=${jobId}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        setProgress(PROGRESS[data.status] ?? 15);
+        if (data.step_message) setStepMessage(data.step_message);
+
+        if (data.status === "done") {
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          router.push(`/resultado/${data.analysis_id}`);
+        } else if (data.status === "error") {
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          setError(data.error_message || "Ocurrió un error durante el análisis.");
+          setLoading(false);
+        }
+      } catch {
+        // Network error — keep polling
+      }
+    }, 3000);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -113,7 +137,9 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
     }
 
     setLoading(true);
-    setLoadingMsgIdx(0);
+    setProgress(5);
+    setStepMessage("Iniciando análisis...");
+
     try {
       const body: Record<string, unknown> = {
         producto: producto.trim(),
@@ -141,13 +167,28 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
         } else {
           setError(data?.detail || data?.error || "Error desconocido.");
         }
+        setLoading(false);
         return;
       }
 
-      router.push(`/resultado/${data.id}`);
+      // Cache hit or image analysis — redirect immediately
+      if (data.id) {
+        router.push(`/resultado/${data.id}`);
+        return;
+      }
+
+      // Background job — start polling
+      if (data.job_id) {
+        setProgress(PROGRESS.pending);
+        setStepMessage("Iniciando análisis...");
+        startPolling(data.job_id);
+        return;
+      }
+
+      setError("Respuesta inesperada del servidor.");
+      setLoading(false);
     } catch (err) {
       setError(String(err));
-    } finally {
       setLoading(false);
     }
   }
@@ -261,12 +302,18 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
           </div>
 
           {loading && (
-            <div className="rounded-md border bg-muted/40 p-4">
+            <div className="rounded-md border bg-muted/40 p-4 space-y-3">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <span className="inline-block h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
-                {LOADING_MESSAGES[loadingMsgIdx]}
+                {stepMessage}
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-700 ease-in-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
                 Esto puede tardar hasta 60 segundos
               </p>
             </div>

@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { scrapeMercadoLibre } from "@/lib/apify";
 import { analizarConGemini } from "@/lib/gemini";
 import { PLAN_CONFIG } from "@/lib/plans";
+import { inngest } from "@/lib/inngest";
 import type { Plan, AnalysisResult } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -92,10 +93,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    let analysis: AnalysisResult | null = null;
-    let publicacionesAnalizadas = 0;
-
-    // Cache lookup — skip if image is provided (image analyses are always fresh)
+    // --- Cache lookup (only when no image) ---
     if (!imagenBase64) {
       const productoNorm = producto.trim().toLowerCase();
       const cutoff = new Date(Date.now() - CACHE_TTL_MS).toISOString();
@@ -109,16 +107,43 @@ export async function POST(request: Request) {
         .maybeSingle();
 
       if (cached) {
-        analysis = cached.resultado_json as AnalysisResult;
-        publicacionesAnalizadas = cached.publicaciones_analizadas as number;
+        const resultadoJson = cached.resultado_json as AnalysisResult;
+        resultadoJson.publicaciones_analizadas = cached.publicaciones_analizadas as number;
+
+        const { data: inserted, error: insertErr } = await supabase
+          .from("analyses")
+          .insert({
+            user_id: user.id,
+            producto,
+            pais,
+            costo_estimado: costoEstimado,
+            resultado_json: resultadoJson,
+            score: resultadoJson.score,
+            veredicto: resultadoJson.veredicto,
+          })
+          .select("id")
+          .single();
+
+        if (insertErr || !inserted) {
+          return NextResponse.json(
+            { error: insertErr?.message ?? "Error guardando el análisis." },
+            { status: 500 }
+          );
+        }
+
+        await supabase
+          .from("users")
+          .update({ analisis_restantes: Math.max(0, restantes - 1) })
+          .eq("id", user.id);
+
+        return NextResponse.json({ id: inserted.id });
       }
     }
 
-    if (!analysis) {
+    // --- Image analysis: run synchronously (can't pass base64 through Inngest) ---
+    if (imagenBase64) {
       const scrape = await scrapeMercadoLibre(producto, pais, plan);
-      publicacionesAnalizadas = scrape.totalListings;
-
-      analysis = await analizarConGemini({
+      const analysis = await analizarConGemini({
         producto,
         pais,
         costoEstimadoUsd: costoEstimado,
@@ -127,60 +152,74 @@ export async function POST(request: Request) {
         imagenMimeType,
       });
 
-      // Persist to cache (skip when image is attached — image analyses are bespoke)
-      if (!imagenBase64) {
-        const productoNorm = producto.trim().toLowerCase();
-        await supabase.from("analysis_cache").upsert(
-          {
-            producto: productoNorm,
-            pais,
-            resultado_json: analysis,
-            publicaciones_analizadas: publicacionesAnalizadas,
-          },
-          { onConflict: "producto,pais" }
+      const resultadoJson: AnalysisResult = {
+        ...analysis,
+        publicaciones_analizadas: scrape.totalListings,
+        imagen_url: `data:${imagenMimeType ?? "image/jpeg"};base64,${imagenBase64}`,
+      };
+
+      const { data: inserted, error: insertErr } = await supabase
+        .from("analyses")
+        .insert({
+          user_id: user.id,
+          producto,
+          pais,
+          costo_estimado: costoEstimado,
+          resultado_json: resultadoJson,
+          score: analysis.score,
+          veredicto: analysis.veredicto,
+        })
+        .select("id")
+        .single();
+
+      if (insertErr || !inserted) {
+        return NextResponse.json(
+          { error: insertErr?.message ?? "Error guardando el análisis." },
+          { status: 500 }
         );
       }
+
+      await supabase
+        .from("users")
+        .update({ analisis_restantes: Math.max(0, restantes - 1) })
+        .eq("id", user.id);
+
+      return NextResponse.json({ id: inserted.id });
     }
 
-    const resultadoJson: AnalysisResult = {
-      ...analysis,
-      publicaciones_analizadas: publicacionesAnalizadas,
-      ...(imagenBase64
-        ? { imagen_url: `data:${imagenMimeType ?? "image/jpeg"};base64,${imagenBase64}` }
-        : {}),
-    };
-
-    const { data: inserted, error: insertErr } = await supabase
-      .from("analyses")
+    // --- No cache, no image: create job and fire Inngest ---
+    const { data: job, error: jobErr } = await supabase
+      .from("analysis_jobs")
       .insert({
         user_id: user.id,
         producto,
         pais,
         costo_estimado: costoEstimado,
-        resultado_json: resultadoJson,
-        score: analysis.score,
-        veredicto: analysis.veredicto,
+        status: "pending",
       })
       .select("id")
       .single();
 
-    if (insertErr || !inserted) {
+    if (jobErr || !job) {
       return NextResponse.json(
-        { error: insertErr?.message ?? "Error guardando el análisis." },
+        { error: jobErr?.message ?? "Error creando el job." },
         { status: 500 }
       );
     }
 
-    const { error: updErr } = await supabase
-      .from("users")
-      .update({ analisis_restantes: Math.max(0, restantes - 1) })
-      .eq("id", user.id);
+    await inngest.send({
+      name: "nichalo/analisis.requested",
+      data: {
+        job_id: job.id,
+        user_id: user.id,
+        producto,
+        pais,
+        costo_estimado: costoEstimado,
+        plan,
+      },
+    });
 
-    if (updErr) {
-      console.warn("[analizar] failed to decrement credits", updErr.message);
-    }
-
-    return NextResponse.json({ success: true, id: inserted.id });
+    return NextResponse.json({ job_id: job.id }, { status: 202 });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
