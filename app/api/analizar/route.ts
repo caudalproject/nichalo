@@ -161,8 +161,6 @@ export async function POST(request: Request) {
         ? `${process.env.SITE_URL}/.netlify/functions/analizar-background`
         : `${process.env.SITE_URL}/api/analizar-background`;
 
-    console.log("[analizar] Calling background function:", bgUrl);
-
     fetch(bgUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -174,12 +172,7 @@ export async function POST(request: Request) {
         costo_estimado: costoEstimado,
         plan,
       }),
-    }).then(async (res) => {
-      const text = await res.text();
-      console.log("[analizar] Background function response:", res.status, text);
-    }).catch((err) => {
-      console.error("[analizar] Background function error:", err);
-    });
+    }).catch(() => {});
 
     return NextResponse.json({ job_id: job.id }, { status: 202 });
   } catch (err) {
