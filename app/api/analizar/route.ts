@@ -158,8 +158,8 @@ export async function POST(request: Request) {
     // Fire-and-forget: no await
     const bgUrl =
       process.env.NODE_ENV === "production"
-        ? `${process.env.NEXT_PUBLIC_SITE_URL}/.netlify/functions/analizar-background`
-        : `${process.env.NEXT_PUBLIC_SITE_URL}/api/analizar-background`;
+        ? `${process.env.SITE_URL}/.netlify/functions/analizar-background`
+        : `${process.env.SITE_URL}/api/analizar-background`;
 
     fetch(bgUrl, {
       method: "POST",
