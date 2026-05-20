@@ -156,7 +156,12 @@ export async function POST(request: Request) {
     }
 
     // Fire-and-forget: no await
-    fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/analizar-background`, {
+    const bgUrl =
+      process.env.NODE_ENV === "production"
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/.netlify/functions/analizar-background`
+        : `${process.env.NEXT_PUBLIC_SITE_URL}/api/analizar-background`;
+
+    fetch(bgUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
