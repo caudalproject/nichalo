@@ -1,34 +1,33 @@
 import { createClient } from "@supabase/supabase-js";
+import { startApifyRun, checkApifyRun, getApifyResults } from "../../lib/apify.js";
+import { analizarConGemini } from "../../lib/gemini.js";
+import { PLAN_CONFIG } from "../../lib/plans.js";
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export default async function handler(req: Request) {
+const updateJob = async (job_id, fields) => {
+  await supabase
+    .from("analysis_jobs")
+    .update({ ...fields, updated_at: new Date().toISOString() })
+    .eq("id", job_id);
+};
+
+export default async function handler(req) {
   const { job_id, user_id, producto, pais, costo_estimado, plan } = await req.json();
 
-  const updateJob = async (fields: Record<string, unknown>) => {
-    await supabase
-      .from("analysis_jobs")
-      .update({ ...fields, updated_at: new Date().toISOString() })
-      .eq("id", job_id);
-  };
-
   try {
-    await updateJob({ status: "scraping", step_message: "Buscando productos en Mercado Libre..." });
-
-    const { startApifyRun, checkApifyRun, getApifyResults } = await import("../../lib/apify");
-    const { PLAN_CONFIG } = await import("../../lib/plans");
+    await updateJob(job_id, { status: "scraping", step_message: "Buscando productos en Mercado Libre..." });
 
     const runId = await startApifyRun(producto, pais, plan);
 
-    // Polling de Apify (hasta 120 segundos)
     let apifyStatus = "RUNNING";
     let attempts = 0;
-    while (apifyStatus === "RUNNING" || apifyStatus === "READY" || apifyStatus === "CREATED") {
+    while (["RUNNING", "READY", "CREATED"].includes(apifyStatus)) {
       if (attempts > 40) throw new Error("Apify timeout después de 120 segundos");
-      await new Promise((r) => setTimeout(r, 3000));
+      await new Promise(r => setTimeout(r, 3000));
       const result = await checkApifyRun(runId);
       apifyStatus = result.status;
       attempts++;
@@ -41,9 +40,8 @@ export default async function handler(req: Request) {
     const { maxItems } = PLAN_CONFIG[plan];
     const scrape = await getApifyResults(runId, producto, pais, maxItems);
 
-    await updateJob({ status: "analyzing", step_message: "Analizando competencia con IA..." });
+    await updateJob(job_id, { status: "analyzing", step_message: "Analizando competencia con IA..." });
 
-    const { analizarConGemini } = await import("../../lib/gemini");
     const analysis = await analizarConGemini({
       producto,
       pais,
@@ -74,12 +72,7 @@ export default async function handler(req: Request) {
 
     const productoNorm = producto.trim().toLowerCase();
     await supabase.from("analysis_cache").upsert(
-      {
-        producto: productoNorm,
-        pais,
-        resultado_json: resultadoJson,
-        publicaciones_analizadas: scrape.totalListings,
-      },
+      { producto: productoNorm, pais, resultado_json: resultadoJson, publicaciones_analizadas: scrape.totalListings },
       { onConflict: "producto,pais" }
     );
 
@@ -96,21 +89,17 @@ export default async function handler(req: Request) {
         .eq("id", user_id);
     }
 
-    await updateJob({
+    await updateJob(job_id, {
       status: "done",
       step_message: "¡Análisis completado!",
       analysis_id: inserted.id,
     });
+
   } catch (err) {
-    await supabase
-      .from("analysis_jobs")
-      .update({
-        status: "error",
-        error_message: String(err),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", job_id);
+    console.error("[analizar-background] Error:", err);
+    await updateJob(job_id, {
+      status: "error",
+      error_message: String(err),
+    });
   }
 }
-
-export const config = { path: "/api/analizar-background" };
