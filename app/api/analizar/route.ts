@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
-import { scrapeMercadoLibre } from "@/lib/apify";
 import { analizarConGemini } from "@/lib/gemini";
 import { PLAN_CONFIG } from "@/lib/plans";
 import { inngest } from "@/lib/inngest";
@@ -140,51 +139,12 @@ export async function POST(request: Request) {
       }
     }
 
-    // --- Image analysis: run synchronously (can't pass base64 through Inngest) ---
+    // --- Image analysis: temporarily disabled ---
     if (imagenBase64) {
-      const scrape = await scrapeMercadoLibre(producto, pais, plan);
-      const analysis = await analizarConGemini({
-        producto,
-        pais,
-        costoEstimadoUsd: costoEstimado,
-        scrape,
-        imagenBase64,
-        imagenMimeType,
-      });
-
-      const resultadoJson: AnalysisResult = {
-        ...analysis,
-        publicaciones_analizadas: scrape.totalListings,
-        imagen_url: `data:${imagenMimeType ?? "image/jpeg"};base64,${imagenBase64}`,
-      };
-
-      const { data: inserted, error: insertErr } = await supabase
-        .from("analyses")
-        .insert({
-          user_id: user.id,
-          producto,
-          pais,
-          costo_estimado: costoEstimado,
-          resultado_json: resultadoJson,
-          score: analysis.score,
-          veredicto: analysis.veredicto,
-        })
-        .select("id")
-        .single();
-
-      if (insertErr || !inserted) {
-        return NextResponse.json(
-          { error: insertErr?.message ?? "Error guardando el análisis." },
-          { status: 500 }
-        );
-      }
-
-      await supabase
-        .from("users")
-        .update({ analisis_restantes: Math.max(0, restantes - 1) })
-        .eq("id", user.id);
-
-      return NextResponse.json({ id: inserted.id });
+      return NextResponse.json(
+        { error: "El análisis con imagen está temporalmente deshabilitado. Usá el análisis estándar." },
+        { status: 503 }
+      );
     }
 
     // --- No cache, no image: create job and fire Inngest ---
