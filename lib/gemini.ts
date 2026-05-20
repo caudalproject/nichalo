@@ -55,83 +55,22 @@ export async function analizarConGemini(
 
 function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64 }: AnalyzeArgs) {
   const sample = scrape.listings.slice(0, 50);
-  return `Eres un analista experto de Mercado Libre en LATAM. Te paso datos reales de scraping y un costo estimado por unidad.${imagenBase64 ? " También te adjunto una imagen del producto para que evalúes su calidad, diferenciación visual y posicionamiento." : ""}
+  return `Eres un analista experto de Mercado Libre.${imagenBase64 ? " Evaluá también la imagen adjunta: calidad visual, diferenciación y posicionamiento." : ""}
 
-Producto: "${producto}"
-País objetivo: ${pais} (dominio: ${scrape.domain})
-Costo estimado por unidad (USD): ${costoEstimadoUsd}
-Cantidad de publicaciones relevadas: ${scrape.totalListings}
+Producto: "${producto}" | País: ${pais} (${scrape.domain}) | Costo/unidad USD: ${costoEstimadoUsd} | Publicaciones: ${scrape.totalListings}
 
-Listado (JSON, hasta 50 items):
-${JSON.stringify(sample, null, 2)}
+Datos (${sample.length} items):
+${JSON.stringify(sample)}
 
-Devolvé EXCLUSIVAMENTE un JSON válido (sin texto adicional, sin markdown) con esta estructura exacta:
-{
-  "veredicto": "VIABLE" | "SATURADO" | "MARGINAL",
-  "score": número entero entre 0 y 100,
-  "resumen": "4-5 líneas con análisis real del mercado y oportunidad",
-  "competencia": {
-    "cantidad_vendedores": entero,
-    "precio_minimo": número en USD,
-    "precio_maximo": número en USD,
-    "precio_promedio": número en USD,
-    "top_vendedores": [
-      {
-        "nombre": "nombre del vendedor",
-        "precio": número en USD,
-        "ventas": entero (cantidad vendida),
-        "reputacion": "ALTA|MEDIA|BAJA",
-        "diferenciador": "qué los hace destacar en 1 línea"
-      }
-    ],
-    "palabras_clave_titulos": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-    "distribucion_precios": [
-      { "rango": "0-20", "cantidad": entero },
-      { "rango": "20-50", "cantidad": entero },
-      { "rango": "50-100", "cantidad": entero },
-      { "rango": "100+", "cantidad": entero }
-    ]
-  },
-  "margen": {
-    "precio_sugerido_venta": número en USD (calculado según la lógica de percentil 30 indicada al final),
-    "comision_ml_estimada": número en USD (comisión total estimada de Mercado Libre por venta),
-    "ganancia_estimada": número en USD (precio_sugerido - costo - comision),
-    "margen_porcentaje": número (ganancia/precio_sugerido * 100),
-    "costo_evaluacion": "COMPETITIVO" | "ALTO" | "MUY_ALTO"
-  },
-  "tendencia": "descripción de la tendencia y demanda observada en los datos",
-  "estacionalidad": "descripción de estacionalidad y épocas de mayor demanda para este producto",
-  "diferenciadores_oportunidad": ["oportunidad1", "oportunidad2", "oportunidad3"],
-  "riesgos": ["riesgo1", "riesgo2", "riesgo3"],
-  "recomendacion": "una recomendación accionable y específica para el seller",
-  "titulo_sugerido_publicacion": "un título optimizado para ML con palabras clave relevantes (máx 60 caracteres)",
-  "analisis_costo_proveedor": {
-    "rango_mayorista_estimado": "rango estimado en USD basado en Alibaba/importación (ej: $8-15 USD/unidad)",
-    "evaluacion": "análisis de si el costo ingresado es competitivo vs importación directa"
-  }
-}
+Respondé SOLO con JSON válido (sin markdown):
+{"veredicto":"VIABLE"|"SATURADO"|"MARGINAL","score":0-100,"resumen":"4-5 líneas de análisis real","competencia":{"cantidad_vendedores":int,"precio_minimo":USD,"precio_maximo":USD,"precio_promedio":USD,"top_vendedores":[{"nombre":"","precio":USD,"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"margen":{"precio_sugerido_venta":USD,"comision_ml_estimada":USD,"ganancia_estimada":USD,"margen_porcentaje":número,"costo_evaluacion":"COMPETITIVO"|"ALTO"|"MUY_ALTO"},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"USD/unidad","evaluacion":""}}
 
-Criterio de veredicto (usá el score para determinar el veredicto de forma consistente):
-- VIABLE: score 75-100. Poca competencia o márgenes claros (>25%).
-- MARGINAL: score 50-74. Viable pero ajustado (10-25% margen) o competencia media.
-- SATURADO: score 0-49. Mucha competencia con precios bajos y margen <10%.
-
-Criterio de costo_evaluacion:
-- COMPETITIVO: el costo ingresado es similar o menor al rango de importación directa.
-- ALTO: el costo es 20-50% mayor al promedio de importación directa.
-- MUY_ALTO: el costo es más del 50% mayor al promedio de importación directa.
-
-Para top_vendedores incluí los 3 mejores vendedores por ventas/precio. Incluí al menos 2 items en distribucion_precios.
-
-Para calcular precio_sugerido_venta seguí esta lógica en orden:
-1. Tomá los precios scrapeados y ordenalos de menor a mayor
-2. Identificá el percentil 30 (precio que está por encima del 30% más barato del mercado) — esta es la zona de mayor conversión en ML sin competir con réplicas
-3. Verificá que ese precio cubra: costo del usuario + 15% de comisión ML estimada + 25% de margen mínimo
-4. Si no cubre, subí al precio mínimo que sí cubra esos costos
-5. El precio sugerido final es ese número, redondeado al entero más cercano
-6. En la recomendación, explicá brevemente por qué ese precio es el óptimo: qué posición ocupa en el mercado y qué margen real deja después de comisiones ML
-
-Usá precios en USD para todos los cálculos, sin asumir tipo de cambio específico. No incluyas comentarios ni texto fuera del JSON.`;
+Reglas:
+- VIABLE score 75-100 (>25% margen, poca competencia) | MARGINAL 50-74 (10-25% margen) | SATURADO 0-49 (<10% margen)
+- costo_evaluacion: COMPETITIVO=similar/menor a importación directa; ALTO=20-50% mayor; MUY_ALTO=>50% mayor
+- top_vendedores: los 3 mejores por ventas; distribucion_precios: al menos 2 rangos
+- precio_sugerido: percentil 30 del mercado, verificando costo + 15% comisión ML + 25% margen mínimo; si no cubre, subí al mínimo que cubra
+- Todos los precios en USD.`;
 }
 
 function extractJson(text: string): unknown | null {
