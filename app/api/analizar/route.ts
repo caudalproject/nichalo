@@ -5,13 +5,11 @@ import { scrapeMercadoLibre } from "@/lib/apify";
 import { analizarConGemini } from "@/lib/gemini";
 import { PLAN_CONFIG } from "@/lib/plans";
 import type { Plan, AnalysisResult } from "@/lib/supabase";
-import type { MLListing } from "@/lib/apify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const PAIS_LABEL: Record<string, string> = { AR: "Argentina", MX: "México", CO: "Colombia" };
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 const BodySchema = z.object({
@@ -93,146 +91,97 @@ export async function POST(request: Request) {
     );
   }
 
-  const encoder = new TextEncoder();
+  try {
+    let analysis: AnalysisResult | null = null;
+    let publicacionesAnalizadas = 0;
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      function send(data: Record<string, unknown>) {
-        controller.enqueue(encoder.encode(JSON.stringify(data) + "\n"));
+    // Cache lookup — skip if image is provided (image analyses are always fresh)
+    if (!imagenBase64) {
+      const productoNorm = producto.trim().toLowerCase();
+      const cutoff = new Date(Date.now() - CACHE_TTL_MS).toISOString();
+
+      const { data: cached } = await supabase
+        .from("analysis_cache")
+        .select("resultado_json, publicaciones_analizadas")
+        .eq("producto", productoNorm)
+        .eq("pais", pais)
+        .gte("created_at", cutoff)
+        .maybeSingle();
+
+      if (cached) {
+        analysis = cached.resultado_json as AnalysisResult;
+        publicacionesAnalizadas = cached.publicaciones_analizadas as number;
       }
+    }
 
-      try {
-        let analysis: AnalysisResult | null = null;
-        let publicacionesAnalizadas = 0;
+    if (!analysis) {
+      const scrape = await scrapeMercadoLibre(producto, pais, plan);
+      publicacionesAnalizadas = scrape.totalListings;
 
-        // Cache lookup — skip if image is provided (image analyses are always fresh)
-        if (!imagenBase64) {
-          const productoNorm = producto.trim().toLowerCase();
-          const cutoff = new Date(Date.now() - CACHE_TTL_MS).toISOString();
+      analysis = await analizarConGemini({
+        producto,
+        pais,
+        costoEstimadoUsd: costoEstimado,
+        scrape,
+        imagenBase64,
+        imagenMimeType,
+      });
 
-          const { data: cached } = await supabase
-            .from("analysis_cache")
-            .select("resultado_json, publicaciones_analizadas")
-            .eq("producto", productoNorm)
-            .eq("pais", pais)
-            .gte("created_at", cutoff)
-            .maybeSingle();
-
-          if (cached) {
-            send({ step: "cache", msg: "⚡ Usando análisis reciente en caché..." });
-            analysis = cached.resultado_json as AnalysisResult;
-            publicacionesAnalizadas = cached.publicaciones_analizadas as number;
-            send({ step: "verdict", msg: "✅ Generando veredicto final..." });
-          }
-        }
-
-        if (!analysis) {
-          send({
-            step: "scraping",
-            msg: `🔍 Buscando publicaciones de "${producto}" en Mercado Libre ${PAIS_LABEL[pais] ?? pais}...`,
-          });
-
-          const keepalive = setInterval(() => {
-            send({ step: "keepalive" });
-          }, 5000);
-          const scrape = await scrapeMercadoLibre(producto, pais, plan).finally(() => {
-            clearInterval(keepalive);
-          });
-          publicacionesAnalizadas = scrape.totalListings;
-
-          send({
-            step: "analyzing",
-            msg: `📦 Encontré ${scrape.totalListings} publicaciones. Analizando precios y vendedores...`,
-          });
-
-          const topListing = scrape.listings
-            .filter((l: MLListing) => l.soldQuantity != null && l.price != null)
-            .sort((a: MLListing, b: MLListing) => (b.soldQuantity ?? 0) - (a.soldQuantity ?? 0))[0];
-
-          if (topListing?.seller && topListing.price != null) {
-            send({
-              step: "topseller",
-              msg: `🏆 Top vendedor: ${topListing.seller} vendiendo a $${topListing.price.toFixed(2)} USD...`,
-            });
-          }
-
-          send({ step: "ai", msg: "🤖 Procesando datos con IA..." });
-
-          analysis = await analizarConGemini({
-            producto,
+      // Persist to cache (skip when image is attached — image analyses are bespoke)
+      if (!imagenBase64) {
+        const productoNorm = producto.trim().toLowerCase();
+        await supabase.from("analysis_cache").upsert(
+          {
+            producto: productoNorm,
             pais,
-            costoEstimadoUsd: costoEstimado,
-            scrape,
-            imagenBase64,
-            imagenMimeType,
-          });
-
-          send({ step: "verdict", msg: "✅ Generando veredicto final..." });
-
-          // Persist to cache (skip when image is attached — image analyses are bespoke)
-          if (!imagenBase64) {
-            const productoNorm = producto.trim().toLowerCase();
-            await supabase.from("analysis_cache").upsert(
-              {
-                producto: productoNorm,
-                pais,
-                resultado_json: analysis,
-                publicaciones_analizadas: publicacionesAnalizadas,
-              },
-              { onConflict: "producto,pais" }
-            );
-          }
-        }
-
-        const resultadoJson: AnalysisResult = {
-          ...analysis,
-          publicaciones_analizadas: publicacionesAnalizadas,
-          ...(imagenBase64
-            ? { imagen_url: `data:${imagenMimeType ?? "image/jpeg"};base64,${imagenBase64}` }
-            : {}),
-        };
-
-        const { data: inserted, error: insertErr } = await supabase
-          .from("analyses")
-          .insert({
-            user_id: user.id,
-            producto,
-            pais,
-            costo_estimado: costoEstimado,
-            resultado_json: resultadoJson,
-            score: analysis.score,
-            veredicto: analysis.veredicto,
-          })
-          .select("id")
-          .single();
-
-        if (insertErr || !inserted) {
-          send({
-            step: "error",
-            error: insertErr?.message ?? "Error guardando el análisis.",
-          });
-          return;
-        }
-
-        const { error: updErr } = await supabase
-          .from("users")
-          .update({ analisis_restantes: Math.max(0, restantes - 1) })
-          .eq("id", user.id);
-
-        if (updErr) {
-          console.warn("[analizar] failed to decrement credits", updErr.message);
-        }
-
-        send({ step: "done", id: inserted.id });
-      } catch (err) {
-        send({ step: "error", error: String(err) });
-      } finally {
-        controller.close();
+            resultado_json: analysis,
+            publicaciones_analizadas: publicacionesAnalizadas,
+          },
+          { onConflict: "producto,pais" }
+        );
       }
-    },
-  });
+    }
 
-  return new Response(stream, {
-    headers: { "Content-Type": "application/x-ndjson; charset=utf-8" },
-  });
+    const resultadoJson: AnalysisResult = {
+      ...analysis,
+      publicaciones_analizadas: publicacionesAnalizadas,
+      ...(imagenBase64
+        ? { imagen_url: `data:${imagenMimeType ?? "image/jpeg"};base64,${imagenBase64}` }
+        : {}),
+    };
+
+    const { data: inserted, error: insertErr } = await supabase
+      .from("analyses")
+      .insert({
+        user_id: user.id,
+        producto,
+        pais,
+        costo_estimado: costoEstimado,
+        resultado_json: resultadoJson,
+        score: analysis.score,
+        veredicto: analysis.veredicto,
+      })
+      .select("id")
+      .single();
+
+    if (insertErr || !inserted) {
+      return NextResponse.json(
+        { error: insertErr?.message ?? "Error guardando el análisis." },
+        { status: 500 }
+      );
+    }
+
+    const { error: updErr } = await supabase
+      .from("users")
+      .update({ analisis_restantes: Math.max(0, restantes - 1) })
+      .eq("id", user.id);
+
+    if (updErr) {
+      console.warn("[analizar] failed to decrement credits", updErr.message);
+    }
+
+    return NextResponse.json({ success: true, id: inserted.id });
+  } catch (err) {
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
 }

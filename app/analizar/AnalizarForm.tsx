@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,15 +20,14 @@ interface Props {
   plan: string;
 }
 
-type StepId = "cache" | "scraping" | "analyzing" | "topseller" | "ai" | "verdict" | "done";
-
-interface ProgressStep {
-  id: StepId | "error";
-  msg: string;
-  done: boolean;
-}
-
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // 4 MB
+
+const LOADING_MESSAGES = [
+  "Buscando publicaciones en Mercado Libre...",
+  "Analizando precios y competencia...",
+  "Procesando datos con IA...",
+  "Casi listo...",
+];
 
 export function AnalizarForm({ creditsLeft, plan }: Props) {
   const router = useRouter();
@@ -41,17 +40,21 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [steps, setSteps] = useState<ProgressStep[]>([]);
 
   const noCredits = creditsLeft <= 0;
 
-  function addStep(id: StepId | "error", msg: string) {
-    setSteps((prev) => {
-      const updated = prev.map((s) => (s.done ? s : { ...s, done: true }));
-      return [...updated, { id, msg, done: false }];
-    });
-  }
+  useEffect(() => {
+    if (!loading) {
+      setLoadingMsgIdx(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setLoadingMsgIdx((prev) => (prev + 1) % LOADING_MESSAGES.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [loading]);
 
   function handleFile(file: File) {
     if (file.size > MAX_IMAGE_BYTES) {
@@ -93,7 +96,6 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setSteps([]);
 
     if (noCredits) {
       setError("No te quedan análisis en tu plan. Actualizá a Starter o Pro para continuar.");
@@ -111,6 +113,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
     }
 
     setLoading(true);
+    setLoadingMsgIdx(0);
     try {
       const body: Record<string, unknown> = {
         producto: producto.trim(),
@@ -128,9 +131,9 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
         body: JSON.stringify(body),
       });
 
-      // Handle non-streaming error responses (401, 402, 422, 500)
-      if (!res.ok && res.headers.get("content-type")?.includes("application/json")) {
-        const data = await res.json();
+      const data = await res.json();
+
+      if (!res.ok) {
         if (res.status === 402) {
           setError("No te quedan análisis. Actualizá tu plan para seguir.");
         } else if (res.status === 401) {
@@ -141,50 +144,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
         return;
       }
 
-      if (!res.body) {
-        setError("No se recibió respuesta del servidor.");
-        return;
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) continue;
-
-          let event: Record<string, unknown>;
-          try {
-            event = JSON.parse(trimmed);
-          } catch {
-            continue;
-          }
-
-          const step = event.step as string;
-          const msg = event.msg as string | undefined;
-
-          if (step === "done") {
-            addStep("done", "✅ ¡Análisis completado!");
-            router.push(`/resultado/${event.id as string}`);
-            return;
-          } else if (step === "error") {
-            setError((event.error as string) || "Error inesperado.");
-            setLoading(false);
-            return;
-          } else if (msg) {
-            addStep(step as StepId, msg);
-          }
-        }
-      }
+      router.push(`/resultado/${data.id}`);
     } catch (err) {
       setError(String(err));
     } finally {
@@ -300,24 +260,15 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
             )}
           </div>
 
-          {steps.length > 0 && (
-            <div className="rounded-md border bg-muted/40 p-4 space-y-2">
-              {steps.map((s, i) => (
-                <div
-                  key={i}
-                  className={`flex items-center gap-2 text-sm transition-opacity ${
-                    s.done ? "opacity-50" : "opacity-100 font-medium"
-                  }`}
-                >
-                  {!s.done && (
-                    <span className="inline-block h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
-                  )}
-                  {s.done && (
-                    <span className="inline-block h-3 w-3 rounded-full bg-primary/40 shrink-0" />
-                  )}
-                  {s.msg}
-                </div>
-              ))}
+          {loading && (
+            <div className="rounded-md border bg-muted/40 p-4">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <span className="inline-block h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
+                {LOADING_MESSAGES[loadingMsgIdx]}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Esto puede tardar hasta 60 segundos
+              </p>
             </div>
           )}
 
