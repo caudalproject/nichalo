@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
-import { analizarConGemini } from "@/lib/gemini";
-import { PLAN_CONFIG } from "@/lib/plans";
-import { inngest } from "@/lib/inngest";
 import type { Plan, AnalysisResult } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
 
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
@@ -35,7 +31,7 @@ export async function POST(request: Request) {
       { status: 422 }
     );
   }
-  const { producto, pais, costoEstimado, imagenBase64, imagenMimeType } = parsed.data;
+  const { producto, pais, costoEstimado, imagenBase64 } = parsed.data;
 
   const supabase = createSupabaseServerClient();
 
@@ -81,15 +77,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "no_credits_left" }, { status: 402 });
   }
 
-  const plan = ((profile?.plan ?? "free") as Plan);
-  const planConfig = PLAN_CONFIG[plan];
-
-  if (imagenBase64 && !planConfig.allowImage) {
-    return NextResponse.json(
-      { error: "plan_no_permite_imagen", detail: "La subida de imagen está disponible desde el plan Pro." },
-      { status: 403 }
-    );
-  }
+  const plan = (profile?.plan ?? "free") as Plan;
 
   try {
     // --- Cache lookup (only when no image) ---
@@ -147,7 +135,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- No cache, no image: create job and fire Inngest ---
+    // --- No cache, no image: create job and fire background function ---
     const { data: job, error: jobErr } = await supabase
       .from("analysis_jobs")
       .insert({
@@ -167,17 +155,19 @@ export async function POST(request: Request) {
       );
     }
 
-    await inngest.send({
-      name: "nichalo/analisis.requested",
-      data: {
+    // Fire-and-forget: no await
+    fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/analizar-background`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         job_id: job.id,
         user_id: user.id,
         producto,
         pais,
         costo_estimado: costoEstimado,
         plan,
-      },
-    });
+      }),
+    }).catch(() => {});
 
     return NextResponse.json({ job_id: job.id }, { status: 202 });
   } catch (err) {
