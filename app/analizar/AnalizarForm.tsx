@@ -20,6 +20,14 @@ interface Props {
   plan: string;
 }
 
+type PerfilVendedor = "principiante" | "intermedio" | "experto";
+
+const PERFIL_OPTIONS: { value: PerfilVendedor; label: string; desc: string }[] = [
+  { value: "principiante", label: "Principiante", desc: "Cuenta nueva o menos de 6 meses. Pocas o ninguna venta." },
+  { value: "intermedio", label: "Intermedio", desc: "Cuenta activa con ventas. Reputación verde o amarilla." },
+  { value: "experto", label: "Experto", desc: "Cuenta consolidada. Reputación naranja o roja." },
+];
+
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // 4 MB
 
 const PROGRESS: Record<string, number> = {
@@ -36,6 +44,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
 
   const [producto, setProducto] = useState("");
   const [pais, setPais] = useState<"AR" | "MX" | "CO">("AR");
+  const [perfilVendedor, setPerfilVendedor] = useState<PerfilVendedor>("principiante");
   const [costo, setCosto] = useState("");
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imageMimeType, setImageMimeType] = useState<string>("image/jpeg");
@@ -145,6 +154,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
         producto: producto.trim(),
         pais,
         costoEstimado: costoNum,
+        perfilVendedor,
       };
       if (imageBase64) {
         body.imagenBase64 = imageBase64;
@@ -213,38 +223,60 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
             </p>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="pais">País</Label>
-              <Select
-                value={pais}
-                onValueChange={(v) => setPais(v as "AR" | "MX" | "CO")}
-              >
-                <SelectTrigger id="pais">
-                  <SelectValue placeholder="Elegí un país" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="AR">Argentina (MLA)</SelectItem>
-                  <SelectItem value="MX">México (MLM)</SelectItem>
-                  <SelectItem value="CO">Colombia (MCO)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="pais">País</Label>
+            <Select
+              value={pais}
+              onValueChange={(v) => setPais(v as "AR" | "MX" | "CO")}
+            >
+              <SelectTrigger id="pais">
+                <SelectValue placeholder="Elegí un país" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="AR">Argentina (MLA)</SelectItem>
+                <SelectItem value="MX">México (MLM)</SelectItem>
+                <SelectItem value="CO">Colombia (MCO)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="costo">Costo estimado (USD)</Label>
-              <Input
-                id="costo"
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                min="0.01"
-                placeholder="35.00"
-                value={costo}
-                onChange={(e) => setCosto(e.target.value)}
-                required
-              />
+          <div className="space-y-2">
+            <Label>Perfil de vendedor</Label>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {PERFIL_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setPerfilVendedor(opt.value)}
+                  className={`text-left p-3 rounded-lg border transition-colors ${
+                    perfilVendedor === opt.value
+                      ? "border-[#16A34A] bg-[#DCFCE7]"
+                      : "border-[#E5E7EB] bg-[#F9FAFB] hover:border-[#D1D5DB]"
+                  }`}
+                >
+                  <span className="block text-sm font-medium text-[#0A0A0A]">{opt.label}</span>
+                  <span className="block text-xs text-[#6B7280] mt-0.5">{opt.desc}</span>
+                </button>
+              ))}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="costo">Costo estimado (USD)</Label>
+            <Input
+              id="costo"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0.01"
+              placeholder="35.00"
+              value={costo}
+              onChange={(e) => setCosto(e.target.value)}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              Ingresá el costo en dólares (precio de compra o importación)
+            </p>
           </div>
 
           {/* Image upload */}

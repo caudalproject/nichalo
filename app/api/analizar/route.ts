@@ -14,6 +14,7 @@ const BodySchema = z.object({
   costoEstimado: z.number().positive().max(1_000_000),
   imagenBase64: z.string().optional(),
   imagenMimeType: z.string().optional(),
+  perfilVendedor: z.enum(["principiante", "intermedio", "experto"]).default("principiante"),
 });
 
 export async function POST(request: Request) {
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
       { status: 422 }
     );
   }
-  const { producto, pais, costoEstimado, imagenBase64 } = parsed.data;
+  const { producto, pais, costoEstimado, imagenBase64, perfilVendedor } = parsed.data;
 
   const supabase = createSupabaseServerClient();
 
@@ -171,6 +172,7 @@ export async function POST(request: Request) {
         pais,
         costo_estimado: costoEstimado,
         plan,
+        perfil_vendedor: perfilVendedor,
       }),
     }).catch(() => {});
 

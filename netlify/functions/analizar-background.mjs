@@ -17,7 +17,7 @@ const updateJob = async (job_id, fields) => {
 };
 
 export default async function handler(req) {
-  const { job_id, user_id, producto, pais, costo_estimado, plan } = await req.json();
+  const { job_id, user_id, producto, pais, costo_estimado, plan, perfil_vendedor } = await req.json();
 
   try {
     await updateJob(job_id, { status: "scraping", step_message: "Buscando productos en Mercado Libre..." });
@@ -53,6 +53,7 @@ export default async function handler(req) {
       scrape,
       currency,
       exchangeRate,
+      perfilVendedor: perfil_vendedor,
     });
 
     const resultadoJson = {

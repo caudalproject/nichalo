@@ -13,6 +13,7 @@ interface AnalyzeArgs {
   imagenMimeType?: string;
   currency?: { code: string; symbol: string; name: string };
   exchangeRate?: number;
+  perfilVendedor?: string;
 }
 
 export async function analizarConGemini(
@@ -55,17 +56,30 @@ export async function analizarConGemini(
   return normalizeAnalysis(parsed, args);
 }
 
-function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate }: AnalyzeArgs) {
+function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor }: AnalyzeArgs) {
   const sample = scrape.listings.slice(0, 50);
   const currencyCode = currency?.code ?? "ARS";
   const currencyName = currency?.name ?? "Peso argentino";
   const rate = exchangeRate ?? 1400;
+  const perfil = perfilVendedor ?? "principiante";
   return `Eres un analista experto de Mercado Libre.${imagenBase64 ? " Evaluá también la imagen adjunta: calidad visual, diferenciación y posicionamiento." : ""}
 
 Producto: "${producto}" | País: ${pais} (${scrape.domain}) | Costo/unidad USD: ${costoEstimadoUsd} | Publicaciones: ${scrape.totalListings}
-MONEDA LOCAL: ${currencyName} (${currencyCode})
-TASA DE CAMBIO ACTUAL: 1 USD = ${rate} ${currencyCode}
-IMPORTANTE: Los precios del scraping están en ${currencyCode} (moneda local). Usá la tasa de cambio provista para convertir a USD. Reporta precio_promedio, precio_minimo, precio_maximo y precio_sugerido en USD usando esta tasa exacta. El costo estimado (${costoEstimadoUsd} USD) ya está en USD.
+
+MONEDA LOCAL DEL MERCADO: ${currencyName} (${currencyCode})
+TASA DE CAMBIO HOY: 1 USD = ${rate} ${currencyCode}
+CRÍTICO — CONVERSIÓN DE PRECIOS:
+- Los precios del scraping de Mercado Libre están en ${currencyCode} (moneda local)
+- Dividí cada precio por ${rate} para convertir a USD
+- Ejemplo: si un producto cuesta ${Math.round(rate * 25)} ${currencyCode} = 25 USD
+- NUNCA reportes precios en ${currencyCode} en el JSON — siempre en USD usando esta tasa
+- El costo_estimado del usuario (${costoEstimadoUsd} USD) ya está en USD, no convertir
+
+PERFIL DEL VENDEDOR: ${perfil}
+Reglas según perfil:
+- Si es "principiante": Penalizar fuerte mercados con más de 15 vendedores activos. El precio de entrada recomendado debe ser el percentil 10 del mercado (los más baratos con ventas), no el promedio. El score debe bajar 20-30 puntos si hay muchos competidores establecidos. La recomendación debe incluir consejos específicos para construir reputación desde cero (primeras ventas, precios de lanzamiento, envío gratis inicial).
+- Si es "intermedio": Usar precio del percentil 25-30. Score normal según competencia. Recomendación enfocada en diferenciación y optimización.
+- Si es "experto": Usar precio del percentil 40-50 (puede entrar al promedio). Score puede ser más alto en mercados competidos. Recomendación enfocada en escala y volumen.
 
 Datos (${sample.length} items):
 ${JSON.stringify(sample)}
@@ -73,11 +87,18 @@ ${JSON.stringify(sample)}
 Respondé SOLO con JSON válido (sin markdown):
 {"veredicto":"VIABLE"|"SATURADO"|"MARGINAL","score":0-100,"resumen":"4-5 líneas de análisis real","competencia":{"cantidad_vendedores":int,"precio_minimo":USD,"precio_maximo":USD,"precio_promedio":USD,"top_vendedores":[{"nombre":"","precio":USD,"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"margen":{"precio_sugerido_venta":USD,"comision_ml_estimada":USD,"ganancia_estimada":USD,"margen_porcentaje":número,"costo_evaluacion":"COMPETITIVO"|"ALTO"|"MUY_ALTO"},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"USD/unidad","evaluacion":""}}
 
-Reglas:
+REGLAS DE SCORE:
+- Si no hay datos de ventas registradas en las publicaciones: máximo score 65
+- Si hay más de 30 vendedores activos Y el perfil es principiante: máximo score 50
+- Si hay más de 30 vendedores activos Y el perfil es intermedio: máximo score 65
+- Si hay más de 30 vendedores activos Y el perfil es experto: máximo score 80
+- Un score de 75+ requiere que haya evidencia de ventas reales en el mercado
+
+Reglas generales:
 - VIABLE score 75-100 (>25% margen, poca competencia) | MARGINAL 50-74 (10-25% margen) | SATURADO 0-49 (<10% margen)
 - costo_evaluacion: COMPETITIVO=similar/menor a importación directa; ALTO=20-50% mayor; MUY_ALTO=>50% mayor
 - top_vendedores: los 3 mejores por ventas; distribucion_precios: al menos 2 rangos
-- precio_sugerido: percentil 30 del mercado, verificando costo + 15% comisión ML + 25% margen mínimo; si no cubre, subí al mínimo que cubra
+- precio_sugerido: según perfil vendedor (ver reglas arriba), verificando costo + 15% comisión ML + 25% margen mínimo; si no cubre, subí al mínimo que cubra
 - Todos los precios en USD.`;
 }
 
