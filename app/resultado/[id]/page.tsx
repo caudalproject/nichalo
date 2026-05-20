@@ -139,6 +139,12 @@ export default async function ResultadoPage({ params }: Params) {
 
   const result = analysis.resultado_json as AnalysisResult;
   const styles = veredictoStyles(analysis.veredicto);
+
+  const costo = Number(analysis.costo_estimado);
+  const precioVenta = result.margen.precio_sugerido_venta;
+  const margenBruto =
+    precioVenta > 0 ? ((precioVenta - costo) / precioVenta) * 100 : 0;
+  const roi = costo > 0 ? ((precioVenta - costo) / costo) * 100 : 0;
   const fecha = new Date(analysis.created_at).toLocaleString("es-AR", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -226,7 +232,7 @@ export default async function ResultadoPage({ params }: Params) {
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {[
               { label: "Precio promedio", value: formatCurrency(result.competencia.precio_promedio) },
-              { label: "Margen estimado", value: `${result.margen.margen_porcentaje.toFixed(1)}%` },
+              { label: "Margen bruto", value: `${margenBruto.toFixed(1)}%` },
               { label: "Vendedores relevados", value: String(result.competencia.cantidad_vendedores) },
               { label: "Precio sugerido", value: formatCurrency(result.margen.precio_sugerido_venta) },
             ].map((m) => (
@@ -323,17 +329,30 @@ export default async function ResultadoPage({ params }: Params) {
                 <Row label="Ganancia estimada">
                   <strong>{formatCurrency(result.margen.ganancia_estimada)}</strong>
                 </Row>
-                <Row label="Margen %">
+                <Row label="Margen bruto">
                   <Badge
                     variant={
-                      result.margen.margen_porcentaje >= 25
+                      margenBruto >= 25
                         ? "success"
-                        : result.margen.margen_porcentaje >= 10
+                        : margenBruto >= 10
                           ? "warning"
                           : "destructive"
                     }
                   >
-                    {result.margen.margen_porcentaje.toFixed(1)}%
+                    {margenBruto.toFixed(1)}%
+                  </Badge>
+                </Row>
+                <Row label="ROI">
+                  <Badge
+                    variant={
+                      roi >= 30
+                        ? "success"
+                        : roi >= 15
+                          ? "warning"
+                          : "destructive"
+                    }
+                  >
+                    {roi.toFixed(1)}%
                   </Badge>
                 </Row>
                 {result.margen.costo_evaluacion && (
@@ -382,18 +401,26 @@ export default async function ResultadoPage({ params }: Params) {
                         <div className="flex items-center justify-between">
                           <span className="text-muted-foreground">Reputación</span>
                           {repValida ? (
+                            v.reputacion === "BAJA" ? (
+                              <Badge
+                                variant="outline"
+                                className="text-xs bg-orange-100 text-orange-700 border-orange-300"
+                                title="Oportunidad de entrada"
+                              >
+                                BAJA · Oportunidad
+                              </Badge>
+                            ) : (
                             <Badge
                               variant={
                                 v.reputacion === "ALTA"
                                   ? "success"
-                                  : v.reputacion === "MEDIA"
-                                    ? "warning"
-                                    : "destructive"
+                                  : "warning"
                               }
                               className="text-xs"
                             >
                               {v.reputacion}
                             </Badge>
+                            )
                           ) : (
                             <Badge variant="secondary" className="text-xs">
                               Sin datos

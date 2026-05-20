@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { startApifyRun, checkApifyRun, getApifyResults } from "../../lib/apify.js";
 import { analizarConGemini } from "../../lib/gemini.js";
 import { PLAN_CONFIG } from "../../lib/plans.js";
+import { getCurrencyForCountry, getExchangeRate } from "../../lib/currency.js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -42,16 +43,22 @@ export default async function handler(req) {
 
     await updateJob(job_id, { status: "analyzing", step_message: "Analizando competencia con IA..." });
 
+    const currency = getCurrencyForCountry(pais);
+    const exchangeRate = await getExchangeRate(currency.code);
+
     const analysis = await analizarConGemini({
       producto,
       pais,
       costoEstimadoUsd: costo_estimado,
       scrape,
+      currency,
+      exchangeRate,
     });
 
     const resultadoJson = {
       ...analysis,
       publicaciones_analizadas: scrape.totalListings,
+      moneda: currency.code,
     };
 
     const { data: inserted, error: insertErr } = await supabase

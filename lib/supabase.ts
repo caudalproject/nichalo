@@ -63,6 +63,7 @@ export interface AnalysisResult {
   };
   imagen_url?: string;
   publicaciones_analizadas?: number;
+  moneda?: string;
 }
 
 export interface AnalysisRow {

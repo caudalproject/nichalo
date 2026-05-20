@@ -11,6 +11,8 @@ interface AnalyzeArgs {
   scrape: ScrapeResult;
   imagenBase64?: string;
   imagenMimeType?: string;
+  currency?: { code: string; symbol: string; name: string };
+  exchangeRate?: number;
 }
 
 export async function analizarConGemini(
@@ -53,11 +55,17 @@ export async function analizarConGemini(
   return normalizeAnalysis(parsed, args);
 }
 
-function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64 }: AnalyzeArgs) {
+function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate }: AnalyzeArgs) {
   const sample = scrape.listings.slice(0, 50);
+  const currencyCode = currency?.code ?? "ARS";
+  const currencyName = currency?.name ?? "Peso argentino";
+  const rate = exchangeRate ?? 1400;
   return `Eres un analista experto de Mercado Libre.${imagenBase64 ? " Evaluá también la imagen adjunta: calidad visual, diferenciación y posicionamiento." : ""}
 
 Producto: "${producto}" | País: ${pais} (${scrape.domain}) | Costo/unidad USD: ${costoEstimadoUsd} | Publicaciones: ${scrape.totalListings}
+MONEDA LOCAL: ${currencyName} (${currencyCode})
+TASA DE CAMBIO ACTUAL: 1 USD = ${rate} ${currencyCode}
+IMPORTANTE: Los precios del scraping están en ${currencyCode} (moneda local). Usá la tasa de cambio provista para convertir a USD. Reporta precio_promedio, precio_minimo, precio_maximo y precio_sugerido en USD usando esta tasa exacta. El costo estimado (${costoEstimadoUsd} USD) ya está en USD.
 
 Datos (${sample.length} items):
 ${JSON.stringify(sample)}
