@@ -1,7 +1,8 @@
 import { inngest } from "./inngest";
 import { createSupabaseServiceClient } from "./supabase-service";
-import { scrapeMercadoLibre } from "./apify";
+import { startApifyRun, checkApifyRun, getApifyResults } from "./apify";
 import { analizarConGemini } from "./gemini";
+import { PLAN_CONFIG } from "./plans";
 import type { Plan, AnalysisResult } from "./supabase";
 
 interface AnalizarEvent {
@@ -32,9 +33,28 @@ export const analizarProducto = inngest.createFunction(
         await updateJob({ status: "scraping", step_message: "Buscando productos en Mercado Libre..." });
       });
 
-      const scrape = await step.run("scrape-mercadolibre", async () => {
-        return await scrapeMercadoLibre(producto, pais, plan);
+      const runId = await step.run("start-apify", async () => {
+        return await startApifyRun(producto, pais, plan);
       });
+
+      const scrape = await step.run(
+        { id: "wait-apify", retryCount: 20 },
+        async () => {
+          const { status } = await checkApifyRun(runId);
+
+          if (status === "RUNNING" || status === "READY" || status === "CREATED") {
+            throw new Error(`Apify still running: ${status}`);
+          }
+
+          if (status === "FAILED" || status === "TIMED-OUT" || status === "ABORTED") {
+            throw new Error(`Apify run failed with status: ${status}`);
+          }
+
+          // SUCCEEDED — obtener resultados
+          const { maxItems } = PLAN_CONFIG[plan];
+          return await getApifyResults(runId, producto, pais, maxItems);
+        }
+      );
 
       await step.run("update-to-analyzing", async () => {
         await updateJob({ status: "analyzing", step_message: "Analizando competencia con IA..." });

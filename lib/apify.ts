@@ -39,110 +39,113 @@ export interface ScrapeResult {
   sourcedFrom: "apify" | "mock";
 }
 
-const POLL_INTERVAL_MS = 3000;
-const MAX_ATTEMPTS = 40; // 40 × 3s = 120s timeout
-
-export async function scrapeMercadoLibre(
+export async function startApifyRun(
   query: string,
   pais: "AR" | "MX" | "CO",
-  plan: Plan = "free"
-): Promise<ScrapeResult> {
+  plan: Plan
+): Promise<string> {
   const apiKey = process.env.APIFY_API_KEY;
-  const domain = ML_DOMAINS[pais] ?? ML_DOMAINS.AR;
+  if (!apiKey) throw new Error("APIFY_API_KEY no configurada");
+
   const siteId = SITE_IDS[pais] ?? "MLA";
   const config = PLAN_CONFIG[plan];
 
-  if (!apiKey) throw new Error("APIFY_API_KEY no configurada");
-
-  const runEndpoint = `https://api.apify.com/v2/acts/${ACTOR_ID}/runs?token=${apiKey}`;
-
-  const body = {
-    siteId,
-    searchQueries: [query],
-    maxItems: config.maxItems,
-    maxPagesPerQuery: config.maxPagesPerQuery,
-    proxyConfiguration: {
-      useApifyProxy: true,
-      apifyProxyGroups: ["RESIDENTIAL"],
-    },
-  };
-
   console.log("[apify] starting async run", query, "on", siteId);
 
-  const runRes = await fetch(runEndpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+  const res = await fetch(
+    `https://api.apify.com/v2/acts/${ACTOR_ID}/runs?token=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        siteId,
+        searchQueries: [query],
+        maxItems: config.maxItems,
+        maxPagesPerQuery: config.maxPagesPerQuery,
+        proxyConfiguration: {
+          useApifyProxy: true,
+          apifyProxyGroups: ["RESIDENTIAL"],
+        },
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Apify run respondió ${res.status}: ${text.slice(0, 300)}`);
+  }
+
+  const data = (await res.json()) as { data: { id: string } };
+  const runId = data.data.id;
+  console.log("[apify] run started, id:", runId);
+  return runId;
+}
+
+export async function checkApifyRun(runId: string): Promise<{ status: string }> {
+  const apiKey = process.env.APIFY_API_KEY;
+  if (!apiKey) throw new Error("APIFY_API_KEY no configurada");
+
+  const res = await fetch(
+    `https://api.apify.com/v2/actor-runs/${runId}?token=${apiKey}`
+  );
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Apify status respondió ${res.status}: ${text.slice(0, 300)}`);
+  }
+
+  const data = (await res.json()) as { data: { status: string } };
+  console.log("[apify] run", runId, "status:", data.data.status);
+  return { status: data.data.status };
+}
+
+export async function getApifyResults(
+  runId: string,
+  query: string,
+  pais: "AR" | "MX" | "CO",
+  maxItems: number
+): Promise<ScrapeResult> {
+  const apiKey = process.env.APIFY_API_KEY;
+  if (!apiKey) throw new Error("APIFY_API_KEY no configurada");
+
+  const domain = ML_DOMAINS[pais] ?? ML_DOMAINS.AR;
+
+  const res = await fetch(
+    `https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${apiKey}&limit=${maxItems}`
+  );
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Apify dataset respondió ${res.status}: ${text.slice(0, 300)}`);
+  }
+
+  const data = (await res.json()) as Array<Record<string, unknown>>;
+  console.log("[apify] received", data.length, "items for run", runId);
+
+  const listings: MLListing[] = data.map((item) => {
+    const seller = item.seller as Record<string, unknown> | null;
+    return {
+      title: String(item.title ?? ""),
+      price: toNum(item.price),
+      currency: str(item.currency),
+      seller: str(seller?.nickname ?? seller?.storeName),
+      rating: toNum(item.ratingAverage),
+      reviewsCount: toNum(item.reviewCount),
+      soldQuantity: toNum(item.soldQuantity),
+      url: str(item.permalink),
+      isFreeShipping: item.freeShipping === true,
+    };
   });
 
-  if (!runRes.ok) {
-    const text = await runRes.text().catch(() => "");
-    throw new Error(`Apify run respondió ${runRes.status}: ${text.slice(0, 300)}`);
-  }
-
-  const runData = (await runRes.json()) as { data: { id: string } };
-  const runId = runData.data.id;
-  console.log("[apify] run started, id:", runId);
-
-  // Polling
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
-
-    const statusRes = await fetch(
-      `https://api.apify.com/v2/actor-runs/${runId}?token=${apiKey}`
-    );
-
-    if (!statusRes.ok) continue;
-
-    const statusData = (await statusRes.json()) as { data: { status: string } };
-    const status = statusData.data.status;
-    console.log(`[apify] poll ${attempt + 1}/${MAX_ATTEMPTS} — status: ${status}`);
-
-    if (status === "FAILED" || status === "TIMED_OUT") {
-      throw new Error(`Apify run ${status} (runId: ${runId})`);
-    }
-
-    if (status === "SUCCEEDED") {
-      const itemsRes = await fetch(
-        `https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${apiKey}`
-      );
-
-      if (!itemsRes.ok) {
-        const text = await itemsRes.text().catch(() => "");
-        throw new Error(`Apify dataset respondió ${itemsRes.status}: ${text.slice(0, 300)}`);
-      }
-
-      const data = (await itemsRes.json()) as Array<Record<string, unknown>>;
-      console.log("[apify] received", data.length, "items from", siteId);
-
-      const listings: MLListing[] = data.slice(0, config.maxItems).map((item) => {
-        const seller = item.seller as Record<string, unknown> | null;
-        return {
-          title: String(item.title ?? ""),
-          price: toNum(item.price),
-          currency: str(item.currency),
-          seller: str(seller?.nickname ?? seller?.storeName),
-          rating: toNum(item.ratingAverage),
-          reviewsCount: toNum(item.reviewCount),
-          soldQuantity: toNum(item.soldQuantity),
-          url: str(item.permalink),
-          isFreeShipping: item.freeShipping === true,
-        };
-      });
-
-      return {
-        query,
-        pais,
-        domain,
-        fetchedAt: new Date().toISOString(),
-        totalListings: listings.length,
-        listings,
-        sourcedFrom: "apify",
-      };
-    }
-  }
-
-  throw new Error(`Apify timeout después de ${MAX_ATTEMPTS * POLL_INTERVAL_MS / 1000}s (runId: ${runId})`);
+  return {
+    query,
+    pais,
+    domain,
+    fetchedAt: new Date().toISOString(),
+    totalListings: listings.length,
+    listings,
+    sourcedFrom: "apify",
+  };
 }
 
 function toNum(v: unknown): number | null {
