@@ -67,7 +67,7 @@ export async function scrapeMercadoLibre(
   console.log("[apify] scraping", query, "on", siteId, `(${domain})`);
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+  const timeout = setTimeout(() => controller.abort(), 25000);
 
   let res: Response;
   try {

@@ -9,7 +9,7 @@ import type { MLListing } from "@/lib/apify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 120;
+export const maxDuration = 60;
 
 const PAIS_LABEL: Record<string, string> = { AR: "Argentina", MX: "México", CO: "Colombia" };
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -132,7 +132,12 @@ export async function POST(request: Request) {
             msg: `🔍 Buscando publicaciones de "${producto}" en Mercado Libre ${PAIS_LABEL[pais] ?? pais}...`,
           });
 
-          const scrape = await scrapeMercadoLibre(producto, pais, plan);
+          const keepalive = setInterval(() => {
+            send({ step: "keepalive" });
+          }, 5000);
+          const scrape = await scrapeMercadoLibre(producto, pais, plan).finally(() => {
+            clearInterval(keepalive);
+          });
           publicacionesAnalizadas = scrape.totalListings;
 
           send({
