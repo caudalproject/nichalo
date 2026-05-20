@@ -60,14 +60,17 @@ export const analizarProducto = inngest.createFunction(
         await updateJob({ status: "analyzing", step_message: "Analizando competencia con IA..." });
       });
 
-      const analysis = await step.run("analyze-with-gemini", async () => {
-        return await analizarConGemini({
-          producto,
-          pais,
-          costoEstimadoUsd: costo_estimado,
-          scrape,
-        });
-      });
+      const analysis = await step.run(
+        { id: "analyze-with-gemini", retryCount: 5 },
+        async () => {
+          return await analizarConGemini({
+            producto,
+            pais,
+            costoEstimadoUsd: costo_estimado,
+            scrape,
+          });
+        }
+      );
 
       const analysisId = await step.run("save-and-finalize", async () => {
         const resultadoJson: AnalysisResult = {
