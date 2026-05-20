@@ -35,6 +35,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# obsidian & segundo cerebro (archivos locales, no van al repo)
+.obsidian/
+SEGUNDO CEREBRO OBSIDIAN/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

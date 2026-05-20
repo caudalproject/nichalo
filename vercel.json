@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "app/api/analizar/route.ts": {
-      "maxDuration": 300
-    }
-  }
-}
