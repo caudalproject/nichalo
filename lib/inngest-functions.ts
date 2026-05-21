@@ -20,8 +20,10 @@ const updateJob = async (job_id: string, fields: Record<string, unknown>) => {
 };
 
 export const analizarProducto = inngest.createFunction(
-  { id: "analizar-producto", retries: 0 },
-  { event: "nichalo/analisis.requested" },
+  {
+    id: "analizar-producto",
+    triggers: [{ event: "nichalo/analisis.requested" }],
+  },
   async ({ event, step }) => {
     const {
       job_id,
