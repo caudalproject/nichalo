@@ -46,15 +46,28 @@ export default async function handler(req) {
     const currency = getCurrencyForCountry(pais);
     const exchangeRate = await getExchangeRate(currency.code);
 
-    const analysis = await analizarConGemini({
-      producto,
-      pais,
-      costoEstimadoUsd: costo_estimado,
-      scrape,
-      currency,
-      exchangeRate,
-      perfilVendedor: perfil_vendedor,
-    });
+    let analysis;
+    let geminiAttempts = 0;
+    while (geminiAttempts < 4) {
+      try {
+        analysis = await analizarConGemini({
+          producto,
+          pais,
+          costoEstimadoUsd: costo_estimado,
+          scrape,
+          currency,
+          exchangeRate,
+          perfilVendedor: perfil_vendedor,
+        });
+        break;
+      } catch (err) {
+        geminiAttempts++;
+        if (geminiAttempts >= 4) throw err;
+        const wait = geminiAttempts * 10000;
+        console.log(`[gemini] Intento ${geminiAttempts} fallido, reintentando en ${wait / 1000}s...`);
+        await new Promise(r => setTimeout(r, wait));
+      }
+    }
 
     const resultadoJson = {
       ...analysis,
