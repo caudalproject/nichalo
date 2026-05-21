@@ -23,6 +23,7 @@ export const analizarProducto = inngest.createFunction(
   {
     id: "analizar-producto",
     triggers: [{ event: "nichalo/analisis.requested" }],
+    retries: 20,
   },
   async ({ event, step }) => {
     const {
@@ -71,7 +72,6 @@ export const analizarProducto = inngest.createFunction(
           const { maxItems } = PLAN_CONFIG[plan];
           return await getApifyResults(runId, producto, pais, maxItems);
         },
-        { retryCount: 20 }
       );
 
       // Step 3: Análisis con Gemini
@@ -96,7 +96,6 @@ export const analizarProducto = inngest.createFunction(
             perfilVendedor: perfil_vendedor,
           });
         },
-        { retryCount: 5 }
       );
 
       // Step 4: Guardar resultados, cachear y decrementar créditos
