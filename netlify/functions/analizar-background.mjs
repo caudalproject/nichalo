@@ -19,6 +19,8 @@ const updateJob = async (job_id, fields) => {
 export default async function handler(req) {
   const { job_id, user_id, producto, pais, costo_estimado, plan, perfil_vendedor } = await req.json();
 
+  let inserted = null; // visible en catch para saber si el análisis fue guardado
+
   try {
     await updateJob(job_id, { status: "scraping", step_message: "Buscando productos en Mercado Libre..." });
 
@@ -75,7 +77,7 @@ export default async function handler(req) {
       moneda: currency.code,
     };
 
-    const { data: inserted, error: insertErr } = await supabase
+    const { data: insertData, error: insertErr } = await supabase
       .from("analyses")
       .insert({
         user_id,
@@ -89,7 +91,8 @@ export default async function handler(req) {
       .select("id")
       .single();
 
-    if (insertErr || !inserted) throw new Error(insertErr?.message ?? "Error guardando análisis");
+    if (insertErr || !insertData) throw new Error(insertErr?.message ?? "Error guardando análisis");
+    inserted = insertData;
 
     const productoNorm = producto.trim().toLowerCase();
     await supabase.from("analysis_cache").upsert(
@@ -118,6 +121,28 @@ export default async function handler(req) {
 
   } catch (err) {
     console.error("[analizar-background] Error:", err);
+
+    // Si el análisis no fue guardado, el crédito no debería haberse descontado.
+    // Este bloque es un safety net para restaurarlo si por algún motivo se decrementó.
+    if (!inserted) {
+      try {
+        const { data: userRow } = await supabase
+          .from("users")
+          .select("analisis_restantes")
+          .eq("id", user_id)
+          .single();
+        if (userRow) {
+          await supabase
+            .from("users")
+            .update({ analisis_restantes: userRow.analisis_restantes + 1 })
+            .eq("id", user_id);
+          console.log(`[analizar-background] Crédito restaurado para user ${user_id}`);
+        }
+      } catch (restoreErr) {
+        console.error("[analizar-background] Error restaurando crédito:", restoreErr);
+      }
+    }
+
     await updateJob(job_id, {
       status: "error",
       error_message: String(err),
