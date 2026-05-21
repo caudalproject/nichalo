@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "app/api/inngest/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/analizar/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/analizar/status/route.ts": {
+      "maxDuration": 30
+    }
+  }
+}

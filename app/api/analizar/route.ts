@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { inngest } from "@/lib/inngest";
 import type { Plan, AnalysisResult } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -136,7 +137,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- No cache, no image: create job and fire background function ---
+    // --- No cache, no image: crear job y disparar evento Inngest ---
     const { data: job, error: jobErr } = await supabase
       .from("analysis_jobs")
       .insert({
@@ -156,16 +157,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Fire-and-forget: no await
-    const bgUrl =
-      process.env.NODE_ENV === "production"
-        ? `${process.env.SITE_URL}/.netlify/functions/analizar-background`
-        : `${process.env.SITE_URL}/api/analizar-background`;
-
-    fetch(bgUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    await inngest.send({
+      name: "nichalo/analisis.requested",
+      data: {
         job_id: job.id,
         user_id: user.id,
         producto,
@@ -173,8 +167,8 @@ export async function POST(request: Request) {
         costo_estimado: costoEstimado,
         plan,
         perfil_vendedor: perfilVendedor,
-      }),
-    }).catch(() => {});
+      },
+    });
 
     return NextResponse.json({ job_id: job.id }, { status: 202 });
   } catch (err) {
