@@ -74,7 +74,29 @@ export const analizarProducto = inngest.createFunction(
         },
       );
 
-      // Step 3: Análisis con Gemini
+      // Step 3: Obtener tendencias de ML
+      const mlTrends = await step.run("fetch-ml-trends", async () => {
+        const siteMap: Record<string, string> = {
+          AR: "MLA",
+          MX: "MLM",
+          CO: "MCO",
+        };
+        const siteId = siteMap[pais] ?? "MLA";
+
+        try {
+          const res = await fetch(
+            `https://api.mercadolibre.com/trends/${siteId}`,
+            { headers: { "Content-Type": "application/json" } }
+          );
+          if (!res.ok) return [];
+          const data = await res.json();
+          return data.slice(0, 20).map((t: { keyword: string }) => t.keyword);
+        } catch {
+          return [];
+        }
+      });
+
+      // Step 4: Análisis con Gemini
       const analysis = await step.run(
         "analyze-with-gemini",
         async () => {
@@ -94,11 +116,12 @@ export const analizarProducto = inngest.createFunction(
             currency,
             exchangeRate,
             perfilVendedor: perfil_vendedor,
+            mlTrends,
           });
         },
       );
 
-      // Step 4: Guardar resultados, cachear y decrementar créditos
+      // Step 5: Guardar resultados, cachear y decrementar créditos
       await step.run("save-results", async () => {
         const resultadoJson = {
           ...analysis,

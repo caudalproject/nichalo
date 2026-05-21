@@ -14,6 +14,7 @@ interface AnalyzeArgs {
   currency?: { code: string; symbol: string; name: string };
   exchangeRate?: number;
   perfilVendedor?: string;
+  mlTrends?: string[];
 }
 
 export async function analizarConGemini(
@@ -71,7 +72,7 @@ export async function analizarConGemini(
   throw new Error("No se pudo completar el análisis con ningún modelo");
 }
 
-function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor }: AnalyzeArgs) {
+function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlTrends }: AnalyzeArgs) {
   const sample = scrape.listings.slice(0, 50);
   const currencyCode = currency?.code ?? "ARS";
   const currencyName = currency?.name ?? "Peso argentino";
@@ -81,7 +82,12 @@ function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, c
 
 Producto: "${producto}" | País: ${pais} (${scrape.domain}) | Costo/unidad USD: ${costoEstimadoUsd} | Publicaciones: ${scrape.totalListings}
 
-MONEDA LOCAL: ${currencyName} (${currencyCode})
+${mlTrends && mlTrends.length > 0 ? `TENDENCIAS REALES DE MERCADO LIBRE HOY (${new Date().toLocaleDateString('es-AR')}):
+${mlTrends.join(', ')}
+Si el producto analizado ("${producto}") coincide o está relacionado con alguna de estas tendencias, mencionarlo explícitamente en la sección "tendencia" del análisis.
+Si no aparece en tendencias, indicarlo como dato relevante.
+
+` : ''}MONEDA LOCAL: ${currencyName} (${currencyCode})
 TASA DE CAMBIO HOY: 1 USD = ${rate} ${currencyCode}
 REGLA DE PRECIOS CRÍTICA:
 - Todos los precios del scraping ya están en ${currencyCode} (moneda local)
