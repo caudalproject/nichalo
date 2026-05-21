@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { ScrapeResult } from "./apify";
 import type { AnalysisResult } from "./supabase";
 
-const GEMINI_MODEL = "gemini-2.5-flash";
+const MODELS = ["gemini-2.5-flash", "gemini-1.5-flash"] as const;
 
 interface AnalyzeArgs {
   producto: string;
@@ -22,14 +22,7 @@ export async function analizarConGemini(
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY no configurada");
 
-  console.log("[gemini] calling model", GEMINI_MODEL);
-
   const genAI = new GoogleGenerativeAI(apiKey);
-  // responseMimeType only exists in v1beta; v1 enforces JSON via the prompt
-  const model = genAI.getGenerativeModel(
-    { model: GEMINI_MODEL, generationConfig: { temperature: 0.4 } },
-    { apiVersion: "v1" }
-  );
 
   const promptText = buildPrompt(args);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,16 +37,38 @@ export async function analizarConGemini(
     });
   }
 
-  const result = await model.generateContent(parts);
-  const text = result.response.text();
-  console.log("[gemini] raw response length", text?.length ?? 0);
+  for (const modelName of MODELS) {
+    try {
+      console.log("[gemini] calling model", modelName);
+      // responseMimeType only exists in v1beta; v1 enforces JSON via the prompt
+      const model = genAI.getGenerativeModel(
+        { model: modelName, generationConfig: { temperature: 0.4 } },
+        { apiVersion: "v1" }
+      );
 
-  if (!text) throw new Error("Gemini devolvió respuesta vacía");
+      const result = await model.generateContent(parts);
+      const text = result.response.text();
+      console.log("[gemini] raw response length", text?.length ?? 0);
 
-  const parsed = extractJson(text);
-  if (!parsed) throw new Error(`Gemini no devolvió JSON válido. Respuesta: ${text.slice(0, 200)}`);
+      if (!text) throw new Error("Gemini devolvió respuesta vacía");
 
-  return normalizeAnalysis(parsed, args);
+      const parsed = extractJson(text);
+      if (!parsed) throw new Error(`Gemini no devolvió JSON válido. Respuesta: ${text.slice(0, 200)}`);
+
+      return normalizeAnalysis(parsed, args);
+    } catch (err: unknown) {
+      const e = err as { message?: string; status?: number };
+      const is503 = e?.message?.includes("503") || e?.status === 503;
+      const isLastModel = modelName === MODELS[MODELS.length - 1];
+      if (is503 && !isLastModel) {
+        console.log(`[gemini] ${modelName} dio 503, intentando con fallback...`);
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw new Error("No se pudo completar el análisis con ningún modelo");
 }
 
 function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor }: AnalyzeArgs) {
