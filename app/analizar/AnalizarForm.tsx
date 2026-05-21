@@ -346,7 +346,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Esto puede tardar hasta 60 segundos
+                Esto puede tardar hasta 5 minutos
               </p>
             </div>
           )}
