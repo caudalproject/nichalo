@@ -245,7 +245,7 @@ export default async function ResultadoPage({ params }: Params) {
             {[
               { label: "Precio promedio", value: formatLocalPrice(result.competencia.precio_promedio, moneda) },
               { label: "Margen bruto", value: `${margenBruto.toFixed(1)}%` },
-              { label: "Vendedores relevados", value: String(result.competencia.cantidad_vendedores) },
+              { label: "Publicaciones scrapeadas", value: String(result.publicaciones_analizadas ?? result.competencia.cantidad_vendedores) },
               { label: "Precio sugerido", value: formatLocalPrice(result.margen.precio_sugerido_venta, moneda) },
             ].map((m) => (
               <div key={m.label} className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
@@ -306,9 +306,14 @@ export default async function ResultadoPage({ params }: Params) {
                 <CardTitle className="text-lg">Competencia</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <Row label="Vendedores relevados">
-                  {result.competencia.cantidad_vendedores}
+                <Row label="Publicaciones scrapeadas">
+                  {result.publicaciones_analizadas ?? result.competencia.cantidad_vendedores}
                 </Row>
+                {result.total_publicaciones_ml ? (
+                  <Row label="Total en ML">
+                    {result.total_publicaciones_ml.toLocaleString("es-AR")} publicaciones
+                  </Row>
+                ) : null}
                 <Row label="Precio mínimo">
                   {formatLocalPrice(result.competencia.precio_minimo, moneda)}
                 </Row>

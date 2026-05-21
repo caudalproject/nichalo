@@ -63,6 +63,7 @@ export interface AnalysisResult {
   };
   imagen_url?: string;
   publicaciones_analizadas?: number;
+  total_publicaciones_ml?: number;
   moneda?: string;
   tasa_cambio?: number;
 }

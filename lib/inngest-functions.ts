@@ -5,6 +5,7 @@ import { startApifyRun, checkApifyRun, getApifyResults } from "./apify";
 import { analizarConGemini } from "./gemini";
 import { PLAN_CONFIG } from "./plans";
 import { getCurrencyForCountry, getExchangeRate } from "./currency";
+import { getMLSearchTotal, getMLCategoryData } from "./mercadolibre";
 import type { Plan } from "./supabase";
 
 const supabase = createClient(
@@ -96,7 +97,16 @@ export const analizarProducto = inngest.createFunction(
         }
       });
 
-      // Step 4: Análisis con Gemini
+      // Step 4: Obtener datos reales de ML Search
+      const mlSearchData = await step.run("fetch-ml-search", async () => {
+        const [total, categoryData] = await Promise.all([
+          getMLSearchTotal(producto, pais),
+          getMLCategoryData(producto, pais),
+        ]);
+        return { total, categoryData };
+      });
+
+      // Step 5: Análisis con Gemini
       const analysis = await step.run(
         "analyze-with-gemini",
         async () => {
@@ -117,6 +127,7 @@ export const analizarProducto = inngest.createFunction(
             exchangeRate,
             perfilVendedor: perfil_vendedor,
             mlTrends,
+            mlSearchData,
           });
         },
       );
@@ -126,6 +137,7 @@ export const analizarProducto = inngest.createFunction(
         const resultadoJson = {
           ...analysis,
           publicaciones_analizadas: scrape.totalListings,
+          total_publicaciones_ml: mlSearchData.total,
         };
 
         const { data: insertData, error: insertErr } = await supabase
