@@ -5,7 +5,7 @@ import { startApifyRun, checkApifyRun, getApifyResults } from "./apify";
 import { analizarConGemini } from "./gemini";
 import { PLAN_CONFIG } from "./plans";
 import { getCurrencyForCountry, getExchangeRate } from "./currency";
-import { getMLSearchTotal, getMLCategoryData } from "./mercadolibre";
+// mercadolibre functions imported dynamically inside the step
 import type { Plan } from "./supabase";
 
 const supabase = createClient(
@@ -97,13 +97,14 @@ export const analizarProducto = inngest.createFunction(
         }
       });
 
-      // Step 4: Obtener datos reales de ML Search
-      const mlSearchData = await step.run("fetch-ml-search", async () => {
-        const [total, categoryData] = await Promise.all([
+      // Step 4: Obtener total de ML y tendencias de Google en paralelo
+      const mlData = await step.run("fetch-ml-data", async () => {
+        const { getMLSearchTotal, getGoogleTrends } = await import("./mercadolibre");
+        const [total, trends] = await Promise.all([
           getMLSearchTotal(producto, pais),
-          getMLCategoryData(producto, pais),
+          getGoogleTrends(producto, pais),
         ]);
-        return { total, categoryData };
+        return { total, trends };
       });
 
       // Step 5: Análisis con Gemini
@@ -127,7 +128,7 @@ export const analizarProducto = inngest.createFunction(
             exchangeRate,
             perfilVendedor: perfil_vendedor,
             mlTrends,
-            mlSearchData,
+            mlData,
           });
         },
       );
@@ -137,7 +138,9 @@ export const analizarProducto = inngest.createFunction(
         const resultadoJson = {
           ...analysis,
           publicaciones_analizadas: scrape.totalListings,
-          total_publicaciones_ml: mlSearchData.total,
+          total_publicaciones_ml: mlData?.total ?? 0,
+          google_trends_interest: mlData?.trends?.interest ?? 0,
+          google_trends_trending: mlData?.trends?.trending ?? false,
         };
 
         const { data: insertData, error: insertErr } = await supabase

@@ -15,7 +15,10 @@ interface AnalyzeArgs {
   exchangeRate?: number;
   perfilVendedor?: string;
   mlTrends?: string[];
-  mlSearchData?: { total: number; categoryData: { categoryName: string; totalInCategory: number } | null };
+  mlData?: {
+    total: number;
+    trends?: { trending: boolean; interest: number; related: string[] };
+  };
 }
 
 export async function analizarConGemini(
@@ -73,7 +76,7 @@ export async function analizarConGemini(
   throw new Error("No se pudo completar el análisis con ningún modelo");
 }
 
-function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlTrends, mlSearchData }: AnalyzeArgs) {
+function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlTrends, mlData }: AnalyzeArgs) {
   const sample = scrape.listings.slice(0, 50);
   const currencyCode = currency?.code ?? "ARS";
   const currencyName = currency?.name ?? "Peso argentino";
@@ -88,15 +91,23 @@ ${mlTrends.join(', ')}
 Si el producto analizado ("${producto}") coincide o está relacionado con alguna de estas tendencias, mencionarlo explícitamente en la sección "tendencia" del análisis.
 Si no aparece en tendencias, indicarlo como dato relevante.
 
-` : ''}${mlSearchData?.total ? `DATOS REALES DE MERCADO LIBRE:
-Total de publicaciones para "${producto}" en ${pais}: ${mlSearchData.total.toLocaleString('es-AR')} publicaciones
-${mlSearchData.categoryData ? `- Categoría principal: ${mlSearchData.categoryData.categoryName} (${mlSearchData.categoryData.totalInCategory.toLocaleString('es-AR')} publicaciones en esa categoría)` : ''}
-Nota: el scraping analizó una muestra de ${scrape.totalListings} publicaciones de ese universo total
+` : ''}${mlData?.total ? `
+DATOS REALES DE MERCADO LIBRE:
 
-Usá el total real de publicaciones para evaluar la saturación del mercado:
-- Menos de 500 publicaciones: mercado poco competido
-- 500-2000 publicaciones: competencia moderada
-- Más de 2000 publicaciones: mercado muy competido/saturado
+Total de publicaciones para "${producto}": ${mlData.total.toLocaleString('es-AR')} publicaciones
+Nota: el análisis se basó en una muestra de ${scrape.totalListings} publicaciones
+
+Saturación según total real:
+- Menos de 500: mercado poco competido → score puede ser más alto
+- 500 a 2.000: competencia moderada
+- Más de 2.000: mercado saturado → penalizar score especialmente para principiantes
+
+` : ''}${mlData?.trends?.interest ? `TENDENCIA EN GOOGLE (último año en ${pais}):
+Interés promedio: ${mlData.trends.interest}/100
+En tendencia creciente: ${mlData.trends.trending ? "SÍ" : "NO"}
+${mlData.trends.related?.length ? `- Búsquedas relacionadas: ${mlData.trends.related.join(', ')}` : ''}
+
+Usá estos datos para la sección de tendencia y demanda del análisis.
 
 ` : ''}MONEDA LOCAL: ${currencyName} (${currencyCode})
 TASA DE CAMBIO HOY: 1 USD = ${rate} ${currencyCode}

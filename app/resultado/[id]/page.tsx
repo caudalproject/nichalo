@@ -242,17 +242,45 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 2: Resumen ejecutivo */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {[
-              { label: "Precio promedio", value: formatLocalPrice(result.competencia.precio_promedio, moneda) },
-              { label: "Margen bruto", value: `${margenBruto.toFixed(1)}%` },
-              { label: "Publicaciones scrapeadas", value: String(result.publicaciones_analizadas ?? result.competencia.cantidad_vendedores) },
-              { label: "Precio sugerido", value: formatLocalPrice(result.margen.precio_sugerido_venta, moneda) },
-            ].map((m) => (
-              <div key={m.label} className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
-                <div className="text-xs text-[#6B7280]">{m.label}</div>
-                <div className="mt-1 text-xl font-bold text-[#0A0A0A]">{m.value}</div>
+            <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-xs text-[#6B7280]">Mercado total</div>
+              {result.total_publicaciones_ml ? (
+                <>
+                  <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
+                    {result.total_publicaciones_ml.toLocaleString("es-AR")}
+                  </div>
+                  <div className="mt-1">
+                    {result.google_trends_trending ? (
+                      <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                        📈 En alza
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                        📊 Estable
+                      </span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="mt-1 text-xl font-bold text-[#0A0A0A]">—</div>
+              )}
+            </div>
+            <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-xs text-[#6B7280]">Margen bruto</div>
+              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">{margenBruto.toFixed(1)}%</div>
+            </div>
+            <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-xs text-[#6B7280]">Publicaciones scrapeadas</div>
+              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
+                {String(result.publicaciones_analizadas ?? result.competencia.cantidad_vendedores)}
               </div>
-            ))}
+            </div>
+            <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-xs text-[#6B7280]">Precio sugerido</div>
+              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
+                {formatLocalPrice(result.margen.precio_sugerido_venta, moneda)}
+              </div>
+            </div>
           </div>
 
           {/* CAPA 3: Imagen analizada */}
