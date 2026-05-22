@@ -75,7 +75,7 @@ function sanitizeText(text: string): string {
 }
 
 function sellerDisplayName(nombre: string, index: number): string {
-  if (!nombre || nombre.includes("http") || nombre.includes("/") || nombre.includes(".com")) {
+  if (!nombre || nombre === "null" || nombre.includes("http") || nombre.includes("/") || nombre.includes(".com")) {
     return `Vendedor #${index + 1}`;
   }
   return nombre;
@@ -161,6 +161,8 @@ export default async function ResultadoPage({ params }: Params) {
     dateStyle: "medium",
     timeStyle: "short",
   });
+
+  const isFree = !user || !profile || profile.plan === "free";
 
   const publicaciones =
     result.publicaciones_analizadas ?? result.competencia?.cantidad_vendedores ?? 0;
@@ -328,6 +330,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 6: Competencia + Margen */}
+          <LockedSection locked={isFree}>
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -412,9 +415,11 @@ export default async function ResultadoPage({ params }: Params) {
               </CardContent>
             </Card>
           </div>
+          </LockedSection>
 
           {/* CAPA 7: Top vendedores */}
           {hasTopVendedores && (
+            <LockedSection locked={isFree}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Top vendedores</CardTitle>
@@ -485,10 +490,12 @@ export default async function ResultadoPage({ params }: Params) {
                 </div>
               </CardContent>
             </Card>
+            </LockedSection>
           )}
 
           {/* CAPA 8: Distribución de precios */}
           {hasChart && (
+            <LockedSection locked={isFree}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Distribución de precios</CardTitle>
@@ -510,10 +517,12 @@ export default async function ResultadoPage({ params }: Params) {
                 </div>
               </CardContent>
             </Card>
+            </LockedSection>
           )}
 
           {/* CAPA 9: Palabras clave */}
           {hasKeywords && (
+            <LockedSection locked={isFree}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Palabras clave en títulos</CardTitle>
@@ -528,9 +537,11 @@ export default async function ResultadoPage({ params }: Params) {
                 </div>
               </CardContent>
             </Card>
+            </LockedSection>
           )}
 
           {/* CAPA 10: Tendencia + Estacionalidad */}
+          <LockedSection locked={isFree}>
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -552,9 +563,11 @@ export default async function ResultadoPage({ params }: Params) {
               </Card>
             )}
           </div>
+          </LockedSection>
 
           {/* CAPA 11: Oportunidades de diferenciación */}
           {hasDiferenciadores && (
+            <LockedSection locked={isFree}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Oportunidades de diferenciación</CardTitle>
@@ -572,10 +585,12 @@ export default async function ResultadoPage({ params }: Params) {
                 </div>
               </CardContent>
             </Card>
+            </LockedSection>
           )}
 
           {/* CAPA 12: Análisis de costo vs proveedores */}
           {result.analisis_costo_proveedor && (
+            <LockedSection locked={isFree}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Análisis de costo vs. proveedores</CardTitle>
@@ -598,9 +613,11 @@ export default async function ResultadoPage({ params }: Params) {
                 </p>
               </CardContent>
             </Card>
+            </LockedSection>
           )}
 
           {/* CAPA 13: Riesgos */}
+          <LockedSection locked={isFree}>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Riesgos a tener en cuenta</CardTitle>
@@ -619,8 +636,10 @@ export default async function ResultadoPage({ params }: Params) {
               )}
             </CardContent>
           </Card>
+          </LockedSection>
 
           {/* CAPA 14: Recomendación */}
+          <LockedSection locked={isFree}>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Recomendación</CardTitle>
@@ -629,9 +648,42 @@ export default async function ResultadoPage({ params }: Params) {
               <p className="text-sm font-medium">{sanitizeText(result.recomendacion)}</p>
             </CardContent>
           </Card>
+          </LockedSection>
         </div>
       </main>
     </>
+  );
+}
+
+function LockedSection({
+  children,
+  locked,
+}: {
+  children: React.ReactNode;
+  locked: boolean;
+}) {
+  if (!locked) return <>{children}</>;
+  return (
+    <div className="relative">
+      <div className="blur-sm pointer-events-none select-none opacity-60">
+        {children}
+      </div>
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 rounded-lg border border-[#E5E7EB] backdrop-blur-sm">
+        <span className="text-2xl mb-2">🔒</span>
+        <p className="text-sm font-semibold text-[#0A0A0A] mb-1">
+          Disponible en Starter y Pro
+        </p>
+        <p className="text-xs text-[#6B7280] mb-3 text-center px-4">
+          Desbloqueá el análisis completo
+        </p>
+        <a
+          href="/#planes"
+          className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors"
+        >
+          Ver planes →
+        </a>
+      </div>
+    </div>
   );
 }
 
