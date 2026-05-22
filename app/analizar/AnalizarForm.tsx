@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getCurrencyForCountry, getExchangeRate } from "@/lib/currency";
 
 interface Props {
   creditsLeft: number;
@@ -46,6 +47,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
   const [pais, setPais] = useState<"AR" | "MX" | "CO">("AR");
   const [perfilVendedor, setPerfilVendedor] = useState<PerfilVendedor>("principiante");
   const [costo, setCosto] = useState("");
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imageMimeType, setImageMimeType] = useState<string>("image/jpeg");
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
@@ -63,6 +65,20 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
   }, []);
+
+  // Load exchange rate when country changes
+  useEffect(() => {
+    const currency = getCurrencyForCountry(pais);
+    if (currency.code === "USD") {
+      setExchangeRate(1);
+      return;
+    }
+    let cancelled = false;
+    getExchangeRate(currency.code).then((rate) => {
+      if (!cancelled) setExchangeRate(rate);
+    });
+    return () => { cancelled = true; };
+  }, [pais]);
 
   function handleFile(file: File) {
     if (file.size > MAX_IMAGE_BYTES) {
@@ -135,25 +151,26 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
       return;
     }
 
-    const costoNum = Number(costo);
+    const costoLocalParsed = parseFloat(costo.replace(",", "."));
+    const costoUSDSubmit = exchangeRate ? costoLocalParsed / exchangeRate : costoLocalParsed;
     if (!producto.trim() || producto.trim().length < 2) {
       setError("Ingresá un producto válido (mínimo 2 caracteres).");
       return;
     }
-    if (!Number.isFinite(costoNum) || costoNum <= 0) {
+    if (!Number.isFinite(costoLocalParsed) || costoLocalParsed <= 0) {
       setError("Ingresá un costo estimado mayor a 0.");
       return;
     }
 
     setLoading(true);
     setProgress(5);
-    setStepMessage("Iniciando análisis...");
+    setStepMessage(imageBase64 ? "Analizando imagen..." : "Iniciando análisis...");
 
     try {
       const body: Record<string, unknown> = {
         producto: producto.trim(),
         pais,
-        costoEstimado: costoNum,
+        costoEstimado: costoUSDSubmit,
         perfilVendedor,
       };
       if (imageBase64) {
@@ -262,21 +279,39 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="costo">Costo estimado (USD)</Label>
-            <Input
-              id="costo"
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              min="0.01"
-              placeholder="35.00"
-              value={costo}
-              onChange={(e) => setCosto(e.target.value)}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              Ingresá el costo en dólares (precio de compra o importación)
-            </p>
+            {(() => {
+              const currency = getCurrencyForCountry(pais);
+              const costoLocal = parseFloat(costo.replace(",", "."));
+              const costoUSD =
+                exchangeRate && !isNaN(costoLocal) && costoLocal > 0
+                  ? costoLocal / exchangeRate
+                  : null;
+              return (
+                <>
+                  <Label htmlFor="costo">Costo estimado ({currency.code})</Label>
+                  <Input
+                    id="costo"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder={currency.code === "USD" ? "Ej: 35.00" : "Ej: 14.900"}
+                    value={costo}
+                    onChange={(e) => setCosto(e.target.value)}
+                    required
+                  />
+                  {costoUSD !== null ? (
+                    <p className="text-xs text-muted-foreground">
+                      ≈ ${costoUSD.toFixed(2)} USD
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      {currency.code === "USD"
+                        ? "Ingresá el costo en dólares"
+                        : `Ingresá el costo en ${currency.name}`}
+                    </p>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* Image upload */}

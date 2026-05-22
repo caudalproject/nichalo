@@ -26,10 +26,20 @@ export async function getMLSearchTotal(
     );
     if (!res.ok) return 0;
     const html = await res.text();
+    console.log("[ml-search] HTML snippet:", html.substring(0, 500));
 
-    const match = html.match(/(\d[\d.]*)\s*resultados/i);
-    if (match) {
-      return parseInt(match[1].replace(/\./g, ""), 10);
+    const patterns = [
+      /(\d[\d.]*)\s*resultados/i,
+      /(\d[\d.]*)\s*resultado/i,
+      /"paging":\{"total":(\d+)/,
+      /results['"]\s*:\s*(\d+)/i,
+    ];
+
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match) {
+        return parseInt(match[1].replace(/\./g, ""), 10);
+      }
     }
     return 0;
   } catch {

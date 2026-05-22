@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { inngest } from "@/lib/inngest";
+import { extractKeywordsFromImage } from "@/lib/gemini";
 import type { Plan, AnalysisResult } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
       { status: 422 }
     );
   }
-  const { producto, pais, costoEstimado, imagenBase64, perfilVendedor } = parsed.data;
+  const { producto, pais, costoEstimado, imagenBase64, imagenMimeType, perfilVendedor } = parsed.data;
 
   const supabase = createSupabaseServerClient();
 
@@ -129,15 +130,21 @@ export async function POST(request: Request) {
       }
     }
 
-    // --- Image analysis: temporarily disabled ---
+    // --- Si hay imagen, extraer keyword descriptiva para Apify ---
+    let searchKeyword = producto;
     if (imagenBase64) {
-      return NextResponse.json(
-        { error: "El análisis con imagen está temporalmente deshabilitado. Usá el análisis estándar." },
-        { status: 503 }
-      );
+      try {
+        const keyword = await extractKeywordsFromImage(
+          imagenBase64,
+          imagenMimeType ?? "image/jpeg"
+        );
+        if (keyword) searchKeyword = keyword;
+      } catch {
+        // Fallback silencioso al texto del usuario
+      }
     }
 
-    // --- No cache, no image: crear job y disparar evento Inngest ---
+    // --- Crear job y disparar evento Inngest ---
     const { data: job, error: jobErr } = await supabase
       .from("analysis_jobs")
       .insert({
@@ -157,17 +164,22 @@ export async function POST(request: Request) {
       );
     }
 
+    const eventData: Record<string, unknown> = {
+      job_id: job.id,
+      user_id: user.id,
+      producto,
+      pais,
+      costo_estimado: costoEstimado,
+      plan,
+      perfil_vendedor: perfilVendedor,
+    };
+    if (searchKeyword !== producto) {
+      eventData.search_keyword = searchKeyword;
+    }
+
     await inngest.send({
       name: "nichalo/analisis.requested",
-      data: {
-        job_id: job.id,
-        user_id: user.id,
-        producto,
-        pais,
-        costo_estimado: costoEstimado,
-        plan,
-        perfil_vendedor: perfilVendedor,
-      },
+      data: eventData,
     });
 
     return NextResponse.json({ job_id: job.id }, { status: 202 });

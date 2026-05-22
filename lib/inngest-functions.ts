@@ -35,6 +35,7 @@ export const analizarProducto = inngest.createFunction(
       costo_estimado,
       plan,
       perfil_vendedor,
+      search_keyword,
     } = event.data as {
       job_id: string;
       user_id: string;
@@ -43,6 +44,7 @@ export const analizarProducto = inngest.createFunction(
       costo_estimado: number;
       plan: Plan;
       perfil_vendedor: string;
+      search_keyword?: string;
     };
 
     try {
@@ -52,7 +54,7 @@ export const analizarProducto = inngest.createFunction(
           status: "scraping",
           step_message: "Buscando productos en Mercado Libre...",
         });
-        return await startApifyRun(producto, pais, plan);
+        return await startApifyRun(search_keyword ?? producto, pais, plan);
       });
 
       // Step 2: Polling de Apify — cada retry chequea si terminó

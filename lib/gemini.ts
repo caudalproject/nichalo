@@ -21,6 +21,43 @@ interface AnalyzeArgs {
   };
 }
 
+export async function extractKeywordsFromImage(
+  imagenBase64: string,
+  mimeType: string = "image/jpeg"
+): Promise<string | null> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const prompt = `Analizá esta imagen de producto y generá entre 3 y 5 keywords descriptivas en español que un comprador usaría para buscarlo en Mercado Libre.
+Devolvé SOLO las keywords separadas por coma, sin explicación, sin markdown.
+Ejemplo: lámpara sal rosa, luz ambiente sal, lámpara himalaya decorativa`;
+
+  for (const modelName of MODELS) {
+    try {
+      const model = genAI.getGenerativeModel(
+        { model: modelName },
+        { apiVersion: "v1" }
+      );
+      const result = await model.generateContent([
+        { inlineData: { mimeType, data: imagenBase64 } },
+        { text: prompt },
+      ]);
+      const text = result.response.text().trim();
+      if (!text) continue;
+      const first = text.split(",")[0].trim();
+      return first || null;
+    } catch (err: unknown) {
+      const e = err as { message?: string; status?: number };
+      const is503 = e?.message?.includes("503") || e?.status === 503;
+      const isLast = modelName === MODELS[MODELS.length - 1];
+      if (is503 && !isLast) continue;
+      return null;
+    }
+  }
+  return null;
+}
+
 export async function analizarConGemini(
   args: AnalyzeArgs
 ): Promise<AnalysisResult> {
