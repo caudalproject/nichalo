@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
+import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 
 const FEATURES = [
   {
@@ -30,9 +31,10 @@ const FEATURES = [
 const PLANS = [
   {
     name: "Free",
-    price: "$0",
-    period: "/mes",
+    price: "Gratis",
+    period: "",
     popular: false,
+    mpPlan: null as null,
     features: [
       { label: "1 análisis por mes", included: true },
       { label: "Análisis básico (30 publicaciones)", included: true },
@@ -43,29 +45,31 @@ const PLANS = [
   },
   {
     name: "Starter",
-    price: "$12",
+    price: "$17.000",
     period: "/mes",
     popular: true,
+    mpPlan: "starter" as const,
     features: [
       { label: "10 análisis por mes", included: true },
       { label: "Análisis estándar (200 publicaciones)", included: true },
       { label: "Subida de imagen del producto", included: false },
     ],
     cta: "Empezar ahora",
-    href: "/login",
+    href: null,
   },
   {
     name: "Pro",
-    price: "$29",
+    price: "$41.000",
     period: "/mes",
     popular: false,
+    mpPlan: "pro" as const,
     features: [
       { label: "30 análisis por mes", included: true },
       { label: "Análisis profundo (500 publicaciones)", included: true },
       { label: "Subida de imagen del producto", included: true },
     ],
     cta: "Empezar ahora",
-    href: "/login",
+    href: null,
   },
 ];
 
@@ -164,7 +168,7 @@ export default function LandingPage() {
               Elegí el plan que mejor se adapta a tu ritmo de trabajo.
             </p>
             <p className="mt-1 text-center text-sm text-[#6B7280]">
-              Precios en dólares estadounidenses (USD)
+              Precios en pesos argentinos (ARS)
             </p>
             <div className="mt-12 mx-auto grid max-w-5xl gap-6 md:grid-cols-3 items-start">
               {PLANS.map((plan) => (
@@ -219,14 +223,22 @@ export default function LandingPage() {
                         ))}
                       </ul>
                       <div className="mt-8">
-                        <Link href={plan.href} className="block">
-                          <Button
-                            className="w-full rounded-md"
+                        {plan.mpPlan ? (
+                          <PricingCheckoutButton
+                            plan={plan.mpPlan}
                             variant={plan.popular ? "default" : "outline"}
-                          >
-                            {plan.cta}
-                          </Button>
-                        </Link>
+                            label={plan.cta}
+                          />
+                        ) : (
+                          <Link href={plan.href!} className="block">
+                            <Button
+                              className="w-full rounded-md"
+                              variant="outline"
+                            >
+                              {plan.cta}
+                            </Button>
+                          </Link>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DashboardList } from "@/components/DashboardList";
+import { UpgradeBanner } from "@/components/UpgradeBanner";
 import type { AnalysisRow, UserRow } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -90,6 +91,12 @@ export default async function DashboardPage() {
             </Button>
           </Link>
         </div>
+
+        {(profile?.analisis_restantes ?? 0) === 0 && profile?.plan !== "pro" && (
+          <div className="mt-6">
+            <UpgradeBanner />
+          </div>
+        )}
 
         <div className="mt-8">
           <DashboardList initialList={list} userId={user.id} />
