@@ -48,24 +48,24 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (user) {
-    const { error: upsertErr } = await supabase
+    const { data: existingUser } = await supabase
       .from("users")
-      .upsert(
-        {
-          id: user.id,
-          email: user.email,
-        },
-        { onConflict: "id", ignoreDuplicates: true }
-      );
+      .select("id")
+      .eq("id", user.id)
+      .single();
 
-    // Enviar bienvenida solo si el usuario es nuevo (creado hace menos de 10 segundos)
-    if (!upsertErr && user.email) {
-      const createdAt = new Date(user.created_at).getTime();
-      const isNewUser = Date.now() - createdAt < 10_000;
-      if (isNewUser) {
-        const nombre = user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email.split('@')[0];
-        await sendWelcomeEmail(user.email, nombre);
-      }
+    const isNewUser = !existingUser;
+
+    await supabase
+      .from("users")
+      .upsert({ id: user.id, email: user.email }, { onConflict: "id" });
+
+    if (isNewUser && user.email) {
+      const nombre =
+        user.user_metadata?.full_name ??
+        user.user_metadata?.name ??
+        user.email.split("@")[0];
+      await sendWelcomeEmail(user.email, nombre);
     }
   }
 
