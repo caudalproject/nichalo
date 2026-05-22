@@ -5,6 +5,7 @@ import { startApifyRun, checkApifyRun, getApifyResults } from "./apify";
 import { analizarConGemini } from "./gemini";
 import { PLAN_CONFIG } from "./plans";
 import { getCurrencyForCountry, getExchangeRate } from "./currency";
+import { sendAnalysisReadyEmail } from "./resend";
 // mercadolibre functions imported dynamically inside the step
 import type { Plan } from "./supabase";
 
@@ -192,6 +193,23 @@ export const analizarProducto = inngest.createFunction(
           step_message: "¡Análisis completado!",
           analysis_id: insertData.id,
         });
+
+        // Enviar email de resultado al usuario
+        const { data: userRow2 } = await supabase
+          .from("users")
+          .select("email")
+          .eq("id", user_id)
+          .single();
+
+        if (userRow2?.email) {
+          await sendAnalysisReadyEmail(
+            userRow2.email,
+            producto,
+            analysis.veredicto,
+            analysis.score,
+            insertData.id,
+          );
+        }
       });
     } catch (err) {
       await updateJob(job_id, {

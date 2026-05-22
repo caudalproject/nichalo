@@ -27,9 +27,17 @@ function isInRange(rango: string, precio: number): boolean {
   return precio >= parts[0] && precio < parts[1];
 }
 
+function detectCurrency(data: DistribucionPrecio[]): string {
+  const rango = data[0]?.rango ?? "";
+  const match = rango.match(/[A-Z]{3}$/);
+  return match ? match[0] : "USD";
+}
+
 export function PriceDistributionChart({ data, precioSugerido }: Props) {
   const filtered = (data ?? []).filter((d) => d.cantidad > 0);
   if (filtered.length === 0) return null;
+
+  const currency = detectCurrency(filtered);
 
   return (
     <ResponsiveContainer width="100%" height={200}>
@@ -38,12 +46,12 @@ export function PriceDistributionChart({ data, precioSugerido }: Props) {
         <XAxis
           dataKey="rango"
           tick={{ fontSize: 12 }}
-          label={{ value: "Rango USD", position: "insideBottom", offset: -2, fontSize: 11 }}
+          label={{ value: `Rango ${currency}`, position: "insideBottom", offset: -2, fontSize: 11 }}
         />
         <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
         <Tooltip
           formatter={(value) => [value, "Publicaciones"]}
-          labelFormatter={(label) => `Rango: $${label} USD`}
+          labelFormatter={(label) => `Rango: $${label} ${currency}`}
         />
         <Bar dataKey="cantidad" radius={[4, 4, 0, 0]}>
           {filtered.map((entry, i) => {

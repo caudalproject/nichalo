@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { inngest } from "@/lib/inngest";
 import { extractKeywordsFromImage } from "@/lib/gemini";
+import { sendUpsellEmail } from "@/lib/resend";
 import type { Plan, AnalysisResult } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -77,6 +78,9 @@ export async function POST(request: Request) {
   }
 
   if (restantes <= 0) {
+    if (user.email) {
+      await sendUpsellEmail(user.email);
+    }
     return NextResponse.json({ error: "no_credits_left" }, { status: 402 });
   }
 
