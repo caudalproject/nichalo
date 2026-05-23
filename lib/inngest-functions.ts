@@ -102,6 +102,7 @@ export const analizarProducto = inngest.createFunction(
 
       // Step 4: Obtener total de ML y tendencias de Google en paralelo
       const mlData = await step.run("fetch-ml-data", async () => {
+        console.log("[fetch-ml-data] iniciando");
         const { getMLSearchTotal, getGoogleTrends } = await import("./mercadolibre");
         const [total, trends] = await Promise.all([
           getMLSearchTotal(producto, pais),
