@@ -5,43 +5,24 @@ export async function getMLSearchTotal(
   producto: string,
   pais: string
 ): Promise<number> {
-  const domainMap: Record<string, string> = {
-    AR: "listado.mercadolibre.com.ar",
-    MX: "listado.mercadolibre.com.mx",
-    CO: "listado.mercadolibre.com.co",
+  const siteMap: Record<string, string> = {
+    AR: "MLA",
+    MX: "MLM",
+    CO: "MCO",
+    CL: "MLC",
+    UY: "MLU",
   };
-  const domain = domainMap[pais] ?? "listado.mercadolibre.com.ar";
+  const siteId = siteMap[pais] ?? "MLA";
   const query = encodeURIComponent(producto);
 
   try {
     const res = await fetch(
-      `https://${domain}/${query}`,
-      {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-          "Accept": "text/html",
-        },
-        signal: AbortSignal.timeout(8000),
-      }
+      `https://api.mercadolibre.com/sites/${siteId}/search?q=${query}&limit=1`,
+      { signal: AbortSignal.timeout(8000) }
     );
     if (!res.ok) return 0;
-    const html = await res.text();
-    console.log("[ml-search] HTML snippet:", html.substring(0, 500));
-
-    const patterns = [
-      /(\d[\d.]*)\s*resultados/i,
-      /(\d[\d.]*)\s*resultado/i,
-      /"paging":\{"total":(\d+)/,
-      /results['"]\s*:\s*(\d+)/i,
-    ];
-
-    for (const pattern of patterns) {
-      const match = html.match(pattern);
-      if (match) {
-        return parseInt(match[1].replace(/\./g, ""), 10);
-      }
-    }
-    return 0;
+    const data = await res.json();
+    return data?.paging?.total ?? 0;
   } catch {
     return 0;
   }
