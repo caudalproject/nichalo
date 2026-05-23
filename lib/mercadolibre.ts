@@ -13,17 +13,25 @@ export async function getMLSearchTotal(
     UY: "MLU",
   };
   const siteId = siteMap[pais] ?? "MLA";
-  const query = encodeURIComponent(producto);
 
   try {
     const res = await fetch(
-      `https://api.mercadolibre.com/sites/${siteId}/search?q=${query}&limit=1`,
-      { signal: AbortSignal.timeout(8000) }
+      `https://api.mercadolibre.com/sites/${siteId}/search?q=${encodeURIComponent(producto)}&limit=1`,
+      {
+        signal: AbortSignal.timeout(8000),
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; Nichalo/1.0)" },
+      }
     );
-    if (!res.ok) return 0;
+    console.log("[ML API] status:", res.status, "query:", producto, "site:", siteId);
+    if (!res.ok) {
+      console.log("[ML API] error response:", await res.text());
+      return 0;
+    }
     const data = await res.json();
+    console.log("[ML API] paging.total:", data?.paging?.total);
     return data?.paging?.total ?? 0;
-  } catch {
+  } catch (err) {
+    console.log("[ML API] fetch error:", err);
     return 0;
   }
 }

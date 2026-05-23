@@ -246,7 +246,7 @@ export default async function ResultadoPage({ params }: Params) {
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Mercado total</div>
-              {result.total_publicaciones_ml ? (
+              {result.total_publicaciones_ml != null ? (
                 <>
                   <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
                     {result.total_publicaciones_ml.toLocaleString("es-AR")}
@@ -340,7 +340,7 @@ export default async function ResultadoPage({ params }: Params) {
                 <Row label="Publicaciones scrapeadas">
                   {result.publicaciones_analizadas ?? result.competencia.cantidad_vendedores}
                 </Row>
-                {result.total_publicaciones_ml ? (
+                {result.total_publicaciones_ml != null ? (
                   <Row label="Total en ML">
                     {result.total_publicaciones_ml.toLocaleString("es-AR")} publicaciones
                   </Row>
