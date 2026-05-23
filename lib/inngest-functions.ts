@@ -1,5 +1,6 @@
 import { NonRetriableError } from "inngest";
 import { createClient } from "@supabase/supabase-js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { inngest } from "./inngest";
 import { startApifyRun, checkApifyRun, getApifyResults } from "./apify";
 import { analizarConGemini } from "./gemini";
@@ -78,6 +79,57 @@ export const analizarProducto = inngest.createFunction(
         },
       );
 
+      // Step 2b: Si Apify devolvió 0 resultados, intentar con keyword simplificada
+      const fallbackRunId = await step.run("apify-fallback-start", async () => {
+        if (scrape.totalListings > 0) return null;
+
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) return null;
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel(
+          { model: "gemini-2.5-flash" },
+          { apiVersion: "v1" }
+        );
+
+        const prompt = `El usuario quiere vender "${producto}" en Mercado Libre ${pais}.
+Generá UNA sola keyword corta (2-3 palabras máximo) que un comprador usaría para buscar este producto en Mercado Libre.
+Respondé SOLO con la keyword, sin explicación.
+Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
+
+        try {
+          const result = await model.generateContent([{ text: prompt }]);
+          const simplifiedKeyword = result.response.text().trim();
+          if (!simplifiedKeyword) return null;
+
+          console.log("[apify] fallback keyword:", simplifiedKeyword);
+          return await startApifyRun(simplifiedKeyword, pais, plan);
+        } catch {
+          return null;
+        }
+      });
+
+      // Step 2c: Polling del fallback run (se omite si no hubo fallback)
+      const finalScrape = await step.run("apify-fallback-wait", async () => {
+        if (!fallbackRunId) return scrape;
+
+        const result = await checkApifyRun(fallbackRunId);
+
+        if (["FAILED", "ABORTED", "TIMED-OUT"].includes(result.status)) {
+          console.log("[apify] fallback run falló, continuando con 0 resultados");
+          return scrape;
+        }
+
+        if (result.status !== "SUCCEEDED") {
+          throw new Error(`Apify fallback en progreso: ${result.status}`);
+        }
+
+        const { maxItems } = PLAN_CONFIG[plan];
+        const fallbackScrape = await getApifyResults(fallbackRunId, producto, pais, maxItems);
+        console.log("[apify] fallback obtuvo", fallbackScrape.totalListings, "items");
+        return fallbackScrape;
+      });
+
       // Step 3: Obtener tendencias de ML
       const mlTrends = await step.run("fetch-ml-trends", async () => {
         const siteMap: Record<string, string> = {
@@ -127,7 +179,7 @@ export const analizarProducto = inngest.createFunction(
             producto,
             pais,
             costoEstimadoUsd: costo_estimado,
-            scrape,
+            scrape: finalScrape,
             currency,
             exchangeRate,
             perfilVendedor: perfil_vendedor,
@@ -141,7 +193,7 @@ export const analizarProducto = inngest.createFunction(
       await step.run("save-results", async () => {
         const resultadoJson = {
           ...analysis,
-          publicaciones_analizadas: scrape.totalListings,
+          publicaciones_analizadas: finalScrape.totalListings,
           total_publicaciones_ml: mlData?.total ?? 0,
           google_trends_interest: mlData?.trends?.interest ?? 0,
           google_trends_trending: mlData?.trends?.trending ?? false,
@@ -171,7 +223,7 @@ export const analizarProducto = inngest.createFunction(
             producto: productoNorm,
             pais,
             resultado_json: resultadoJson,
-            publicaciones_analizadas: scrape.totalListings,
+            publicaciones_analizadas: finalScrape.totalListings,
           },
           { onConflict: "producto,pais" }
         );
