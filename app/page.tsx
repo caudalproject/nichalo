@@ -33,26 +33,30 @@ const PLANS = [
     name: "Free",
     price: "Gratis",
     period: "",
+    priceNote: null as null | string,
     popular: false,
     mpPlan: null as null,
     features: [
       { label: "1 análisis por mes", included: true },
-      { label: "Análisis básico (30 publicaciones)", included: true },
-      { label: "Subida de imagen del producto", included: false },
+      { label: "30 publicaciones analizadas", included: true },
+      { label: "Subida de imagen del producto", included: true },
+      { label: "Análisis mayormente bloqueado — solo veredicto, score y resumen", included: false },
     ],
-    cta: "Empezar gratis",
+    cta: "Probar gratis",
     href: "/login",
   },
   {
     name: "Starter",
     price: "$17.000",
     period: "/mes",
+    priceNote: "~$6 por análisis" as null | string,
     popular: true,
     mpPlan: "starter" as const,
     features: [
       { label: "10 análisis por mes", included: true },
-      { label: "Análisis estándar (200 publicaciones)", included: true },
-      { label: "Subida de imagen del producto", included: false },
+      { label: "50 publicaciones analizadas", included: true },
+      { label: "Subida de imagen del producto", included: true },
+      { label: "Análisis completo desbloqueado", included: true },
     ],
     cta: "Empezar ahora",
     href: null,
@@ -61,12 +65,15 @@ const PLANS = [
     name: "Pro",
     price: "$41.000",
     period: "/mes",
+    priceNote: "~$1,37 por análisis" as null | string,
     popular: false,
     mpPlan: "pro" as const,
     features: [
       { label: "30 análisis por mes", included: true },
-      { label: "Análisis profundo (500 publicaciones)", included: true },
+      { label: "100 publicaciones analizadas", included: true },
       { label: "Subida de imagen del producto", included: true },
+      { label: "Análisis completo desbloqueado", included: true },
+      { label: "Mayor profundidad de datos", included: true },
     ],
     cta: "Empezar ahora",
     href: null,
@@ -127,7 +134,7 @@ export default function LandingPage() {
               </div>
               <div>
                 <div className="text-3xl font-bold text-[#0A0A0A]">
-                  &lt; 60s
+                  ~2 min
                 </div>
                 <div className="text-sm text-[#6B7280] mt-1">
                   por análisis
@@ -199,6 +206,9 @@ export default function LandingPage() {
                           {plan.period}
                         </span>
                       </div>
+                      {plan.priceNote && (
+                        <p className="mt-1 text-xs text-[#6B7280]">{plan.priceNote}</p>
+                      )}
                       <ul className="mt-6 space-y-3">
                         {plan.features.map((feat) => (
                           <li
@@ -245,6 +255,9 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+            <p className="mt-8 text-center text-sm text-[#6B7280]">
+              Sin contratos. Cancelá cuando quieras.
+            </p>
           </div>
         </section>
 
