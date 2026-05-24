@@ -245,9 +245,9 @@ export default async function ResultadoPage({ params }: Params) {
           {/* CAPA 2: Resumen ejecutivo */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
-              <div className="text-xs text-[#6B7280]">ROI estimado</div>
+              <div className="text-xs text-[#6B7280]">Ganancia por unidad</div>
               <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
-                {roi != null ? `${roi.toFixed(1)}%` : "—"}
+                {result.margen?.ganancia_estimada != null ? `US$ ${result.margen.ganancia_estimada.toFixed(2)}` : "—"}
               </div>
             </div>
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
