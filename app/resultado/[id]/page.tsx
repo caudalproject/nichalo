@@ -245,27 +245,10 @@ export default async function ResultadoPage({ params }: Params) {
           {/* CAPA 2: Resumen ejecutivo */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
-              <div className="text-xs text-[#6B7280]">Mercado total</div>
-              {result.total_publicaciones_ml != null ? (
-                <>
-                  <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
-                    {result.total_publicaciones_ml.toLocaleString("es-AR")}
-                  </div>
-                  <div className="mt-1">
-                    {result.google_trends_trending ? (
-                      <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                        📈 En alza
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-                        📊 Estable
-                      </span>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div className="mt-1 text-xl font-bold text-[#0A0A0A]">—</div>
-              )}
+              <div className="text-xs text-[#6B7280]">ROI estimado</div>
+              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
+                {roi != null ? `${roi.toFixed(1)}%` : "—"}
+              </div>
             </div>
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Margen bruto</div>
