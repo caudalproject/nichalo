@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Navbar } from "@/components/Navbar";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DashboardList } from "@/components/DashboardList";
 import { UpgradeBanner } from "@/components/UpgradeBanner";
+import { PixelRegistration } from "@/components/PixelRegistration";
 import type { AnalysisRow, UserRow } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +64,9 @@ export default async function DashboardPage() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <PixelRegistration />
+      </Suspense>
       <Navbar
         email={profile?.email ?? user.email}
         analisisRestantes={profile?.analisis_restantes}

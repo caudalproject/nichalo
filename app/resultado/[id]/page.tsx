@@ -199,48 +199,65 @@ export default async function ResultadoPage({ params }: Params) {
           </div>
 
           {/* CAPA 1: Veredicto hero */}
-          <Card className={cn("border-2 shadow-sm rounded-lg", styles.pillBorder, styles.pillBg)}>
-            <CardContent className="p-8 text-center">
-              <div className="text-5xl">{styles.emoji}</div>
-              <div className={cn("mt-3 text-4xl font-extrabold tracking-tight", styles.title)}>
-                {analysis.veredicto}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className={`h-1.5 w-full ${
+              analysis.veredicto === 'VIABLE' ? 'bg-green-500' :
+              analysis.veredicto === 'MARGINAL' ? 'bg-yellow-400' :
+              'bg-red-500'
+            }`} />
+
+            <div className="px-8 py-10">
+              <div className="flex items-center gap-3 mb-8">
+                <span className={`text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full ${
+                  analysis.veredicto === 'VIABLE' ? 'bg-green-50 text-green-700' :
+                  analysis.veredicto === 'MARGINAL' ? 'bg-yellow-50 text-yellow-700' :
+                  'bg-red-50 text-red-700'
+                }`}>
+                  {analysis.veredicto}
+                </span>
+                <span className="text-sm text-gray-400">{styles.headline}</span>
               </div>
-              <p className={cn("mt-1 text-sm font-medium", styles.pillText)}>
-                {styles.headline}
-              </p>
-              <div className="mt-6 inline-flex items-baseline gap-2 rounded-full bg-white/70 px-5 py-2 shadow-sm">
-                <span className="text-sm text-muted-foreground">Score</span>
-                <span className="text-3xl font-bold">{analysis.score}</span>
-                <span className="text-sm text-muted-foreground">/ 100</span>
+
+              <div className="mb-8">
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-8xl font-black leading-none ${
+                    analysis.veredicto === 'VIABLE' ? 'text-green-500' :
+                    analysis.veredicto === 'MARGINAL' ? 'text-yellow-400' :
+                    'text-red-500'
+                  }`}>
+                    {analysis.score}
+                  </span>
+                  <span className="text-2xl text-gray-300 font-light">/100</span>
+                </div>
+
+                <div className="mt-4 h-1.5 bg-gray-100 rounded-full w-64">
+                  <div className={`h-full rounded-full transition-all ${
+                    analysis.veredicto === 'VIABLE' ? 'bg-green-500' :
+                    analysis.veredicto === 'MARGINAL' ? 'bg-yellow-400' :
+                    'bg-red-500'
+                  }`} style={{ width: `${analysis.score}%` }} />
+                </div>
+
+                <div className="flex gap-4 mt-2 text-xs text-gray-400">
+                  <span>0–49 · Saturado</span>
+                  <span>50–74 · Marginal</span>
+                  <span>75–100 · Viable</span>
+                </div>
               </div>
-              <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
-                {SCORE_PILLS.map((pill) => {
-                  const active = analysis.score >= pill.min && analysis.score <= pill.max;
-                  return (
-                    <span
-                      key={pill.label}
-                      className={cn(
-                        "rounded-full border px-3 py-0.5 text-xs font-semibold",
-                        active ? pill.active : pill.base
-                      )}
-                    >
-                      {pill.label} · {pill.sublabel}
-                    </span>
-                  );
-                })}
-              </div>
-              <h2 className="mt-6 text-lg font-semibold">{analysis.producto}</h2>
-              <p className="text-sm text-muted-foreground">
-                {PAIS_LABEL[analysis.pais] ?? analysis.pais} · Costo{" "}
-                {formatCurrency(Number(analysis.costo_estimado), "USD")} · {fecha}
-              </p>
-              {publicaciones > 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Análisis basado en {publicaciones} publicaciones de Mercado Libre
+
+              <div className="border-t border-gray-50 pt-6">
+                <h1 className="text-xl font-semibold text-gray-900 mb-1">{analysis.producto}</h1>
+                <p className="text-sm text-gray-400">
+                  {PAIS_LABEL[analysis.pais] ?? analysis.pais} · Costo US$ {Number(analysis.costo_estimado).toFixed(2)} · {fecha}
                 </p>
-              )}
-            </CardContent>
-          </Card>
+                {publicaciones > 0 && (
+                  <p className="text-xs text-gray-300 mt-1">
+                    Análisis basado en {publicaciones} publicaciones de Mercado Libre
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* CAPA 2: Resumen ejecutivo */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -323,11 +340,7 @@ export default async function ResultadoPage({ params }: Params) {
                 <Row label="Publicaciones scrapeadas">
                   {result.publicaciones_analizadas ?? result.competencia.cantidad_vendedores}
                 </Row>
-                {result.total_publicaciones_ml != null ? (
-                  <Row label="Total en ML">
-                    {result.total_publicaciones_ml.toLocaleString("es-AR")} publicaciones
-                  </Row>
-                ) : null}
+
                 <Row label="Precio mínimo">
                   {formatLocalPrice(result.competencia.precio_minimo, moneda)}
                 </Row>

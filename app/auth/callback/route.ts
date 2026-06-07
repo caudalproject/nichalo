@@ -66,6 +66,11 @@ export async function GET(request: NextRequest) {
         user.user_metadata?.name ??
         user.email.split("@")[0];
       await sendWelcomeEmail(user.email, nombre);
+
+      // Señalizar al cliente para disparar el evento de píxel
+      const newUserUrl = new URL(response.headers.get("location") ?? `${origin}${next}`);
+      newUserUrl.searchParams.set("registered", "1");
+      return NextResponse.redirect(newUserUrl.toString(), { headers: response.headers });
     }
   }
 
