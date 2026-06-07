@@ -11,6 +11,13 @@ export const dynamic = "force-dynamic";
 
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
+const DatosProSchema = z.object({
+  origen_producto: z.string().nullable().optional(),
+  presupuesto_inicial: z.number().nullable().optional(),
+  tiene_variantes: z.string().nullable().optional(),
+  canal_distribucion: z.string().nullable().optional(),
+}).nullable().optional();
+
 const BodySchema = z.object({
   producto: z.string().min(2).max(120),
   pais: z.enum(["AR", "MX", "CO"]),
@@ -18,6 +25,7 @@ const BodySchema = z.object({
   imagenBase64: z.string().optional(),
   imagenMimeType: z.string().optional(),
   perfilVendedor: z.enum(["principiante", "intermedio", "experto"]).default("principiante"),
+  datos_pro: DatosProSchema,
 });
 
 export async function POST(request: Request) {
@@ -35,7 +43,7 @@ export async function POST(request: Request) {
       { status: 422 }
     );
   }
-  const { producto, pais, costoEstimado, imagenBase64, imagenMimeType, perfilVendedor } = parsed.data;
+  const { producto, pais, costoEstimado, imagenBase64, imagenMimeType, perfilVendedor, datos_pro } = parsed.data;
 
   const supabase = createSupabaseServerClient();
 
@@ -176,6 +184,7 @@ export async function POST(request: Request) {
       costo_estimado: costoEstimado,
       plan,
       perfil_vendedor: perfilVendedor,
+      datos_pro: datos_pro ?? null,
     };
     if (searchKeyword !== producto) {
       eventData.search_keyword = searchKeyword;

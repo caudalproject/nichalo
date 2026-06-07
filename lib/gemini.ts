@@ -4,6 +4,13 @@ import type { AnalysisResult } from "./supabase";
 
 const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-1.5-flash-latest"] as const;
 
+interface DatosPro {
+  origen_producto?: string | null;
+  presupuesto_inicial?: number | null;
+  tiene_variantes?: string | null;
+  canal_distribucion?: string | null;
+}
+
 interface AnalyzeArgs {
   producto: string;
   pais: "AR" | "MX" | "CO";
@@ -19,6 +26,7 @@ interface AnalyzeArgs {
     total: number;
     trends?: { trending: boolean; interest: number; related: string[] };
   };
+  datosPro?: DatosPro;
 }
 
 export async function extractKeywordsFromImage(
@@ -113,7 +121,7 @@ export async function analizarConGemini(
   throw new Error("No se pudo completar el análisis con ningún modelo");
 }
 
-function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlTrends, mlData }: AnalyzeArgs) {
+function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlTrends, mlData, datosPro }: AnalyzeArgs) {
   const sample = scrape.listings.slice(0, 50);
   const currencyCode = currency?.code ?? "ARS";
   const currencyName = currency?.name ?? "Peso argentino";
@@ -192,7 +200,19 @@ Reglas generales:
 - costo_evaluacion: COMPETITIVO=similar/menor a importación directa; ALTO=20-50% mayor; MUY_ALTO=>50% mayor
 - top_vendedores: los 3 mejores por ventas; distribucion_precios: al menos 2 rangos
 - precio_sugerido: según perfil vendedor y REGLA DURA arriba, en ${currencyCode}; comision_ml_estimada y ganancia_estimada en USD
-- Precios de mercado en ${currencyCode}; comision y ganancia en USD.`;
+- Precios de mercado en ${currencyCode}; comision y ganancia en USD.${datosPro ? `
+
+DATOS ADICIONALES DEL VENDEDOR (usar para personalizar el análisis):
+- Origen del producto: ${datosPro.origen_producto || 'no especificado'}
+- Presupuesto inicial disponible: ${datosPro.presupuesto_inicial ? `USD ${datosPro.presupuesto_inicial}` : 'no especificado'}
+- Producto con variantes: ${datosPro.tiene_variantes || 'no especificado'}
+- Canal de distribución: ${datosPro.canal_distribucion || 'no especificado'}
+
+Con estos datos, personalizar:
+- El análisis de costo vs proveedores (¿alcanza el presupuesto para el mínimo de compra mayorista?)
+- La estrategia de lanzamiento (según canal de distribución)
+- Las oportunidades de diferenciación (según si tiene variantes)
+- El análisis de márgenes (según origen del producto y costos de importación)` : ''}`;
 }
 
 function extractJson(text: string): unknown | null {

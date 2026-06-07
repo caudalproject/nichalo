@@ -52,6 +52,10 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
   const [imageMimeType, setImageMimeType] = useState<string>("image/jpeg");
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [origenProducto, setOrigenProducto] = useState('');
+  const [presupuesto, setPresupuesto] = useState('');
+  const [tieneVariantes, setTieneVariantes] = useState('');
+  const [canalDistribucion, setCanalDistribucion] = useState('');
   const [loading, setLoading] = useState(false);
   const [stepMessage, setStepMessage] = useState("Iniciando análisis...");
   const [progress, setProgress] = useState(0);
@@ -172,6 +176,12 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
         pais,
         costoEstimado: costoUSDSubmit,
         perfilVendedor,
+        datos_pro: plan === 'pro' ? {
+          origen_producto: origenProducto || null,
+          presupuesto_inicial: presupuesto ? parseFloat(presupuesto) : null,
+          tiene_variantes: tieneVariantes || null,
+          canal_distribucion: canalDistribucion || null,
+        } : null,
       };
       if (imageBase64) {
         body.imagenBase64 = imageBase64;
@@ -364,6 +374,83 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
                   onChange={handleImageChange}
                   className="hidden"
                 />
+              </div>
+            )}
+          </div>
+
+          {/* Sección Pro */}
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm font-semibold text-gray-900">Análisis avanzado</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-medium">Pro</span>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Origen del producto</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['Importado (China/Asia)', 'Nacional', 'Dropshipping'].map(origen => (
+                    <button key={origen} type="button"
+                      onClick={() => setOrigenProducto(origen)}
+                      className={`text-xs py-2 px-3 rounded-lg border text-center transition-all ${
+                        origenProducto === origen
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}>
+                      {origen}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Presupuesto inicial (USD)</label>
+                <input type="number" placeholder="Ej: 500"
+                  value={presupuesto} onChange={e => setPresupuesto(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                <p className="text-xs text-gray-400 mt-1">Cuánto tenés disponible para invertir en stock</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">¿El producto tiene variantes?</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[{label: 'Sí (talle, color, modelo)', value: 'si'}, {label: 'No', value: 'no'}].map(opt => (
+                    <button key={opt.value} type="button"
+                      onClick={() => setTieneVariantes(opt.value)}
+                      className={`text-xs py-2 px-3 rounded-lg border text-center transition-all ${
+                        tieneVariantes === opt.value
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">¿Dónde vas a vender?</label>
+                <div className="grid grid-cols-1 gap-2">
+                  {['Solo Mercado Libre', 'ML + tienda propia', 'ML + otros marketplaces'].map(canal => (
+                    <button key={canal} type="button"
+                      onClick={() => setCanalDistribucion(canal)}
+                      className={`text-xs py-2 px-3 rounded-lg border text-left transition-all ${
+                        canalDistribucion === canal
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}>
+                      {canal}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {plan !== 'pro' && (
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-3 border border-gray-100">
+                <span className="text-2xl">🔒</span>
+                <p className="text-sm font-medium text-gray-700">Disponible en Plan Pro</p>
+                <a href="/#planes" className="text-xs text-green-600 hover:underline">Ver planes →</a>
               </div>
             )}
           </div>

@@ -38,6 +38,7 @@ export const analizarProducto = inngest.createFunction(
       plan,
       perfil_vendedor,
       search_keyword,
+      datos_pro,
     } = event.data as {
       job_id: string;
       user_id: string;
@@ -47,6 +48,12 @@ export const analizarProducto = inngest.createFunction(
       plan: Plan;
       perfil_vendedor: string;
       search_keyword?: string;
+      datos_pro?: {
+        origen_producto?: string | null;
+        presupuesto_inicial?: number | null;
+        tiene_variantes?: string | null;
+        canal_distribucion?: string | null;
+      } | null;
     };
 
     try {
@@ -185,6 +192,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             perfilVendedor: perfil_vendedor,
             mlTrends,
             mlData,
+            datosPro: datos_pro ?? undefined,
           });
         },
       );
