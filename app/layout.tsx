@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -44,6 +45,7 @@ fbq('track', 'PageView');`}
             alt=""
           />
         </noscript>
+        <Analytics />
       </body>
     </html>
   );
