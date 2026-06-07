@@ -258,7 +258,7 @@ export default function LandingPage() {
                         {plan.mpPlan ? (
                           <PricingCheckoutButton
                             plan={plan.mpPlan}
-                            variant={plan.popular ? "default" : "outline"}
+                            variant="default"
                             label={plan.cta}
                           />
                         ) : (
