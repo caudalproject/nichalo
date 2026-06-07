@@ -31,11 +31,24 @@ const PERFIL_OPTIONS: { value: PerfilVendedor; label: string; desc: string }[] =
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // 4 MB
 
-const PROGRESS: Record<string, number> = {
-  pending: 15,
-  scraping: 33,
-  analyzing: 66,
+const STATUS_PROGRESS: Record<string, number> = {
+  pending: 10,
+  scraping: 25,
+  analyzing: 80,
   done: 100,
+};
+
+const MESSAGE_PROGRESS: Record<string, number> = {
+  "Iniciando análisis...": 10,
+  "Analizando imagen...": 15,
+  "Buscando productos en Mercado Libre...": 25,
+  "Scrapeando publicaciones de Mercado Libre...": 40,
+  "Buscando con keywords alternativas...": 45,
+  "Obteniendo más publicaciones...": 50,
+  "Analizando tendencias del mercado...": 60,
+  "Calculando tamaño del mercado...": 70,
+  "Analizando competencia con IA...": 80,
+  "¡Análisis completado!": 100,
 };
 
 export function AnalizarForm({ creditsLeft, plan }: Props) {
@@ -130,8 +143,12 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
 
         const data = await res.json();
 
-        setProgress(PROGRESS[data.status] ?? 15);
-        if (data.step_message) setStepMessage(data.step_message);
+        if (data.step_message) {
+          setStepMessage(data.step_message);
+          setProgress(MESSAGE_PROGRESS[data.step_message] ?? STATUS_PROGRESS[data.status] ?? 10);
+        } else {
+          setProgress(STATUS_PROGRESS[data.status] ?? 10);
+        }
 
         if (data.status === "done") {
           if (pollingRef.current) clearInterval(pollingRef.current);

@@ -71,6 +71,7 @@ export const analizarProducto = inngest.createFunction(
       const scrape = await step.run(
         "wait-apify",
         async () => {
+          await updateJob(job_id, { step_message: "Scrapeando publicaciones de Mercado Libre..." });
           const result = await checkApifyRun(runId);
 
           if (["FAILED", "ABORTED", "TIMED-OUT"].includes(result.status)) {
@@ -90,6 +91,7 @@ export const analizarProducto = inngest.createFunction(
       // Step 2b: Si Apify devolvió 0 resultados, intentar con keyword simplificada
       const fallbackRunId = await step.run("apify-fallback-start", async () => {
         if (scrape.totalListings > 0) return null;
+        await updateJob(job_id, { step_message: "Buscando con keywords alternativas..." });
 
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) return null;
@@ -120,6 +122,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
       // Step 2c: Polling del fallback run (se omite si no hubo fallback)
       const finalScrape = await step.run("apify-fallback-wait", async () => {
         if (!fallbackRunId) return scrape;
+        await updateJob(job_id, { step_message: "Obteniendo más publicaciones..." });
 
         const result = await checkApifyRun(fallbackRunId);
 
@@ -140,6 +143,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
 
       // Step 3: Obtener tendencias de ML
       const mlTrends = await step.run("fetch-ml-trends", async () => {
+        await updateJob(job_id, { step_message: "Analizando tendencias del mercado..." });
         const siteMap: Record<string, string> = {
           AR: "MLA",
           MX: "MLM",
@@ -162,6 +166,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
 
       // Step 4: Obtener total de ML y tendencias de Google en paralelo
       const mlData = await step.run("fetch-ml-data", async () => {
+        await updateJob(job_id, { step_message: "Calculando tamaño del mercado..." });
         console.log("[fetch-ml-data] iniciando");
         const { getMLSearchTotal, getGoogleTrends } = await import("./mercadolibre");
         const [total, trends] = await Promise.all([
