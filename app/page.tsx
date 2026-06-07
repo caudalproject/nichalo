@@ -35,12 +35,13 @@ const PLANS = [
     period: "",
     priceNote: null as null | string,
     popular: false,
+    badge: null as null | string,
     mpPlan: null as null,
     features: [
-      { label: "1 análisis por mes", included: true },
-      { label: "30 publicaciones analizadas", included: true },
-      { label: "Subida de imagen del producto", included: true },
-      { label: "Análisis mayormente bloqueado — solo veredicto, score y resumen", included: false },
+      { label: "1 análisis por mes", included: true, subItems: null as string[] | null },
+      { label: "30 publicaciones analizadas", included: true, subItems: null as string[] | null },
+      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+      { label: "Análisis mayormente bloqueado — solo veredicto, score y resumen", included: false, subItems: null as string[] | null },
     ],
     cta: "Probar gratis",
     href: "/login",
@@ -51,12 +52,13 @@ const PLANS = [
     period: "/mes",
     priceNote: "~$6 por análisis" as null | string,
     popular: true,
+    badge: "Más popular" as null | string,
     mpPlan: "starter" as const,
     features: [
-      { label: "10 análisis por mes", included: true },
-      { label: "50 publicaciones analizadas", included: true },
-      { label: "Subida de imagen del producto", included: true },
-      { label: "Análisis completo desbloqueado", included: true },
+      { label: "10 análisis por mes", included: true, subItems: null as string[] | null },
+      { label: "50 publicaciones analizadas", included: true, subItems: null as string[] | null },
+      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+      { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
     ],
     cta: "Empezar ahora",
     href: null,
@@ -65,15 +67,21 @@ const PLANS = [
     name: "Pro",
     price: "$41.000",
     period: "/mes",
-    priceNote: "~$1,37 por análisis" as null | string,
+    priceNote: "El análisis más completo del mercado" as null | string,
     popular: false,
+    badge: "⭐ Más completo" as null | string,
     mpPlan: "pro" as const,
     features: [
-      { label: "30 análisis por mes", included: true },
-      { label: "100 publicaciones analizadas", included: true },
-      { label: "Subida de imagen del producto", included: true },
-      { label: "Análisis completo desbloqueado", included: true },
-      { label: "Mayor profundidad de datos", included: true },
+      { label: "30 análisis por mes", included: true, subItems: null as string[] | null },
+      { label: "100 publicaciones analizadas", included: true, subItems: null as string[] | null },
+      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+      {
+        label: "Análisis avanzado Pro",
+        included: true,
+        subItems: ["Origen del producto", "Presupuesto inicial", "Variantes del producto", "Canal de distribución"] as string[] | null,
+      },
+      { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
+      { label: "Mayor profundidad de datos", included: true, subItems: null as string[] | null },
     ],
     cta: "Empezar ahora",
     href: null,
@@ -180,10 +188,14 @@ export default function LandingPage() {
             <div className="mt-12 mx-auto grid max-w-5xl gap-6 md:grid-cols-3 items-start">
               {PLANS.map((plan) => (
                 <div key={plan.name} className="relative">
-                  {plan.popular && (
+                  {plan.badge && (
                     <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-                      <span className="bg-[#16A34A] text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
-                        Más popular
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap text-white ${
+                          plan.popular ? "bg-[#16A34A]" : "bg-[#0A0A0A]"
+                        }`}
+                      >
+                        {plan.badge}
                       </span>
                     </div>
                   )}
@@ -220,15 +232,25 @@ export default function LandingPage() {
                             ) : (
                               <X className="h-4 w-4 text-[#6B7280] mt-0.5 shrink-0" />
                             )}
-                            <span
-                              className={
-                                feat.included
-                                  ? "text-[#0A0A0A]"
-                                  : "text-[#6B7280]"
-                              }
-                            >
-                              {feat.label}
-                            </span>
+                            <div>
+                              <span
+                                className={
+                                  feat.included ? "text-[#0A0A0A]" : "text-[#6B7280]"
+                                }
+                              >
+                                {feat.label}
+                              </span>
+                              {feat.subItems && (
+                                <ul className="mt-1.5 space-y-1">
+                                  {feat.subItems.map((sub) => (
+                                    <li key={sub} className="flex items-center gap-1.5 text-xs text-[#6B7280]">
+                                      <span className="text-[#16A34A] font-bold leading-none">·</span>
+                                      {sub}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
                           </li>
                         ))}
                       </ul>
@@ -255,6 +277,38 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+
+            {/* Comparison table */}
+            <div className="mt-16 max-w-3xl mx-auto overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                    <th className="text-left py-3 px-5 font-medium text-[#6B7280] w-[40%]"></th>
+                    <th className="text-center py-3 px-4 font-medium text-[#6B7280]">Free</th>
+                    <th className="text-center py-3 px-4 font-medium text-[#6B7280]">Starter</th>
+                    <th className="text-center py-3 px-4 font-semibold text-[#0A0A0A] bg-[#F0FDF4] border-x border-[#16A34A]/25">Pro</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E5E7EB]">
+                  {[
+                    { label: "Análisis/mes", free: "1", starter: "10", pro: "30" },
+                    { label: "Publicaciones", free: "30", starter: "50", pro: "100" },
+                    { label: "Imagen del producto", free: "✅", starter: "✅", pro: "✅" },
+                    { label: "Análisis avanzado", free: "❌", starter: "❌", pro: "✅" },
+                    { label: "Precio sugerido", free: "✅", starter: "✅", pro: "✅" },
+                    { label: "Secciones completas", free: "❌", starter: "✅", pro: "✅" },
+                  ].map((row) => (
+                    <tr key={row.label}>
+                      <td className="py-3 px-5 text-[#0A0A0A]">{row.label}</td>
+                      <td className="py-3 px-4 text-center text-[#6B7280]">{row.free}</td>
+                      <td className="py-3 px-4 text-center text-[#6B7280]">{row.starter}</td>
+                      <td className="py-3 px-4 text-center font-medium text-[#0A0A0A] bg-[#F0FDF4] border-x border-[#16A34A]/25">{row.pro}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
             <p className="mt-8 text-center text-sm text-[#6B7280]">
               Sin contratos. Cancelá cuando quieras.
             </p>
