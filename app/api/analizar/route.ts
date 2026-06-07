@@ -15,6 +15,7 @@ const DatosProSchema = z.object({
   origen_producto: z.string().nullable().optional(),
   presupuesto_inicial: z.number().nullable().optional(),
   tiene_variantes: z.string().nullable().optional(),
+  detalle_variantes: z.string().nullable().optional(),
   canal_distribucion: z.string().nullable().optional(),
 }).nullable().optional();
 

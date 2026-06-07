@@ -55,6 +55,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
   const [origenProducto, setOrigenProducto] = useState('');
   const [presupuesto, setPresupuesto] = useState('');
   const [tieneVariantes, setTieneVariantes] = useState('');
+  const [detalleVariantes, setDetalleVariantes] = useState('');
   const [canalDistribucion, setCanalDistribucion] = useState('');
   const [loading, setLoading] = useState(false);
   const [stepMessage, setStepMessage] = useState("Iniciando análisis...");
@@ -178,8 +179,9 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
         perfilVendedor,
         datos_pro: plan === 'pro' ? {
           origen_producto: origenProducto || null,
-          presupuesto_inicial: presupuesto ? parseFloat(presupuesto) : null,
+          presupuesto_inicial: presupuesto ? parseFloat(presupuesto.replace(',', '.')) / (exchangeRate ?? 1) : null,
           tiene_variantes: tieneVariantes || null,
+          detalle_variantes: tieneVariantes === 'si' ? detalleVariantes : null,
           canal_distribucion: canalDistribucion || null,
         } : null,
       };
@@ -404,11 +406,33 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">Presupuesto inicial (USD)</label>
-                <input type="number" placeholder="Ej: 500"
-                  value={presupuesto} onChange={e => setPresupuesto(e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
-                <p className="text-xs text-gray-400 mt-1">Cuánto tenés disponible para invertir en stock</p>
+                {(() => {
+                  const currency = getCurrencyForCountry(pais);
+                  const presupuestoLocal = parseFloat(presupuesto.replace(',', '.'));
+                  const presupuestoUSD = exchangeRate && !isNaN(presupuestoLocal) && presupuestoLocal > 0
+                    ? presupuestoLocal / exchangeRate
+                    : null;
+                  return (
+                    <>
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">
+                        Presupuesto inicial ({currency.code})
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder={currency.code === 'USD' ? 'Ej: 500' : 'Ej: 500.000'}
+                        value={presupuesto}
+                        onChange={e => setPresupuesto(e.target.value)}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                      />
+                      {presupuestoUSD !== null ? (
+                        <p className="text-xs text-gray-400 mt-1">≈ ${presupuestoUSD.toFixed(2)} USD</p>
+                      ) : (
+                        <p className="text-xs text-gray-400 mt-1">Cuánto tenés disponible para invertir en stock</p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               <div>
@@ -426,6 +450,18 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
                     </button>
                   ))}
                 </div>
+                {tieneVariantes === 'si' && (
+                  <div className="mt-2">
+                    <input
+                      type="text"
+                      placeholder="Ej: talle S/M/L/XL, colores negro y blanco"
+                      value={detalleVariantes}
+                      onChange={e => setDetalleVariantes(e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Describí las variantes que vas a ofrecer</p>
+                  </div>
+                )}
               </div>
 
               <div>

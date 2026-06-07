@@ -8,6 +8,7 @@ interface DatosPro {
   origen_producto?: string | null;
   presupuesto_inicial?: number | null;
   tiene_variantes?: string | null;
+  detalle_variantes?: string | null;
   canal_distribucion?: string | null;
 }
 
@@ -205,7 +206,7 @@ Reglas generales:
 DATOS ADICIONALES DEL VENDEDOR (usar para personalizar el análisis):
 - Origen del producto: ${datosPro.origen_producto || 'no especificado'}
 - Presupuesto inicial disponible: ${datosPro.presupuesto_inicial ? `USD ${datosPro.presupuesto_inicial}` : 'no especificado'}
-- Producto con variantes: ${datosPro.tiene_variantes || 'no especificado'}
+- Producto con variantes: ${datosPro.tiene_variantes || 'no especificado'}${datosPro.detalle_variantes ? ` (${datosPro.detalle_variantes})` : ''}
 - Canal de distribución: ${datosPro.canal_distribucion || 'no especificado'}
 
 Con estos datos, personalizar:

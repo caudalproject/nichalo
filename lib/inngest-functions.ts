@@ -52,6 +52,7 @@ export const analizarProducto = inngest.createFunction(
         origen_producto?: string | null;
         presupuesto_inicial?: number | null;
         tiene_variantes?: string | null;
+        detalle_variantes?: string | null;
         canal_distribucion?: string | null;
       } | null;
     };
