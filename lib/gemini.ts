@@ -167,13 +167,19 @@ REGLA DE PRECIOS CRÍTICA:
 PERFIL DEL VENDEDOR: ${perfil}
 Reglas según perfil:
 - Si es "principiante": Penalizar fuerte mercados con más de 15 vendedores activos. El precio de entrada recomendado debe ser el percentil 10 del mercado (los más baratos con ventas), no el promedio. El score debe bajar 20-30 puntos si hay muchos competidores establecidos. La recomendación debe incluir consejos específicos para construir reputación desde cero (primeras ventas, precios de lanzamiento, envío gratis inicial).
-- Si es "intermedio": Usar precio del percentil 25-30. Score normal según competencia. Recomendación enfocada en diferenciación y optimización.
-- Si es "experto": Usar precio del percentil 40-50 (puede entrar al promedio). Score puede ser más alto en mercados competidos. Recomendación enfocada en escala y volumen.
+- Si es "intermedio": Usar precio del percentil 25-50. Score normal según competencia. Recomendación enfocada en diferenciación y optimización.
+- Si es "experto": Usar precio del percentil 40-65 (puede acercarse al promedio). Score puede ser más alto en mercados competidos. Recomendación enfocada en escala y volumen.
 
-REGLA DURA DE PRECIO SUGERIDO:
-- Para "principiante": el precio_sugerido NUNCA puede ser mayor al precio_minimo del mercado. Debe estar entre precio_minimo y precio_minimo * 1.05 (hasta 5% sobre el mínimo). Objetivo: conseguir las primeras ventas y reputación, no maximizar margen.
-- Para "intermedio": precio_sugerido entre percentil 20 y percentil 35 del mercado.
-- Para "experto": precio_sugerido en el percentil 30-50 del mercado.
+REGLA DE PRECIO SUGERIDO (crítica):
+El precio_sugerido DEBE estar dentro del rango de precios reales del mercado scrapeado.
+- Para "principiante": entre el percentil 10 y 25 del mercado (precio de entrada agresivo). Ordená los precios del scraping de menor a mayor y elegí uno entre el 10% y el 25% más barato.
+- Para "intermedio": entre el percentil 25 y 50 del mercado (precio competitivo). Elegí un precio en el cuarto inferior-medio del rango.
+- Para "experto": entre el percentil 40 y 65 del mercado (precio con margen pero competitivo). Podés estar cerca del promedio pero no superarlo ampliamente.
+
+NUNCA sugerir un precio mayor al precio_promedio del mercado para perfiles "principiante" e "intermedio".
+NUNCA sugerir un precio que duplique el precio_minimo del mercado.
+
+Si el margen resultante es negativo o menor al 10%, indicarlo claramente en el resumen y recomendacion, pero mantener el precio_sugerido dentro del rango de mercado. El vendedor necesita conocer la viabilidad real, no un precio irreal basado solo en su costo.
 
 Datos (${sample.length} items):
 ${JSON.stringify(sample)}
@@ -200,7 +206,7 @@ Reglas generales:
 - VIABLE score 75-100 (>25% margen, poca competencia) | MARGINAL 50-74 (10-25% margen) | SATURADO 0-49 (<10% margen)
 - costo_evaluacion: COMPETITIVO=similar/menor a importación directa; ALTO=20-50% mayor; MUY_ALTO=>50% mayor
 - top_vendedores: los 3 mejores por ventas; distribucion_precios: al menos 2 rangos
-- precio_sugerido: según perfil vendedor y REGLA DURA arriba, en ${currencyCode}; comision_ml_estimada y ganancia_estimada en USD
+- precio_sugerido: según perfil vendedor y REGLA DE PRECIO SUGERIDO arriba, en ${currencyCode}; comision_ml_estimada y ganancia_estimada en USD
 - Precios de mercado en ${currencyCode}; comision y ganancia en USD.${datosPro ? `
 
 DATOS ADICIONALES DEL VENDEDOR (usar para personalizar el análisis):
