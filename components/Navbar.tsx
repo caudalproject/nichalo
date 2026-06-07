@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { ChevronDown } from "lucide-react";
 
 interface NavbarProps {
   email?: string | null;
@@ -15,24 +15,71 @@ interface NavbarProps {
 
 export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [clientEmail, setClientEmail] = useState<string | null>(email ?? null);
+  const [clientName, setClientName] = useState<string | null>(null);
+  const [userData, setUserData] = useState<{
+    plan: string;
+    analisis_restantes: number;
+  } | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (clientEmail) return;
     const supabase = createSupabaseBrowserClient();
-    supabase.auth
-      .getUser()
-      .then(({ data }) => setClientEmail(data.user?.email ?? null));
-  }, [clientEmail]);
+    supabase.auth.getUser().then(async ({ data }) => {
+      const u = data.user;
+      if (!u) return;
+      setClientEmail(u.email ?? null);
+      setClientName(
+        u.user_metadata?.full_name ?? u.user_metadata?.name ?? null
+      );
+      const { data: ud } = await supabase
+        .from("users")
+        .select("plan, analisis_restantes")
+        .eq("id", u.id)
+        .single();
+      if (ud) setUserData(ud);
+    });
+  }, []);
 
-  async function handleLogout() {
-    setLoading(true);
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  const planActual = userData?.plan ?? plan ?? "free";
+  const analisis = userData?.analisis_restantes ?? analisisRestantes ?? 0;
+  const nombre = clientName ?? clientEmail ?? "";
+  const nombreCorto = clientName
+    ? clientName.split(" ")[0]
+    : (clientEmail?.split("@")[0] ?? "");
+  const inicial = (nombre[0] ?? "?").toUpperCase();
+
+  async function handleSignOut() {
+    setSigningOut(true);
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
-    setLoading(false);
     router.push("/");
     router.refresh();
+  }
+
+  async function handleCancelar() {
+    setOpen(false);
+    const res = await fetch("/api/pagos/cancelar", { method: "POST" });
+    if (res.ok) {
+      setUserData((prev) => (prev ? { ...prev, plan: "free" } : null));
+      router.refresh();
+    }
   }
 
   return (
@@ -61,23 +108,67 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
               >
                 Nuevo análisis
               </Link>
-              {typeof analisisRestantes === "number" && (
-                <Badge variant="secondary" className="text-xs">
-                  {analisisRestantes} · {plan ?? "free"}
-                </Badge>
-              )}
-              <span className="hidden sm:inline text-[#6B7280] text-xs">
-                {clientEmail}
-              </span>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                size="sm"
-                disabled={loading}
-                className="border-[#E5E7EB]"
-              >
-                {loading ? "Saliendo…" : "Salir"}
-              </Button>
+
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setOpen(!open)}
+                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium text-sm">
+                    {inicial}
+                  </div>
+                  <span className="hidden md:block">{nombreCorto}</span>
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+
+                {open && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl border border-gray-100 shadow-lg z-50 py-2">
+                    <div className="px-4 py-3 border-b border-gray-50">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-900 truncate max-w-[140px]">
+                          {nombre}
+                        </span>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            planActual === "pro"
+                              ? "bg-green-50 text-green-700"
+                              : planActual === "starter"
+                                ? "bg-blue-50 text-blue-700"
+                                : "bg-gray-100 text-gray-500"
+                          }`}
+                        >
+                          {planActual === "pro"
+                            ? "Pro"
+                            : planActual === "starter"
+                              ? "Starter"
+                              : "Free"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400">
+                        {analisis} análisis restantes
+                      </p>
+                    </div>
+
+                    <div className="py-1">
+                      {planActual !== "free" && (
+                        <button
+                          onClick={handleCancelar}
+                          className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          Cancelar suscripción
+                        </button>
+                      )}
+                      <button
+                        onClick={handleSignOut}
+                        disabled={signingOut}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                      >
+                        {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <Link href="/login">
