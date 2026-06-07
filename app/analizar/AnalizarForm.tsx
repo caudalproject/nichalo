@@ -235,7 +235,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
 
       // Background job — start polling
       if (data.job_id) {
-        setProgress(PROGRESS.pending);
+        setProgress(STATUS_PROGRESS.pending);
         setStepMessage("Iniciando análisis...");
         startPolling(data.job_id);
         return;
