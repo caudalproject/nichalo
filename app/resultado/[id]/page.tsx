@@ -369,9 +369,30 @@ export default async function ResultadoPage({ params }: Params) {
                       : "Calculado en el percentil 30 del mercado con margen mínimo garantizado"}
                   </p>
                 </div>
-                <Row label="Comisión ML estimada">
-                  {formatCurrency(result.margen.comision_ml_estimada)}
-                </Row>
+                {/* Comisión ML */}
+                <div className="flex justify-between items-start py-2 border-b border-gray-50">
+                  <div>
+                    <span className="text-sm text-gray-500">Comisión ML estimada</span>
+                    {result.comision_detalle && (
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          result.comision_detalle.tipo_publicacion === 'Premium'
+                            ? 'bg-yellow-50 text-yellow-700'
+                            : 'bg-gray-100 text-gray-500'
+                        }`}>
+                          {result.comision_detalle.tipo_publicacion}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {result.comision_detalle.porcentaje}%
+                          {result.comision_detalle.cargo_fijo_ars > 0 && ` + $${result.comision_detalle.cargo_fijo_ars.toLocaleString('es-AR')} fijo`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">
+                    US$ {(result.comision_detalle?.monto_usd ?? result.margen.comision_ml_estimada)?.toFixed(2)}
+                  </span>
+                </div>
                 <Row label="Ganancia estimada">
                   <strong>{formatCurrency(result.margen.ganancia_estimada)}</strong>
                 </Row>

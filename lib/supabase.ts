@@ -68,6 +68,13 @@ export interface AnalysisResult {
   google_trends_trending?: boolean;
   moneda?: string;
   tasa_cambio?: number;
+  comision_detalle?: {
+    tipo_publicacion: string;
+    porcentaje: number;
+    monto_ars: number;
+    monto_usd: number;
+    cargo_fijo_ars: number;
+  };
 }
 
 export interface AnalysisRow {

@@ -170,6 +170,40 @@ Reglas según perfil:
 - Si es "intermedio": Usar precio del percentil 25-50. Score normal según competencia. Recomendación enfocada en diferenciación y optimización.
 - Si es "experto": Usar precio del percentil 40-65 (puede acercarse al promedio). Score puede ser más alto en mercados competidos. Recomendación enfocada en escala y volumen.
 
+COMISIONES DE MERCADO LIBRE ARGENTINA (usar estos datos reales):
+
+Tipo de publicación según perfil:
+- principiante → CLÁSICA (menor visibilidad, sin cuotas) | Comisión: 11.80% - 13% según categoría
+- intermedio → PREMIUM recomendado | Comisión Clásica: 11.80% - 13% | Comisión Premium: 14.80% - 16%
+- experto → PREMIUM (mayor visibilidad, cuotas sin interés) | Comisión: 14.80% - 17.14% según categoría
+
+Comisiones Premium por categoría (usar el punto medio del rango para el cálculo):
+- Electrónica/tecnología: 13% - 14.80% → usar 13.90%
+- Electrodomésticos: 11.80% - 13% → usar 12.40%
+- Ropa y accesorios: 16% - 17.14% → usar 16.57%
+- Deportes y fitness: 14.80% - 16% → usar 15.40%
+- Hogar y jardín: 14.80% - 16% → usar 15.40%
+- Juguetes: 14.80% - 16% → usar 15.40%
+- Resto de categorías: 14.80% - 16% → usar 15.40%
+
+Para Clásica usar: 12.40% como valor representativo (punto medio 11.80%-13%).
+
+Cargo fijo por unidad (sumar al monto de comisión en ARS):
+- Precio de venta < 33000 ARS → cargo fijo 2500 ARS
+- Precio de venta entre 33000 y 60000 ARS → cargo fijo 4000 ARS
+- Precio de venta > 60000 ARS → sin cargo fijo (0)
+
+IVA: asumir Monotributista por defecto (sin IVA adicional sobre la comisión).
+
+Para calcular el campo comision_detalle:
+1. Determinar tipo_publicacion: "principiante" → "Clásica", "intermedio" → "Premium", "experto" → "Premium"
+2. Estimar la categoría del producto por su nombre para elegir el % correcto
+3. porcentaje = % del punto medio de la categoría correspondiente
+4. monto_ars = round(precio_sugerido_venta × porcentaje / 100) + cargo_fijo_ars
+5. cargo_fijo_ars según la tabla de precios de arriba
+6. monto_usd = round(monto_ars / ${rate}, 2)
+7. Usar monto_usd como valor de comision_ml_estimada en el objeto margen
+
 REGLA DE PRECIO SUGERIDO (crítica):
 El precio_sugerido DEBE estar dentro del rango de precios reales del mercado scrapeado.
 - Para "principiante": entre el percentil 10 y 25 del mercado (precio de entrada agresivo). Ordená los precios del scraping de menor a mayor y elegí uno entre el 10% y el 25% más barato.
@@ -185,7 +219,7 @@ Datos (${sample.length} items):
 ${JSON.stringify(sample)}
 
 Respondé SOLO con JSON válido (sin markdown):
-{"veredicto":"VIABLE"|"SATURADO"|"MARGINAL","score":0-100,"resumen":"4-5 líneas de análisis real","competencia":{"cantidad_vendedores":int,"precio_minimo":${currencyCode},"precio_maximo":${currencyCode},"precio_promedio":${currencyCode},"top_vendedores":[{"nombre":"","precio":${currencyCode},"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"margen":{"precio_sugerido_venta":${currencyCode},"comision_ml_estimada":USD,"ganancia_estimada":USD,"margen_porcentaje":número,"costo_evaluacion":"COMPETITIVO"|"ALTO"|"MUY_ALTO"},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"USD/unidad","evaluacion":""}}
+{"veredicto":"VIABLE"|"SATURADO"|"MARGINAL","score":0-100,"resumen":"4-5 líneas de análisis real","competencia":{"cantidad_vendedores":int,"precio_minimo":${currencyCode},"precio_maximo":${currencyCode},"precio_promedio":${currencyCode},"top_vendedores":[{"nombre":"","precio":${currencyCode},"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"margen":{"precio_sugerido_venta":${currencyCode},"comision_ml_estimada":USD,"ganancia_estimada":USD,"margen_porcentaje":número,"costo_evaluacion":"COMPETITIVO"|"ALTO"|"MUY_ALTO"},"comision_detalle":{"tipo_publicacion":"Clásica|Premium","porcentaje":número,"monto_ars":número,"monto_usd":número,"cargo_fijo_ars":número},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"USD/unidad","evaluacion":""}}
 
 REGLA DE TENDENCIA Y ESTACIONALIDAD:
 - Si no hay datos de ventas en el scraping, inferí la tendencia basándote en: a) La categoría del producto (electrónica, hogar, moda, etc.) b) El país (Argentina, México, Colombia) c) El contexto general del mercado de e-commerce latinoamericano
@@ -246,6 +280,7 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
   const competencia = (r.competencia ?? {}) as Partial<AnalysisResult["competencia"]> & Record<string, unknown>;
   const margen = (r.margen ?? {}) as Partial<AnalysisResult["margen"]> & Record<string, unknown>;
   const analisisCosto = (r.analisis_costo_proveedor ?? {}) as Record<string, unknown>;
+  const comisionDetalle = (r.comision_detalle ?? null) as Record<string, unknown> | null;
 
   const topVendedores = Array.isArray(competencia.top_vendedores)
     ? competencia.top_vendedores.slice(0, 5).map((v) => {
@@ -320,6 +355,15 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
     },
     moneda: args.currency?.code ?? "ARS",
     tasa_cambio: args.exchangeRate ?? 1400,
+    ...(comisionDetalle ? {
+      comision_detalle: {
+        tipo_publicacion: typeof comisionDetalle.tipo_publicacion === "string" ? comisionDetalle.tipo_publicacion : "Clásica",
+        porcentaje: toNumber(comisionDetalle.porcentaje, 0),
+        monto_ars: toNumber(comisionDetalle.monto_ars, 0),
+        monto_usd: toNumber(comisionDetalle.monto_usd, 0),
+        cargo_fijo_ars: toNumber(comisionDetalle.cargo_fijo_ars, 0),
+      },
+    } : {}),
   };
 }
 
