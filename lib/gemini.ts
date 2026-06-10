@@ -218,8 +218,21 @@ Si el margen resultante es negativo o menor al 10%, indicarlo claramente en el r
 Datos (${sample.length} items):
 ${JSON.stringify(sample)}
 
+PRODUCTOS ALTERNATIVOS (incluir solo si veredicto es SATURADO o MARGINAL):
+Si el producto analizado está saturado o es marginal, sugerí 2-3 productos alternativos relacionados que podrían tener mejor oportunidad en el mismo mercado.
+Para cada alternativa incluir:
+- nombre: nombre específico del producto (no genérico)
+- razon: por qué tiene mejor oportunidad (1 frase)
+- nicho: "específico" | "adyacente" | "segmento"
+
+Ejemplos:
+- "Auriculares TWS genéricos" (saturado) → "Auriculares TWS con cancelación de ruido ANC" (específico), "Auriculares óseos deportivos" (adyacente), "Auriculares TWS para niños con limitador de volumen" (segmento)
+- "Camiseta deportiva genérica" (saturado) → "Camiseta deportiva UV protection" (específico), "Camiseta térmica running" (adyacente)
+
+Si el veredicto es VIABLE, devolver "productos_alternativos": []
+
 Respondé SOLO con JSON válido (sin markdown):
-{"veredicto":"VIABLE"|"SATURADO"|"MARGINAL","score":0-100,"resumen":"4-5 líneas de análisis real","competencia":{"cantidad_vendedores":int,"precio_minimo":${currencyCode},"precio_maximo":${currencyCode},"precio_promedio":${currencyCode},"top_vendedores":[{"nombre":"","precio":${currencyCode},"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"margen":{"precio_sugerido_venta":${currencyCode},"comision_ml_estimada":USD,"ganancia_estimada":USD,"margen_porcentaje":número,"costo_evaluacion":"COMPETITIVO"|"ALTO"|"MUY_ALTO"},"comision_detalle":{"tipo_publicacion":"Clásica|Premium","porcentaje":número,"monto_ars":número,"monto_usd":número,"cargo_fijo_ars":número},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"USD/unidad","evaluacion":""}}
+{"veredicto":"VIABLE"|"SATURADO"|"MARGINAL","score":0-100,"resumen":"4-5 líneas de análisis real","competencia":{"cantidad_vendedores":int,"precio_minimo":${currencyCode},"precio_maximo":${currencyCode},"precio_promedio":${currencyCode},"top_vendedores":[{"nombre":"","precio":${currencyCode},"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"margen":{"precio_sugerido_venta":${currencyCode},"comision_ml_estimada":USD,"ganancia_estimada":USD,"margen_porcentaje":número,"costo_evaluacion":"COMPETITIVO"|"ALTO"|"MUY_ALTO"},"comision_detalle":{"tipo_publicacion":"Clásica|Premium","porcentaje":número,"monto_ars":número,"monto_usd":número,"cargo_fijo_ars":número},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"USD/unidad","evaluacion":""},"productos_alternativos":[{"nombre":"","razon":"","nicho":"específico"|"adyacente"|"segmento"}]}
 
 REGLA DE TENDENCIA Y ESTACIONALIDAD:
 - Si no hay datos de ventas en el scraping, inferí la tendencia basándote en: a) La categoría del producto (electrónica, hogar, moda, etc.) b) El país (Argentina, México, Colombia) c) El contexto general del mercado de e-commerce latinoamericano
@@ -355,6 +368,21 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
     },
     moneda: args.currency?.code ?? "ARS",
     tasa_cambio: args.exchangeRate ?? 1400,
+    productos_alternativos: Array.isArray(r.productos_alternativos)
+      ? (r.productos_alternativos as unknown[]).slice(0, 3).map((a) => {
+          const aa = (a ?? {}) as Record<string, unknown>;
+          const nichoRaw = String(aa.nicho ?? "").toLowerCase();
+          const nicho: "específico" | "adyacente" | "segmento" =
+            nichoRaw === "adyacente" ? "adyacente"
+            : nichoRaw === "segmento" ? "segmento"
+            : "específico";
+          return {
+            nombre: typeof aa.nombre === "string" ? aa.nombre : "",
+            razon: typeof aa.razon === "string" ? aa.razon : "",
+            nicho,
+          };
+        }).filter((a) => a.nombre)
+      : [],
     ...(comisionDetalle ? {
       comision_detalle: {
         tipo_publicacion: typeof comisionDetalle.tipo_publicacion === "string" ? comisionDetalle.tipo_publicacion : "Clásica",

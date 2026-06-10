@@ -605,6 +605,37 @@ export default async function ResultadoPage({ params }: Params) {
             </LockedSection>
           )}
 
+          {/* CAPA 11b: Productos alternativos */}
+          {result.productos_alternativos && result.productos_alternativos.length > 0 && (
+            <LockedSection locked={isFree}>
+            <div className="bg-white rounded-2xl border border-gray-100 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">
+                Productos con mejor oportunidad
+              </h2>
+              <p className="text-sm text-gray-500 mb-4">
+                Este nicho está difícil, pero estos productos relacionados tienen más chances:
+              </p>
+              <div className="space-y-3">
+                {result.productos_alternativos.map((alt, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 bg-green-50 rounded-xl border border-green-100">
+                    <span className="text-green-600 font-bold text-sm mt-0.5">{i + 1}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-gray-900">{alt.nombre}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-white border border-green-200 text-green-700">
+                          {alt.nicho === 'específico' ? 'Más específico' :
+                           alt.nicho === 'adyacente' ? 'Nicho adyacente' : 'Nuevo segmento'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500">{alt.razon}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            </LockedSection>
+          )}
+
           {/* CAPA 12: Análisis de costo vs proveedores */}
           {result.analisis_costo_proveedor && (
             <LockedSection locked={isFree}>

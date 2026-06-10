@@ -75,6 +75,11 @@ export interface AnalysisResult {
     monto_usd: number;
     cargo_fijo_ars: number;
   };
+  productos_alternativos?: {
+    nombre: string;
+    razon: string;
+    nicho: 'específico' | 'adyacente' | 'segmento';
+  }[];
 }
 
 export interface AnalysisRow {
