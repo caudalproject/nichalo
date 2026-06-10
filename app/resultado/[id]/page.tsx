@@ -153,6 +153,8 @@ export default async function ResultadoPage({ params }: Params) {
   const costo = Number(analysis.costo_estimado);
   const moneda = result.moneda;
   const tasaCambio = result.tasa_cambio ?? 1400;
+  const usdToLocal = (usd: number) => usd * tasaCambio;
+  const formatLocal = (usd: number) => formatLocalPrice(usdToLocal(usd), moneda ?? 'ARS');
   const precioVentaLocal = result.margen.precio_sugerido_venta;
   const precioVentaUsd = moneda ? (tasaCambio > 0 ? precioVentaLocal / tasaCambio : 0) : precioVentaLocal;
   const margenBruto = precioVentaUsd > 0 ? ((precioVentaUsd - costo) / precioVentaUsd) * 100 : 0;
@@ -248,7 +250,7 @@ export default async function ResultadoPage({ params }: Params) {
               <div className="border-t border-gray-50 pt-6">
                 <h1 className="text-xl font-semibold text-gray-900 mb-1">{analysis.producto}</h1>
                 <p className="text-sm text-gray-400">
-                  {PAIS_LABEL[analysis.pais] ?? analysis.pais} · Costo US$ {Number(analysis.costo_estimado).toFixed(2)} · {fecha}
+                  {PAIS_LABEL[analysis.pais] ?? analysis.pais} · Costo {formatLocal(costo)} · {fecha}
                 </p>
                 {publicaciones > 0 && (
                   <p className="text-xs text-gray-300 mt-1">
@@ -264,7 +266,7 @@ export default async function ResultadoPage({ params }: Params) {
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Ganancia por unidad</div>
               <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
-                {result.margen?.ganancia_estimada != null ? `US$ ${result.margen.ganancia_estimada.toFixed(2)}` : "—"}
+                {result.margen?.ganancia_estimada != null ? formatLocal(result.margen.ganancia_estimada) : "—"}
               </div>
             </div>
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
@@ -364,9 +366,7 @@ export default async function ResultadoPage({ params }: Params) {
                     <span>{formatLocalPrice(result.margen.precio_sugerido_venta, moneda)}</span>
                   </div>
                   <p className="mt-1 text-xs text-[#6B7280]">
-                    {moneda
-                      ? `≈ ${formatCurrency(precioVentaUsd, "USD")} · Percentil según perfil con margen mínimo garantizado`
-                      : "Calculado en el percentil 30 del mercado con margen mínimo garantizado"}
+                    Percentil según perfil con margen mínimo garantizado
                   </p>
                 </div>
                 {/* Comisión ML */}
@@ -390,11 +390,13 @@ export default async function ResultadoPage({ params }: Params) {
                     )}
                   </div>
                   <span className="text-sm font-medium text-gray-900">
-                    US$ {(result.comision_detalle?.monto_usd ?? result.margen.comision_ml_estimada)?.toFixed(2)}
+                    {result.comision_detalle?.monto_ars
+                      ? formatLocalPrice(result.comision_detalle.monto_ars, moneda ?? 'ARS')
+                      : formatLocal(result.comision_detalle?.monto_usd ?? result.margen.comision_ml_estimada ?? 0)}
                   </span>
                 </div>
                 <Row label="Ganancia estimada">
-                  <strong>{formatCurrency(result.margen.ganancia_estimada)}</strong>
+                  <strong>{formatLocal(result.margen.ganancia_estimada)}</strong>
                 </Row>
                 <Row label="Margen bruto">
                   <Badge
@@ -424,9 +426,12 @@ export default async function ResultadoPage({ params }: Params) {
                 </Row>
                 {result.margen.costo_evaluacion && (
                   <Row label="Costo ingresado">
-                    <Badge className={costoBadgeClasses(result.margen.costo_evaluacion)}>
-                      {costoLabel(result.margen.costo_evaluacion)}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{formatLocal(costo)}</span>
+                      <Badge className={costoBadgeClasses(result.margen.costo_evaluacion)}>
+                        {costoLabel(result.margen.costo_evaluacion)}
+                      </Badge>
+                    </div>
                   </Row>
                 )}
               </CardContent>
