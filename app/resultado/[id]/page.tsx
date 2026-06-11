@@ -706,7 +706,14 @@ export default async function ResultadoPage({ params }: Params) {
               <CardTitle className="text-lg">Recomendación</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm font-medium">{sanitizeText(result.recomendacion)}</p>
+              <div className="space-y-2">
+                {result.recomendacion.split(' | ').map((bullet, i) => (
+                  <div key={i} className="flex items-start gap-2 text-sm">
+                    <span className="text-[#16A34A] font-bold mt-0.5">{i + 1}.</span>
+                    <span>{sanitizeText(bullet)}</span>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
           </LockedSection>
