@@ -173,6 +173,119 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Demo estática */}
+        <section className="container py-20">
+          <div className="mx-auto max-w-3xl text-center mb-10">
+            <h2 className="text-3xl font-bold text-[#0A0A0A]">
+              Esto es lo que vas a ver
+            </h2>
+            <p className="mt-3 text-[#6B7280]">
+              Análisis real de Termo Stanley 473ml — Argentina
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-3xl relative">
+            {/* Card de resultado mockeado */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="h-1.5 w-full bg-yellow-400" />
+              <div className="px-8 py-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-yellow-50 text-yellow-700">
+                    MARGINAL
+                  </span>
+                  <span className="text-sm text-gray-400">Es marginal — con cuidado</span>
+                </div>
+                <div className="flex items-baseline gap-2 mb-6">
+                  <span className="text-8xl font-black leading-none text-yellow-400">65</span>
+                  <span className="text-2xl text-gray-300 font-light">/100</span>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">Termo Stanley 473ml</h3>
+                <p className="text-sm text-gray-400 mb-6">Argentina · Costo $ 18.000 · Análisis basado en 50 publicaciones de Mercado Libre</p>
+
+                {/* Métricas */}
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4 mb-6">
+                  {[
+                    { label: "Ganancia por unidad", value: "$ 8.200" },
+                    { label: "Margen bruto", value: "31.4%" },
+                    { label: "Publicaciones", value: "50" },
+                    { label: "Precio sugerido", value: "$ 26.100" },
+                  ].map((m) => (
+                    <div key={m.label} className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-center">
+                      <div className="text-xs text-gray-500">{m.label}</div>
+                      <div className="mt-1 text-lg font-bold text-gray-900">{m.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Resumen visible */}
+                <div className="rounded-xl border border-gray-100 p-4 mb-4">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Resumen</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    Competencia moderada con 50 vendedores activos. Tu costo es competitivo pero el mercado tiene jugadores establecidos con alta reputación. La oportunidad está en diferenciarte por variantes de color y combos.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Blur overlay sobre la parte de abajo */}
+            <div className="relative mt-3">
+              <div className="blur-sm pointer-events-none select-none opacity-60 bg-white rounded-2xl border border-gray-100 p-6 space-y-3">
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-4 bg-gray-200 rounded w-1/2" />
+                <div className="h-4 bg-gray-200 rounded w-2/3" />
+                <div className="h-4 bg-gray-200 rounded w-1/3" />
+              </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 rounded-2xl border border-gray-100 backdrop-blur-sm">
+                <span className="text-2xl mb-2">🔒</span>
+                <p className="text-sm font-semibold text-gray-900 mb-1">
+                  Competencia, márgenes y recomendaciones completas
+                </p>
+                <p className="text-xs text-gray-500 mb-4 text-center px-6">
+                  Creá una cuenta gratis y hacé tu primer análisis en 2 minutos
+                </p>
+                <Link href="/login">
+                  <Button className="rounded-full bg-[#16A34A] hover:bg-[#15803D] text-white px-6">
+                    Empezar gratis →
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonios */}
+        <section className="bg-[#F9FAFB] py-16 border-y border-[#E5E7EB]">
+          <div className="container">
+            <div className="mx-auto max-w-3xl grid gap-6 md:grid-cols-3">
+              {[
+                {
+                  texto: "Iba a comprar stock de auriculares. Nichalo me dio 38/100 — SATURADO. Me ahorré la inversión.",
+                  autor: "Vendedor de electrónica",
+                  pais: "Argentina",
+                },
+                {
+                  texto: "Validé 3 productos en una tarde. El único VIABLE fue el que terminé vendiendo. Los datos son reales.",
+                  autor: "Vendedor de hogar",
+                  pais: "México",
+                },
+                {
+                  texto: "Lo que más me sirvió fue el precio sugerido según mi perfil. No el promedio del mercado, el que yo podía poner.",
+                  autor: "Vendedor principiante",
+                  pais: "Argentina",
+                },
+              ].map((t, i) => (
+                <div key={i} className="bg-white rounded-xl border border-[#E5E7EB] p-5 space-y-3">
+                  <p className="text-sm text-[#0A0A0A] leading-relaxed">&ldquo;{t.texto}&rdquo;</p>
+                  <div>
+                    <p className="text-xs font-semibold text-[#0A0A0A]">{t.autor}</p>
+                    <p className="text-xs text-[#6B7280]">{t.pais}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Pricing */}
         <section className="bg-[#F9FAFB] py-20 border-y border-[#E5E7EB]">
           <div className="container">
