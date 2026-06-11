@@ -633,6 +633,12 @@ export default async function ResultadoPage({ params }: Params) {
                         </span>
                       </div>
                       <p className="text-xs text-gray-500">{alt.razon}</p>
+                      <Link
+                        href={`/analizar?producto=${encodeURIComponent(alt.nombre)}&pais=${analysis.pais}`}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-green-700 hover:text-green-800 mt-2"
+                      >
+                        Analizar este producto →
+                      </Link>
                     </div>
                   </div>
                 ))}
@@ -642,7 +648,9 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 12: Análisis de costo vs proveedores */}
-          {result.analisis_costo_proveedor && (
+          {result.analisis_costo_proveedor &&
+            result.analisis_costo_proveedor.rango_mayorista_estimado &&
+            !result.analisis_costo_proveedor.rango_mayorista_estimado.toLowerCase().includes("no disponible") && (
             <LockedSection locked={isFree}>
             <Card>
               <CardHeader>
@@ -702,6 +710,37 @@ export default async function ResultadoPage({ params }: Params) {
             </CardContent>
           </Card>
           </LockedSection>
+
+          {/* CTA final */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 text-center space-y-3">
+            {isFree ? (
+              <>
+                <p className="text-sm font-semibold text-gray-900">
+                  ¿Querés ver el análisis completo?
+                </p>
+                <p className="text-xs text-gray-500">
+                  Desbloqueá competencia, márgenes, top vendedores y más.
+                </p>
+                <a
+                  href="/#planes"
+                  className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors"
+                >
+                  Ver planes →
+                </a>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-semibold text-gray-900">
+                  ¿Querés validar otro producto?
+                </p>
+                <Link href="/analizar">
+                  <Button className="rounded-full">
+                    + Nuevo análisis
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </main>
     </>

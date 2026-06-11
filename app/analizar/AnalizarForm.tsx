@@ -77,6 +77,15 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
 
   const noCredits = creditsLeft <= 0;
 
+  // Pre-fill from query params (e.g. coming from "Analizar este producto →")
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const productoParam = params.get("producto");
+    const paisParam = params.get("pais");
+    if (productoParam) setProducto(productoParam);
+    if (paisParam && ["AR", "MX", "CO"].includes(paisParam)) setPais(paisParam as "AR" | "MX" | "CO");
+  }, []);
+
   // Cleanup polling on unmount
   useEffect(() => {
     return () => {
