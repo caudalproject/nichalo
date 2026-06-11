@@ -237,7 +237,7 @@ export default async function LandingPage() {
 
             {/* Contenido bloqueado */}
             <div className="relative">
-              <div className="blur-sm pointer-events-none select-none opacity-100 bg-white rounded-2xl border border-gray-100 p-8 space-y-4 min-h-[280px]">
+              <div className="blur-sm pointer-events-none select-none opacity-100 bg-white rounded-2xl border border-gray-100 p-8 space-y-4 min-h-[320px]">
                 {/* Competencia falsa */}
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Competencia</p>
@@ -264,6 +264,14 @@ export default async function LandingPage() {
                     <div className="flex gap-2 text-sm"><span className="text-green-600 font-bold">1.</span><span className="text-gray-600">Entrá al percentil 10 de precios para las primeras ventas</span></div>
                     <div className="flex gap-2 text-sm"><span className="text-green-600 font-bold">2.</span><span className="text-gray-600">Ofrecé envío gratis los primeros 30 días</span></div>
                     <div className="flex gap-2 text-sm"><span className="text-green-600 font-bold">3.</span><span className="text-gray-600">Armá combo termo + mate para diferenciarte</span></div>
+                  </div>
+                </div>
+                {/* Riesgos falsos */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Riesgos</p>
+                  <div className="space-y-1">
+                    <div className="h-3 bg-gray-100 rounded w-full" />
+                    <div className="h-3 bg-gray-100 rounded w-4/5" />
                   </div>
                 </div>
               </div>
