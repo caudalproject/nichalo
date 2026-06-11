@@ -237,7 +237,7 @@ export default async function LandingPage() {
 
             {/* Contenido bloqueado */}
             <div className="relative">
-              <div className="blur-md pointer-events-none select-none opacity-80 bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+              <div className="blur-sm pointer-events-none select-none opacity-100 bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
                 {/* Competencia falsa */}
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Competencia</p>
@@ -267,7 +267,7 @@ export default async function LandingPage() {
                   </div>
                 </div>
               </div>
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 rounded-2xl border border-gray-100 backdrop-blur-sm">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 rounded-2xl border border-gray-100">
                 <span className="text-2xl mb-2">🔒</span>
                 <p className="text-sm font-semibold text-gray-900 mb-1">
                   Competencia, márgenes y recomendaciones completas
