@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
+import { getPaisFromHeaders, getPreciosPorPais } from "@/lib/geolocation";
 
 const FEATURES = [
   {
@@ -28,66 +29,6 @@ const FEATURES = [
   },
 ];
 
-const PLANS = [
-  {
-    name: "Free",
-    price: "Gratis",
-    period: "",
-    priceNote: null as null | string,
-    popular: false,
-    badge: null as null | string,
-    mpPlan: null as null,
-    features: [
-      { label: "1 análisis por mes", included: true, subItems: null as string[] | null },
-      { label: "30 publicaciones analizadas", included: true, subItems: null as string[] | null },
-      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
-      { label: "Análisis mayormente bloqueado — solo veredicto, score y resumen", included: false, subItems: null as string[] | null },
-    ],
-    cta: "Probar gratis",
-    href: "/login",
-  },
-  {
-    name: "Starter",
-    price: "$17.000",
-    period: "/mes",
-    priceNote: "~$6 por análisis" as null | string,
-    popular: true,
-    badge: "Más popular" as null | string,
-    mpPlan: "starter" as const,
-    features: [
-      { label: "10 análisis por mes", included: true, subItems: null as string[] | null },
-      { label: "50 publicaciones analizadas", included: true, subItems: null as string[] | null },
-      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
-      { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
-    ],
-    cta: "Empezar ahora",
-    href: null,
-  },
-  {
-    name: "Pro",
-    price: "$41.000",
-    period: "/mes",
-    priceNote: "El análisis más completo del mercado" as null | string,
-    popular: false,
-    badge: "⭐ Más completo" as null | string,
-    mpPlan: "pro" as const,
-    features: [
-      { label: "30 análisis por mes", included: true, subItems: null as string[] | null },
-      { label: "100 publicaciones analizadas", included: true, subItems: null as string[] | null },
-      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
-      {
-        label: "Análisis avanzado Pro",
-        included: true,
-        subItems: ["Origen del producto", "Presupuesto inicial", "Variantes del producto", "Canal de distribución"] as string[] | null,
-      },
-      { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
-      { label: "Mayor profundidad de datos", included: true, subItems: null as string[] | null },
-    ],
-    cta: "Empezar ahora",
-    href: null,
-  },
-];
-
 const STEPS = [
   {
     title: "Ingresá tu producto",
@@ -103,7 +44,70 @@ const STEPS = [
   },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const pais = getPaisFromHeaders();
+  const precios = getPreciosPorPais(pais);
+
+  const PLANS = [
+    {
+      name: "Free",
+      price: "Gratis",
+      period: "",
+      priceNote: null as null | string,
+      popular: false,
+      badge: null as null | string,
+      mpPlan: null as null,
+      features: [
+        { label: "1 análisis por mes", included: true, subItems: null as string[] | null },
+        { label: "30 publicaciones analizadas", included: true, subItems: null as string[] | null },
+        { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+        { label: "Análisis mayormente bloqueado — solo veredicto, score y resumen", included: false, subItems: null as string[] | null },
+      ],
+      cta: "Probar gratis",
+      href: "/login",
+    },
+    {
+      name: "Starter",
+      price: precios.starter,
+      period: "/mes",
+      priceNote: "~$6 por análisis" as null | string,
+      popular: true,
+      badge: "Más popular" as null | string,
+      mpPlan: "starter" as const,
+      features: [
+        { label: "10 análisis por mes", included: true, subItems: null as string[] | null },
+        { label: "50 publicaciones analizadas", included: true, subItems: null as string[] | null },
+        { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+        { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
+      ],
+      cta: "Empezar ahora",
+      href: null,
+    },
+    {
+      name: "Pro",
+      price: precios.pro,
+      period: "/mes",
+      priceNote: "El análisis más completo del mercado" as null | string,
+      popular: false,
+      badge: "⭐ Más completo" as null | string,
+      mpPlan: "pro" as const,
+      features: [
+        { label: "30 análisis por mes", included: true, subItems: null as string[] | null },
+        { label: "100 publicaciones analizadas", included: true, subItems: null as string[] | null },
+        { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+        {
+          label: "Análisis avanzado Pro",
+          included: true,
+          subItems: ["Origen del producto", "Presupuesto inicial", "Variantes del producto", "Canal de distribución"] as string[] | null,
+        },
+        { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
+        { label: "Mayor profundidad de datos", included: true, subItems: null as string[] | null },
+      ],
+      cta: "Empezar ahora",
+      href: null,
+    },
+  ];
+
   return (
     <>
       <Navbar />
@@ -296,7 +300,7 @@ export default function LandingPage() {
               Elegí el plan que mejor se adapta a tu ritmo de trabajo.
             </p>
             <p className="mt-1 text-center text-sm text-[#6B7280]">
-              Precios en pesos argentinos (ARS)
+              Precios en {pais === "MX" ? "pesos mexicanos (MXN)" : pais === "CO" ? "pesos colombianos (COP)" : "pesos argentinos (ARS)"}
             </p>
             <div className="mt-12 mx-auto grid max-w-5xl gap-6 md:grid-cols-3 items-start">
               {PLANS.map((plan) => (
