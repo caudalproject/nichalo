@@ -236,8 +236,8 @@ export default async function LandingPage() {
             </div>
 
             {/* Contenido bloqueado */}
-            <div className="relative mt-3">
-              <div className="blur-sm pointer-events-none select-none opacity-50 bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+            <div className="relative">
+              <div className="blur-md pointer-events-none select-none opacity-80 bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
                 {/* Competencia falsa */}
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Competencia</p>
