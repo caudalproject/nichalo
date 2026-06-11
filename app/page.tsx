@@ -7,6 +7,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { getPaisFromHeaders, getPreciosPorPais } from "@/lib/geolocation";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 const FEATURES = [
   {
@@ -47,6 +48,9 @@ const STEPS = [
 export default async function LandingPage() {
   const pais = getPaisFromHeaders();
   const precios = getPreciosPorPais(pais);
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
 
   const PLANS = [
     {
@@ -177,14 +181,14 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* Demo estática */}
+        {!isLoggedIn && (
         <section className="container py-20">
           <div className="mx-auto max-w-3xl text-center mb-10">
             <h2 className="text-3xl font-bold text-[#0A0A0A]">
               Esto es lo que vas a ver
             </h2>
             <p className="mt-3 text-[#6B7280]">
-              Análisis real de Termo Stanley 473ml — Argentina
+              Así se ve un análisis real — antes de gastar un peso en stock
             </p>
           </div>
 
@@ -231,13 +235,37 @@ export default async function LandingPage() {
               </div>
             </div>
 
-            {/* Blur overlay sobre la parte de abajo */}
+            {/* Contenido bloqueado */}
             <div className="relative mt-3">
-              <div className="blur-sm pointer-events-none select-none opacity-60 bg-white rounded-2xl border border-gray-100 p-6 space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
-                <div className="h-4 bg-gray-200 rounded w-2/3" />
-                <div className="h-4 bg-gray-200 rounded w-1/3" />
+              <div className="blur-sm pointer-events-none select-none opacity-50 bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+                {/* Competencia falsa */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Competencia</p>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="flex justify-between"><span className="text-gray-400">Precio mínimo</span><span className="font-medium">$ 19.500</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Precio promedio</span><span className="font-medium">$ 34.800</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Precio máximo</span><span className="font-medium">$ 58.000</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Vendedores top</span><span className="font-medium">3 perfiles</span></div>
+                  </div>
+                </div>
+                {/* Palabras clave falsas */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Palabras clave</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["Stanley", "Termo", "473ml", "Original", "Verde"].map(kw => (
+                      <span key={kw} className="px-2 py-1 rounded-full border border-gray-200 text-xs text-gray-600">{kw}</span>
+                    ))}
+                  </div>
+                </div>
+                {/* Recomendación falsa */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Recomendación</p>
+                  <div className="space-y-1">
+                    <div className="flex gap-2 text-sm"><span className="text-green-600 font-bold">1.</span><span className="text-gray-600">Entrá al percentil 10 de precios para las primeras ventas</span></div>
+                    <div className="flex gap-2 text-sm"><span className="text-green-600 font-bold">2.</span><span className="text-gray-600">Ofrecé envío gratis los primeros 30 días</span></div>
+                    <div className="flex gap-2 text-sm"><span className="text-green-600 font-bold">3.</span><span className="text-gray-600">Armá combo termo + mate para diferenciarte</span></div>
+                  </div>
+                </div>
               </div>
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 rounded-2xl border border-gray-100 backdrop-blur-sm">
                 <span className="text-2xl mb-2">🔒</span>
@@ -256,6 +284,7 @@ export default async function LandingPage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Testimonios */}
         <section className="bg-[#F9FAFB] py-16 border-y border-[#E5E7EB]">
