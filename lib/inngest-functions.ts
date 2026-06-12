@@ -221,8 +221,8 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         },
       );
 
-      // Step 5: Guardar resultados, cachear y decrementar créditos
-      await step.run("save-results", async () => {
+      // Step 6a: Guardar análisis en DB y cachear
+      const savedAnalysis = await step.run("save-analysis", async () => {
         const resultadoJson = {
           ...analysis,
           publicaciones_analizadas: finalScrape.totalListings,
@@ -262,6 +262,11 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           { onConflict: "producto,pais,perfil_vendedor" }
         );
 
+        return { analysisId: insertData.id, resultadoJson };
+      });
+
+      // Step 6b: Decrementar crédito del usuario
+      await step.run("decrement-credits", async () => {
         const { data: userRow } = await supabase
           .from("users")
           .select("analisis_restantes")
@@ -274,27 +279,32 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             .update({ analisis_restantes: Math.max(0, userRow.analisis_restantes - 1) })
             .eq("id", user_id);
         }
+      });
 
+      // Step 6c: Marcar job como done
+      await step.run("complete-job", async () => {
         await updateJob(job_id, {
           status: "done",
           step_message: "¡Análisis completado!",
-          analysis_id: insertData.id,
+          analysis_id: savedAnalysis.analysisId,
         });
+      });
 
-        // Enviar email de resultado al usuario
-        const { data: userRow2 } = await supabase
+      // Step 6d: Enviar email (aislado — si falla no afecta el resultado)
+      await step.run("send-email", async () => {
+        const { data: userRow } = await supabase
           .from("users")
           .select("email")
           .eq("id", user_id)
           .single();
 
-        if (userRow2?.email) {
+        if (userRow?.email) {
           await sendAnalysisReadyEmail(
-            userRow2.email,
+            userRow.email,
             producto,
             analysis.veredicto,
             analysis.score,
-            insertData.id,
+            savedAnalysis.analysisId,
           );
         }
       });
