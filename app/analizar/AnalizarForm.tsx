@@ -407,13 +407,12 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
           </div>
 
           {/* Sección Pro */}
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-sm font-semibold text-gray-900">Análisis avanzado</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-medium">Pro</span>
-            </div>
-
+          {plan === 'pro' ? (
             <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-gray-900">Análisis avanzado</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-medium">Pro</span>
+              </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Origen del producto</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -430,7 +429,6 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
                   ))}
                 </div>
               </div>
-
               <div>
                 {(() => {
                   const currency = getCurrencyForCountry(pais);
@@ -460,7 +458,6 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
                   );
                 })()}
               </div>
-
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">¿El producto tiene variantes?</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -489,7 +486,6 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
                   </div>
                 )}
               </div>
-
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">¿Dónde vas a vender?</label>
                 <div className="grid grid-cols-1 gap-2">
@@ -507,15 +503,17 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
                 </div>
               </div>
             </div>
-
-            {plan !== 'pro' && (
-              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-3 border border-gray-100">
-                <span className="text-2xl">🔒</span>
-                <p className="text-sm font-medium text-gray-700">Disponible en Plan Pro</p>
-                <a href="/#planes" className="text-xs text-green-600 hover:underline">Ver planes →</a>
+          ) : (
+            <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-900">Análisis avanzado Pro</p>
+                <p className="text-xs text-gray-500 mt-0.5">Origen, presupuesto, variantes y canal de distribución</p>
               </div>
-            )}
-          </div>
+              <a href="/#planes" className="text-xs font-semibold text-green-600 hover:text-green-700 whitespace-nowrap ml-4">
+                Ver planes →
+              </a>
+            </div>
+          )}
 
           {loading && (
             <div className="rounded-md border bg-muted/40 p-4 space-y-3">
@@ -530,7 +528,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Esto puede tardar hasta 5 minutos
+                Estamos analizando publicaciones reales de ML en este momento
               </p>
             </div>
           )}
@@ -543,7 +541,10 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
 
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
-              Plan {plan} · {creditsLeft} análisis restantes
+              Plan {plan} · {creditsLeft} análisis restante{creditsLeft !== 1 ? 's' : ''}
+              {plan === 'free' && creditsLeft === 1 && (
+                <span className="ml-1 text-amber-600 font-medium">— es tu único análisis gratis</span>
+              )}
             </p>
             <Button type="submit" size="lg" disabled={loading || noCredits}>
               {loading ? "Analizando…" : "Analizar producto"}
