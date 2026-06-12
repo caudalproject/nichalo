@@ -255,11 +255,6 @@ export default async function ResultadoPage({ params }: Params) {
                 {publicaciones > 0 && (
                   <p className="text-xs text-gray-300 mt-1">
                     Análisis basado en {publicaciones} publicaciones de Mercado Libre
-                    {result.cache_date && (
-                      <span className="ml-1">
-                        · Datos del {new Date(result.cache_date).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" })}
-                      </span>
-                    )}
                   </p>
                 )}
               </div>
