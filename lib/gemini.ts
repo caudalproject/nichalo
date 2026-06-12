@@ -28,6 +28,17 @@ interface AnalyzeArgs {
     trends?: { trending: boolean; interest: number; related: string[] };
   };
   datosPro?: DatosPro;
+  precioStats?: {
+    precio_minimo: number;
+    precio_maximo: number;
+    precio_promedio: number;
+    p10: number;
+    p25: number;
+    p50: number;
+    p65: number;
+    total_con_precio: number;
+    total_con_ventas: number;
+  } | null;
 }
 
 export async function extractKeywordsFromImage(
@@ -122,12 +133,29 @@ export async function analizarConGemini(
   throw new Error("No se pudo completar el análisis con ningún modelo");
 }
 
-function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlTrends, mlData, datosPro }: AnalyzeArgs) {
+function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlTrends, mlData, datosPro, precioStats }: AnalyzeArgs) {
   const sample = scrape.listings.slice(0, 50);
   const currencyCode = currency?.code ?? "ARS";
   const currencyName = currency?.name ?? "Peso argentino";
   const rate = exchangeRate ?? 1400;
   const perfil = perfilVendedor ?? "principiante";
+  const preciosCalculados = precioStats ? `
+ESTADÍSTICAS DE PRECIOS (calculadas del scrape — usá estos valores exactos, NO los recalcules):
+- Precio mínimo: ${precioStats.precio_minimo} ${currencyCode}
+- Precio máximo: ${precioStats.precio_maximo} ${currencyCode}
+- Precio promedio: ${precioStats.precio_promedio} ${currencyCode}
+- Percentil 10 (p10): ${precioStats.p10} ${currencyCode}
+- Percentil 25 (p25): ${precioStats.p25} ${currencyCode}
+- Percentil 50 (p50): ${precioStats.p50} ${currencyCode}
+- Percentil 65 (p65): ${precioStats.p65} ${currencyCode}
+- Listings con precio válido: ${precioStats.total_con_precio}
+- Listings con ventas registradas (soldQuantity > 0): ${precioStats.total_con_ventas}
+
+REGLA DE PRECIO SUGERIDO (usar los percentiles de arriba):
+- principiante → usá p10 como precio_sugerido_venta
+- intermedio → usá p25
+- experto → usá p65
+` : '';
   return `Eres un analista experto de Mercado Libre.${imagenBase64 ? " Evaluá también la imagen adjunta: calidad visual, diferenciación y posicionamiento." : ""}
 
 Producto: "${producto}" | País: ${pais} (${scrape.domain}) | Costo/unidad USD: ${costoEstimadoUsd} | Publicaciones: ${scrape.totalListings}
@@ -164,6 +192,7 @@ REGLA DE PRECIOS CRÍTICA:
 - Para calcular margen: convertí el precio_sugerido de ${currencyCode} a USD usando la tasa (dividir por ${rate}), luego restá el costo en USD
 - Ejemplo: si precio_sugerido = ${Math.round(rate * 25)} ${currencyCode} y costo = 10 USD → precio en USD = 25 → ganancia = 25 - 10 - comision = X USD
 
+${preciosCalculados}
 PERFIL DEL VENDEDOR: ${perfil}
 Reglas según perfil:
 - Si es "principiante": Penalizar fuerte mercados con más de 15 vendedores activos. El precio de entrada recomendado debe ser el percentil 10 del mercado (los más baratos con ventas), no el promedio. El score debe bajar 20-30 puntos si hay muchos competidores establecidos. La recomendación debe incluir consejos específicos para construir reputación desde cero (primeras ventas, precios de lanzamiento, envío gratis inicial).
@@ -204,22 +233,17 @@ Para calcular el campo comision_detalle:
 6. monto_usd = round(monto_ars / ${rate}, 2)
 7. Usar monto_usd como valor de comision_ml_estimada en el objeto margen
 
-REGLA DE PRECIO SUGERIDO (crítica):
-El precio_sugerido DEBE estar dentro del rango de precios reales del mercado scrapeado.
-- Para "principiante": entre el percentil 10 y 25 del mercado (precio de entrada agresivo). Ordená los precios del scraping de menor a mayor y elegí uno entre el 10% y el 25% más barato.
-- Para "intermedio": entre el percentil 25 y 50 del mercado (precio competitivo). Elegí un precio en el cuarto inferior-medio del rango.
-- Para "experto": entre el percentil 40 y 65 del mercado (precio con margen pero competitivo). Podés estar cerca del promedio pero no superarlo ampliamente.
-
-NUNCA sugerir un precio mayor al precio_promedio del mercado para perfiles "principiante" e "intermedio".
-NUNCA sugerir un precio que duplique el precio_minimo del mercado.
+REGLA DE PRECIO SUGERIDO: ya está definida arriba con los percentiles calculados. Usá exactamente esos valores.
 
 Si el margen resultante es negativo o menor al 10%, indicarlo claramente en el resumen y recomendacion, pero mantener el precio_sugerido dentro del rango de mercado. El vendedor necesita conocer la viabilidad real, no un precio irreal basado solo en su costo.
 
-Datos (${sample.length} items):
+Datos del scrape (${sample.length} publicaciones de ML):
+Cada item tiene: title, price (en ${currencyCode}), soldQuantity (unidades vendidas — null si no hay datos), seller, rating, reviewsCount, isFreeShipping, url.
+IMPORTANTE: si soldQuantity es null en la mayoría de los items, NO apliques el cap de score 65 automáticamente — la ausencia de datos de ventas no significa que no haya ventas.
 ${JSON.stringify(sample)}
 
-PRODUCTOS ALTERNATIVOS (incluir solo si veredicto es SATURADO o MARGINAL):
-Si el producto analizado está saturado o es marginal, sugerí 2-3 productos alternativos relacionados que podrían tener mejor oportunidad en el mismo mercado.
+PRODUCTOS ALTERNATIVOS (incluir si score <= 74):
+Si el score del análisis es 74 o menos, sugerí 2-3 productos alternativos relacionados que podrían tener mejor oportunidad en el mismo mercado.
 Para cada alternativa incluir:
 - nombre: nombre específico del producto (no genérico)
 - razon: por qué tiene mejor oportunidad (1 frase)

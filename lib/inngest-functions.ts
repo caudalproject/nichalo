@@ -188,6 +188,23 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           const currency = getCurrencyForCountry(pais);
           const exchangeRate = await getExchangeRate(currency.code);
 
+          const precios = finalScrape.listings
+            .map(l => l.price)
+            .filter((p): p is number => p !== null && p > 0)
+            .sort((a, b) => a - b);
+
+          const precioStats = precios.length > 0 ? {
+            precio_minimo: precios[0],
+            precio_maximo: precios[precios.length - 1],
+            precio_promedio: Math.round(precios.reduce((a, b) => a + b, 0) / precios.length),
+            p10: precios[Math.floor(precios.length * 0.10)] ?? precios[0],
+            p25: precios[Math.floor(precios.length * 0.25)] ?? precios[0],
+            p50: precios[Math.floor(precios.length * 0.50)] ?? precios[0],
+            p65: precios[Math.floor(precios.length * 0.65)] ?? precios[precios.length - 1],
+            total_con_precio: precios.length,
+            total_con_ventas: finalScrape.listings.filter(l => (l.soldQuantity ?? 0) > 0).length,
+          } : null;
+
           return await analizarConGemini({
             producto,
             pais,
@@ -199,6 +216,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             mlTrends,
             mlData,
             datosPro: datos_pro ?? undefined,
+            precioStats: precioStats ?? undefined,
           });
         },
       );
