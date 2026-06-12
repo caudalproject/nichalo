@@ -50,8 +50,6 @@ export async function startApifyRun(
   const siteId = SITE_IDS[pais] ?? "MLA";
   const config = PLAN_CONFIG[plan];
 
-  console.log("[apify] starting async run", query, "on", siteId);
-
   const res = await fetch(
     `https://api.apify.com/v2/acts/${ACTOR_ID}/runs?token=${apiKey}`,
     {
@@ -77,7 +75,6 @@ export async function startApifyRun(
 
   const data = (await res.json()) as { data: { id: string } };
   const runId = data.data.id;
-  console.log("[apify] run started, id:", runId);
   return runId;
 }
 
@@ -95,7 +92,6 @@ export async function checkApifyRun(runId: string): Promise<{ status: string }> 
   }
 
   const data = (await res.json()) as { data: { status: string } };
-  console.log("[apify] run", runId, "status:", data.data.status);
   return { status: data.data.status };
 }
 
@@ -132,7 +128,6 @@ export async function getApifyResults(
       sourcedFrom: "apify" as const,
     };
   }
-  console.log("[apify] received", data.length, "items for run", runId);
 
   const listings: MLListing[] = data.map((item) => {
     const seller = item.seller as Record<string, unknown> | null;

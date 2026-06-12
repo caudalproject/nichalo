@@ -115,7 +115,6 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             return null;
           }
 
-          console.log("[apify] fallback keyword:", simplifiedKeyword);
           return await startApifyRun(simplifiedKeyword, pais, plan);
         } catch {
           return null;
@@ -130,7 +129,6 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         const result = await checkApifyRun(fallbackRunId);
 
         if (["FAILED", "ABORTED", "TIMED-OUT"].includes(result.status)) {
-          console.log("[apify] fallback run falló, continuando con 0 resultados");
           return scrape;
         }
 
@@ -140,7 +138,6 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
 
         const { maxItems } = PLAN_CONFIG[plan];
         const fallbackScrape = await getApifyResults(fallbackRunId, producto, pais, maxItems);
-        console.log("[apify] fallback obtuvo", fallbackScrape.totalListings, "items");
         return fallbackScrape;
       });
 
@@ -170,7 +167,6 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
       // Step 4: Obtener total de ML y tendencias de Google en paralelo
       const mlData = await step.run("fetch-ml-data", async () => {
         await updateJob(job_id, { step_message: "Calculando tamaño del mercado..." });
-        console.log("[fetch-ml-data] iniciando");
         const { getMLSearchTotal, getGoogleTrends } = await import("./mercadolibre");
         const [total, trends] = await Promise.all([
           getMLSearchTotal(producto, pais).catch(() => 0),
