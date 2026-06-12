@@ -136,10 +136,7 @@ export async function POST(request: Request) {
           );
         }
 
-        await supabase
-          .from("users")
-          .update({ analisis_restantes: Math.max(0, restantes - 1) })
-          .eq("id", user.id);
+        await supabase.rpc("decrement_analisis_restantes", { user_id_param: user.id });
 
         return NextResponse.json({ id: inserted.id });
       }
