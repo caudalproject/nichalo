@@ -170,8 +170,8 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         console.log("[fetch-ml-data] iniciando");
         const { getMLSearchTotal, getGoogleTrends } = await import("./mercadolibre");
         const [total, trends] = await Promise.all([
-          getMLSearchTotal(producto, pais),
-          getGoogleTrends(producto, pais),
+          getMLSearchTotal(producto, pais).catch(() => 0),
+          getGoogleTrends(producto, pais).catch(() => undefined),
         ]);
         return { total, trends };
       });
