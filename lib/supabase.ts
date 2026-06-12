@@ -63,6 +63,7 @@ export interface AnalysisResult {
   };
   imagen_url?: string;
   publicaciones_analizadas?: number;
+  cache_date?: string;
   total_publicaciones_ml?: number;
   google_trends_interest?: number;
   google_trends_trending?: boolean;

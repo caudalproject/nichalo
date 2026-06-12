@@ -238,6 +238,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             pais,
             resultado_json: resultadoJson,
             publicaciones_analizadas: finalScrape.totalListings,
+            created_at: new Date().toISOString(),
           },
           { onConflict: "producto,pais" }
         );

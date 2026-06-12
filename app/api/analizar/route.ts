@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
       const { data: cached } = await supabase
         .from("analysis_cache")
-        .select("resultado_json, publicaciones_analizadas")
+        .select("resultado_json, publicaciones_analizadas, created_at")
         .eq("producto", productoNorm)
         .eq("pais", pais)
         .gte("created_at", cutoff)
@@ -112,6 +112,7 @@ export async function POST(request: Request) {
       if (cached) {
         const resultadoJson = cached.resultado_json as AnalysisResult;
         resultadoJson.publicaciones_analizadas = cached.publicaciones_analizadas as number;
+        resultadoJson.cache_date = cached.created_at as string;
 
         const { data: inserted, error: insertErr } = await supabase
           .from("analyses")
