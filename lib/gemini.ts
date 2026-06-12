@@ -104,7 +104,7 @@ export async function analizarConGemini(
       console.log("[gemini] calling model", modelName);
       // responseMimeType only exists in v1beta; v1 enforces JSON via the prompt
       const model = genAI.getGenerativeModel(
-        { model: modelName, generationConfig: { temperature: 0.4 } },
+        { model: modelName, generationConfig: { temperature: 0.2 } },
         { apiVersion: "v1" }
       );
 
@@ -137,7 +137,8 @@ function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, c
   const sample = scrape.listings.slice(0, 50);
   const currencyCode = currency?.code ?? "ARS";
   const currencyName = currency?.name ?? "Peso argentino";
-  const rate = exchangeRate ?? 1400;
+  const FALLBACK_RATES: Record<string, number> = { ARS: 1400, MXN: 17, COP: 4200 };
+  const rate = exchangeRate ?? FALLBACK_RATES[currencyCode] ?? 1400;
   const perfil = perfilVendedor ?? "principiante";
   const preciosCalculados = precioStats ? `
 ESTADÍSTICAS DE PRECIOS (calculadas del scrape — usá estos valores exactos, NO los recalcules):
@@ -156,6 +157,95 @@ REGLA DE PRECIO SUGERIDO (usar los percentiles de arriba):
 - intermedio → usá p25
 - experto → usá p65
 ` : '';
+  const comisionesPorPais = {
+    AR: {
+      nombre: "Argentina",
+      clasica: {
+        categorias: {
+          "Electrónica/tecnología": 12.40,
+          "Electrodomésticos": 12.40,
+          "Ropa y accesorios": 12.40,
+          "Deportes y fitness": 12.40,
+          "Hogar y jardín": 12.40,
+          "Juguetes": 12.40,
+          "Resto": 12.40,
+        },
+        cargo_fijo: (precio: number) => precio < 33000 ? 2500 : precio < 60000 ? 4000 : 0,
+      },
+      premium: {
+        categorias: {
+          "Electrónica/tecnología": 13.90,
+          "Electrodomésticos": 12.40,
+          "Ropa y accesorios": 16.57,
+          "Deportes y fitness": 15.40,
+          "Hogar y jardín": 15.40,
+          "Juguetes": 15.40,
+          "Resto": 15.40,
+        },
+        cargo_fijo: (precio: number) => precio < 33000 ? 2500 : precio < 60000 ? 4000 : 0,
+      },
+    },
+    MX: {
+      nombre: "México",
+      clasica: {
+        categorias: {
+          "Electrónica/tecnología": 10.00,
+          "Electrodomésticos": 10.00,
+          "Ropa y accesorios": 16.00,
+          "Deportes y fitness": 14.00,
+          "Hogar y jardín": 15.00,
+          "Juguetes": 14.00,
+          "Resto": 13.00,
+        },
+        cargo_fijo: (precio: number) => precio < 99 ? 25 : precio < 199 ? 30 : precio < 299 ? 37 : 0,
+      },
+      premium: {
+        categorias: {
+          "Electrónica/tecnología": 13.50,
+          "Electrodomésticos": 13.50,
+          "Ropa y accesorios": 20.50,
+          "Deportes y fitness": 17.00,
+          "Hogar y jardín": 18.00,
+          "Juguetes": 17.00,
+          "Resto": 16.50,
+        },
+        cargo_fijo: (_precio: number) => 0,
+      },
+    },
+    CO: {
+      nombre: "Colombia",
+      clasica: {
+        categorias: {
+          "Electrónica/tecnología": 10.00,
+          "Electrodomésticos": 10.00,
+          "Ropa y accesorios": 15.00,
+          "Deportes y fitness": 13.00,
+          "Hogar y jardín": 14.00,
+          "Juguetes": 13.00,
+          "Resto": 13.00,
+        },
+        cargo_fijo: (precio: number) => precio < 50000 ? 1500 : 0,
+      },
+      premium: {
+        categorias: {
+          "Electrónica/tecnología": 13.00,
+          "Electrodomésticos": 13.00,
+          "Ropa y accesorios": 18.00,
+          "Deportes y fitness": 16.00,
+          "Hogar y jardín": 16.00,
+          "Juguetes": 16.00,
+          "Resto": 15.00,
+        },
+        cargo_fijo: (_precio: number) => 0,
+      },
+    },
+  };
+
+  const paisComisiones = comisionesPorPais[pais] ?? comisionesPorPais.AR;
+  const tipoPublicacion = perfil === "principiante" ? "clasica" : "premium";
+  const tablaComisiones = tipoPublicacion === "clasica"
+    ? paisComisiones.clasica
+    : paisComisiones.premium;
   return `Eres un analista experto de Mercado Libre.${imagenBase64 ? " Evaluá también la imagen adjunta: calidad visual, diferenciación y posicionamiento." : ""}
 
 Producto: "${producto}" | País: ${pais} (${scrape.domain}) | Costo/unidad USD: ${costoEstimadoUsd} | Publicaciones: ${scrape.totalListings}
@@ -199,39 +289,26 @@ Reglas según perfil:
 - Si es "intermedio": Usar precio del percentil 25-50. Score normal según competencia. Recomendación enfocada en diferenciación y optimización.
 - Si es "experto": Usar precio del percentil 40-65 (puede acercarse al promedio). Score puede ser más alto en mercados competidos. Recomendación enfocada en escala y volumen.
 
-COMISIONES DE MERCADO LIBRE ARGENTINA (usar estos datos reales):
+COMISIONES DE MERCADO LIBRE ${paisComisiones.nombre.toUpperCase()} (datos reales 2026):
 
 Tipo de publicación según perfil:
-- principiante → CLÁSICA (menor visibilidad, sin cuotas) | Comisión: 11.80% - 13% según categoría
-- intermedio → PREMIUM recomendado | Comisión Clásica: 11.80% - 13% | Comisión Premium: 14.80% - 16%
-- experto → PREMIUM (mayor visibilidad, cuotas sin interés) | Comisión: 14.80% - 17.14% según categoría
+- principiante → CLÁSICA | intermedio/experto → PREMIUM
 
-Comisiones Premium por categoría (usar el punto medio del rango para el cálculo):
-- Electrónica/tecnología: 13% - 14.80% → usar 13.90%
-- Electrodomésticos: 11.80% - 13% → usar 12.40%
-- Ropa y accesorios: 16% - 17.14% → usar 16.57%
-- Deportes y fitness: 14.80% - 16% → usar 15.40%
-- Hogar y jardín: 14.80% - 16% → usar 15.40%
-- Juguetes: 14.80% - 16% → usar 15.40%
-- Resto de categorías: 14.80% - 16% → usar 15.40%
+Tabla de comisiones para ${paisComisiones.nombre} (${tipoPublicacion.toUpperCase()}):
+${Object.entries(tablaComisiones.categorias).map(([cat, pct]) => `- ${cat}: ${pct}%`).join('\n')}
 
-Para Clásica usar: 12.40% como valor representativo (punto medio 11.80%-13%).
+Cargo fijo por unidad: depende del precio de venta en ${currencyCode} — aplicá la lógica del país.
+${pais === 'AR' ? '- Precio < 33.000 ARS → 2.500 ARS fijo\n- Precio 33.000-60.000 ARS → 4.000 ARS fijo\n- Precio > 60.000 ARS → sin cargo fijo' : ''}
+${pais === 'MX' ? '- Precio < 99 MXN → 25 MXN fijo (solo Clásica)\n- Precio 99-198 MXN → 30 MXN fijo (solo Clásica)\n- Precio 199-298 MXN → 37 MXN fijo (solo Clásica)\n- Precio ≥ 299 MXN → sin cargo fijo' : ''}
+${pais === 'CO' ? '- Precio < 50.000 COP → 1.500 COP fijo (solo Clásica)\n- Precio ≥ 50.000 COP → sin cargo fijo' : ''}
 
-Cargo fijo por unidad (sumar al monto de comisión en ARS):
-- Precio de venta < 33000 ARS → cargo fijo 2500 ARS
-- Precio de venta entre 33000 y 60000 ARS → cargo fijo 4000 ARS
-- Precio de venta > 60000 ARS → sin cargo fijo (0)
-
-IVA: asumir Monotributista por defecto (sin IVA adicional sobre la comisión).
-
-Para calcular el campo comision_detalle:
-1. Determinar tipo_publicacion: "principiante" → "Clásica", "intermedio" → "Premium", "experto" → "Premium"
-2. Estimar la categoría del producto por su nombre para elegir el % correcto
-3. porcentaje = % del punto medio de la categoría correspondiente
-4. monto_ars = round(precio_sugerido_venta × porcentaje / 100) + cargo_fijo_ars
-5. cargo_fijo_ars según la tabla de precios de arriba
-6. monto_usd = round(monto_ars / ${rate}, 2)
-7. Usar monto_usd como valor de comision_ml_estimada en el objeto margen
+Para calcular comision_detalle:
+1. tipo_publicacion: "${tipoPublicacion === 'clasica' ? 'Clásica' : 'Premium'}"
+2. Estimá la categoría del producto por su nombre
+3. porcentaje = % de la tabla de arriba para esa categoría
+4. monto_local = round(precio_sugerido_venta × porcentaje / 100) + cargo_fijo
+5. monto_usd = round(monto_local / ${rate}, 2)
+6. Usá monto_usd como comision_ml_estimada en margen
 
 REGLA DE PRECIO SUGERIDO: ya está definida arriba con los percentiles calculados. Usá exactamente esos valores.
 
@@ -266,12 +343,16 @@ REGLA DE TENDENCIA Y ESTACIONALIDAD:
 - Si es hogar/electrodomésticos: mencionar inicio de año (enero-febrero) y Hot Sale
 - Si es moda: temporadas + Hot Sale
 
-REGLAS DE SCORE:
-- Si no hay datos de ventas registradas en las publicaciones: máximo score 65
-- Si hay más de 30 vendedores activos Y el perfil es principiante: máximo score 50
-- Si hay más de 30 vendedores activos Y el perfil es intermedio: máximo score 65
-- Si hay más de 30 vendedores activos Y el perfil es experto: máximo score 80
-- Un score de 75+ requiere que haya evidencia de ventas reales en el mercado
+REGLAS DE SCORE (aplicar en este orden):
+1. Si hay más de 2.000 publicaciones totales en ML (mlData.total): mercado saturado base
+2. Escala de competencia por vendedores activos en el scrape:
+   - 0-10 vendedores: sin penalización
+   - 11-20 vendedores: -10 puntos si es principiante, -5 si es intermedio
+   - 21-30 vendedores: -20 puntos si es principiante, -10 si es intermedio, -5 si es experto
+   - +30 vendedores: máximo 50 para principiante, máximo 65 para intermedio, máximo 80 para experto
+3. Si soldQuantity es null en más del 80% de los listings: máximo 65 (datos insuficientes)
+4. Si hay evidencia de ventas reales (soldQuantity > 0 en al menos 3 listings): score puede llegar a 100
+5. VIABLE = 75-100 (margen > 25%, competencia manejable) | MARGINAL = 50-74 | SATURADO = 0-49
 
 Reglas generales:
 - VIABLE score 75-100 (>25% margen, poca competencia) | MARGINAL 50-74 (10-25% margen) | SATURADO 0-49 (<10% margen)
