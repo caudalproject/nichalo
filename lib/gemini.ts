@@ -285,7 +285,7 @@ REGLA DE PRECIOS CRÍTICA:
 ${preciosCalculados}
 PERFIL DEL VENDEDOR: ${perfil}
 Reglas según perfil:
-- Si es "principiante": Penalizar fuerte mercados con más de 15 vendedores activos. El precio de entrada recomendado debe ser el percentil 10 del mercado (los más baratos con ventas), no el promedio. El score debe bajar 20-30 puntos si hay muchos competidores establecidos. La recomendación debe incluir consejos específicos para construir reputación desde cero (primeras ventas, precios de lanzamiento, envío gratis inicial).
+- Si es "principiante": Aplicar escala de penalización según REGLAS DE SCORE definidas abajo — 11-20 vendedores: -10 puntos, 21-30: -20 puntos, +30: máximo score 50. El precio de entrada recomendado debe ser el percentil 10 del mercado (los más baratos con ventas), no el promedio. La recomendación debe incluir consejos específicos para construir reputación desde cero (primeras ventas, precios de lanzamiento, envío gratis inicial).
 - Si es "intermedio": Usar precio del percentil 25-50. Score normal según competencia. Recomendación enfocada en diferenciación y optimización.
 - Si es "experto": Usar precio del percentil 40-65 (puede acercarse al promedio). Score puede ser más alto en mercados competidos. Recomendación enfocada en escala y volumen.
 
