@@ -309,10 +309,19 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         }
       });
     } catch (err) {
-      await updateJob(job_id, {
-        status: "error",
-        error_message: String(err),
-      });
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const isPollingRetry =
+        errMsg.includes("Apify en progreso") ||
+        errMsg.includes("Apify fallback en progreso");
+
+      if (!isPollingRetry) {
+        await updateJob(job_id, {
+          status: "error",
+          error_message: errMsg.includes("Gemini") || errMsg.includes("Apify")
+            ? "Error al analizar el producto. Intentá de nuevo."
+            : errMsg,
+        });
+      }
       throw err;
     }
   }
