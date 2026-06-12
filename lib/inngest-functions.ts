@@ -109,8 +109,11 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
 
         try {
           const result = await model.generateContent([{ text: prompt }]);
-          const simplifiedKeyword = result.response.text().trim();
-          if (!simplifiedKeyword) return null;
+          const simplifiedKeyword = result.response.text().trim().split('\n')[0].trim();
+          if (!simplifiedKeyword || simplifiedKeyword.length > 40 || simplifiedKeyword.split(' ').length > 4) {
+            console.log("[apify] fallback keyword inválida, abortando:", simplifiedKeyword);
+            return null;
+          }
 
           console.log("[apify] fallback keyword:", simplifiedKeyword);
           return await startApifyRun(simplifiedKeyword, pais, plan);
@@ -204,6 +207,12 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             total_con_precio: precios.length,
             total_con_ventas: finalScrape.listings.filter(l => (l.soldQuantity ?? 0) > 0).length,
           } : null;
+
+          if (finalScrape.totalListings === 0) {
+            throw new NonRetriableError(
+              "No se encontraron publicaciones en Mercado Libre para este producto. Intentá con un término más general."
+            );
+          }
 
           return await analizarConGemini({
             producto,

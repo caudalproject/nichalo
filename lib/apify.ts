@@ -119,7 +119,19 @@ export async function getApifyResults(
     throw new Error(`Apify dataset respondió ${res.status}: ${text.slice(0, 300)}`);
   }
 
-  const data = (await res.json()) as Array<Record<string, unknown>>;
+  const data = (await res.json()) as unknown;
+  if (!Array.isArray(data)) {
+    console.error("[apify] dataset no es array:", JSON.stringify(data).slice(0, 200));
+    return {
+      query,
+      pais,
+      domain,
+      fetchedAt: new Date().toISOString(),
+      totalListings: 0,
+      listings: [],
+      sourcedFrom: "apify" as const,
+    };
+  }
   console.log("[apify] received", data.length, "items for run", runId);
 
   const listings: MLListing[] = data.map((item) => {
