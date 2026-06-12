@@ -254,11 +254,12 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           {
             producto: productoNorm,
             pais,
+            perfil_vendedor: perfil_vendedor ?? "principiante",
             resultado_json: resultadoJson,
             publicaciones_analizadas: finalScrape.totalListings,
             created_at: new Date().toISOString(),
           },
-          { onConflict: "producto,pais" }
+          { onConflict: "producto,pais,perfil_vendedor" }
         );
 
         const { data: userRow } = await supabase

@@ -106,6 +106,7 @@ export async function POST(request: Request) {
         .select("resultado_json, publicaciones_analizadas, created_at")
         .eq("producto", productoNorm)
         .eq("pais", pais)
+        .eq("perfil_vendedor", perfilVendedor ?? "principiante")
         .gte("created_at", cutoff)
         .maybeSingle();
 
