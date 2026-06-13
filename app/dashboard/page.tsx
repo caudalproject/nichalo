@@ -33,29 +33,19 @@ export default async function DashboardPage() {
   profile = profileData;
 
   if (!profile) {
-    const { data: inserted } = await supabase
-      .from("users")
-      .insert({
-        id: user.id,
-        email: user.email,
-        plan: "free",
-        analisis_restantes: 1,
-      })
-      .select("plan, analisis_restantes, email")
-      .single();
-    profile = inserted ?? {
-      plan: "free",
-      analisis_restantes: 1,
-      email: user.email ?? "",
-    };
+    profile = { plan: "free", analisis_restantes: 1, email: user.email ?? "" };
   }
 
-  const { data: analyses } = await supabase
+  const { data: analyses, error: analysesError } = await supabase
     .from("analyses")
     .select("id, producto, pais, score, veredicto, created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(50);
+
+  if (analysesError) {
+    console.error("[dashboard] error cargando análisis:", analysesError.message);
+  }
 
   const list = (analyses ?? []) as Pick<
     AnalysisRow,
@@ -97,14 +87,14 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        {(profile?.analisis_restantes ?? 0) === 0 && profile?.plan !== "pro" && (
+        {(profile?.analisis_restantes ?? 0) <= 0 && profile?.plan !== "pro" && (
           <div className="mt-6">
             <UpgradeBanner />
           </div>
         )}
 
         <div className="mt-8">
-          <DashboardList initialList={list} userId={user.id} />
+          <DashboardList initialList={list} userId={user.id} queryFailed={!!analysesError} />
         </div>
       </main>
     </>
