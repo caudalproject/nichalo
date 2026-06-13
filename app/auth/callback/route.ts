@@ -7,8 +7,15 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/dashboard";
 
+  // Validar que next sea una ruta interna
+  const safeNext = next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\")
+    ? next
+    : "/dashboard";
+
+  const oauthError = searchParams.get("error");
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=missing_code`);
+    const errorMsg = oauthError === "access_denied" ? "cancelled" : "missing_code";
+    return NextResponse.redirect(`${origin}/login?error=${errorMsg}`);
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,7 +24,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=missing_env`);
   }
 
-  const response = NextResponse.redirect(`${origin}${next}`);
+  const response = NextResponse.redirect(`${origin}${safeNext}`);
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -48,27 +55,29 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (user) {
-    const { data: existingUser } = await supabase
-      .from("users")
-      .select("id")
-      .eq("id", user.id)
-      .single();
+    // Usuario nuevo = creado hace menos de 10 segundos
+    const createdAt = new Date(user.created_at).getTime();
+    const now = Date.now();
+    const isNewUser = now - createdAt < 10000;
 
-    const isNewUser = !existingUser;
-
-    await supabase
+    const { error: upsertError } = await supabase
       .from("users")
       .upsert({ id: user.id, email: user.email }, { onConflict: "id" });
+    if (upsertError) {
+      console.error("[auth/callback] error en upsert de users:", upsertError.message);
+    }
 
     if (isNewUser && user.email) {
       const nombre =
         user.user_metadata?.full_name ??
         user.user_metadata?.name ??
         user.email.split("@")[0];
-      await sendWelcomeEmail(user.email, nombre);
+      sendWelcomeEmail(user.email, nombre).catch((err) => {
+        console.error("[auth/callback] error enviando welcome email:", err);
+      });
 
       // Señalizar al cliente para disparar el evento de píxel
-      const newUserUrl = new URL(response.headers.get("location") ?? `${origin}${next}`);
+      const newUserUrl = new URL(response.headers.get("location") ?? `${origin}${safeNext}`);
       newUserUrl.searchParams.set("registered", "1");
       return NextResponse.redirect(newUserUrl.toString(), { headers: response.headers });
     }

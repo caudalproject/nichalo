@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,14 @@ function LoginContent() {
   const redirect = searchParams.get("redirect") ?? "/dashboard";
   const errorParam = searchParams.get("error");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.replace("/dashboard");
+    });
+  }, []);
 
   async function handleGoogle() {
     setLoading(true);
@@ -40,11 +48,13 @@ function LoginContent() {
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {errorParam && (
+          {errorParam === "cancelled" ? (
+            <p className="text-sm text-amber-600">Cancelaste el inicio de sesión. Podés intentarlo de nuevo.</p>
+          ) : errorParam ? (
             <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
               No pudimos iniciar sesión: {errorParam}
             </div>
-          )}
+          ) : null}
           <Button
             className="w-full"
             size="lg"
