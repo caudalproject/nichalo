@@ -41,7 +41,7 @@ export default async function DashboardPage() {
     .select("id, producto, pais, score, veredicto, created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(50);
+    .limit(20);
 
   if (analysesError) {
     console.error("[dashboard] error cargando análisis:", analysesError.message);

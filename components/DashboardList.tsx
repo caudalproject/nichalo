@@ -23,6 +23,32 @@ export function DashboardList({ initialList, userId, queryFailed }: Props) {
   const [list, setList] = useState(initialList);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(initialList.length === 20);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  async function loadMore() {
+    setLoadingMore(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data } = await supabase
+        .from("analyses")
+        .select("id, producto, pais, score, veredicto, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .range(page * 20, page * 20 + 19);
+
+      if (data && data.length > 0) {
+        setList((prev) => [...prev, ...data]);
+        setPage((p) => p + 1);
+        setHasMore(data.length === 20);
+      } else {
+        setHasMore(false);
+      }
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   async function handleDelete(id: string) {
     if (deleting) return;
@@ -86,6 +112,16 @@ export function DashboardList({ initialList, userId, queryFailed }: Props) {
       {list.map((a) => (
         <AnalysisCard key={a.id} analysis={a} onDelete={handleDelete} />
       ))}
+
+      {hasMore && (
+        <button
+          onClick={loadMore}
+          disabled={loadingMore}
+          className="w-full py-2 text-sm text-[#6B7280] hover:text-[#0A0A0A] transition-colors disabled:opacity-50"
+        >
+          {loadingMore ? "Cargando..." : "Cargar más análisis"}
+        </button>
+      )}
 
       {deleteError && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-2 rounded-full shadow-md">
