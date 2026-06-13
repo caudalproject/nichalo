@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const initPoint = suscripcion.init_point ?? suscripcion.sandbox_init_point;
+    const initPoint = suscripcion.init_point ?? (suscripcion as unknown as { sandbox_init_point?: string }).sandbox_init_point;
     if (!initPoint) {
       console.error("[crear-suscripcion] MP no devolvió init_point:", suscripcion);
       return NextResponse.json({ error: "Error al crear suscripción" }, { status: 500 });
