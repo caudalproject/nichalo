@@ -31,34 +31,39 @@ export async function POST() {
     );
   }
 
-  const mp = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! });
-  const preApproval = new PreApproval(mp);
+  try {
+    const mp = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! });
+    const preApproval = new PreApproval(mp);
 
-  const externalRef = `${user.id}|${userData.plan}`;
-  const searchResult = await preApproval.search({
-    options: { external_reference: externalRef },
-  });
+    const externalRef = `${user.id}|${userData.plan}`;
+    const searchResult = await preApproval.search({
+      options: { external_reference: externalRef },
+    });
 
-  const activeSub = searchResult.results?.find(
-    (s) => s.status === "authorized"
-  );
-
-  if (!activeSub?.id) {
-    return NextResponse.json(
-      { error: "No se encontró suscripción activa en Mercado Pago" },
-      { status: 404 }
+    const activeSub = searchResult.results?.find(
+      (s) => s.status === "authorized"
     );
+
+    if (!activeSub?.id) {
+      return NextResponse.json(
+        { error: "No se encontró suscripción activa en Mercado Pago" },
+        { status: 404 }
+      );
+    }
+
+    await preApproval.update({
+      id: activeSub.id,
+      body: { status: "cancelled" },
+    });
+
+    await adminSupabase
+      .from("users")
+      .update({ plan: "free" })
+      .eq("id", user.id);
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[cancelar] error:", err);
+    return NextResponse.json({ error: "Error al cancelar suscripción" }, { status: 500 });
   }
-
-  await preApproval.update({
-    id: activeSub.id,
-    body: { status: "cancelled" },
-  });
-
-  await adminSupabase
-    .from("users")
-    .update({ plan: "free" })
-    .eq("id", user.id);
-
-  return NextResponse.json({ ok: true });
 }
