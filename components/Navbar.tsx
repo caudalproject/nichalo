@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
@@ -15,8 +15,12 @@ interface NavbarProps {
 
 export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   const router = useRouter();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [canceling, setCanceling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [clientEmail, setClientEmail] = useState<string | null>(email ?? null);
   const [clientName, setClientName] = useState<string | null>(null);
   const [userData, setUserData] = useState<{
@@ -26,7 +30,6 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(async ({ data }) => {
       const u = data.user;
       if (!u) return;
@@ -40,8 +43,10 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
         .eq("id", u.id)
         .single();
       if (ud) setUserData(ud);
+    }).catch((err) => {
+      console.error("[navbar] error obteniendo usuario:", err);
     });
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     if (!open) return;
@@ -67,18 +72,27 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
 
   async function handleSignOut() {
     setSigningOut(true);
-    const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
     router.push("/");
     router.refresh();
   }
 
   async function handleCancelar() {
-    setOpen(false);
-    const res = await fetch("/api/pagos/cancelar", { method: "POST" });
-    if (res.ok) {
-      setUserData((prev) => (prev ? { ...prev, plan: "free" } : null));
+    if (canceling) return;
+    setCanceling(true);
+    setCancelError(null);
+    try {
+      const res = await fetch("/api/pagos/cancelar", { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setCancelError(data.error ?? "Error al cancelar. Intentá de nuevo.");
+        return;
+      }
+      setUserData(prev => prev ? { ...prev, plan: "free" } : prev);
+      setShowCancelConfirm(false);
       router.refresh();
+    } finally {
+      setCanceling(false);
     }
   }
 
@@ -150,14 +164,51 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
                     </div>
 
                     <div className="py-1">
-                      {planActual !== "free" && (
-                        <button
-                          onClick={handleCancelar}
-                          className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                      {(planActual === "free" || planActual === "starter") && (
+                        <a
+                          href="/#planes"
+                          className="block px-3 py-2 text-xs font-semibold text-[#16A34A] hover:bg-green-50 rounded-md transition-colors"
+                          onClick={() => setOpen(false)}
                         >
-                          Cancelar suscripción
-                        </button>
+                          ⬆️ Mejorar plan →
+                        </a>
                       )}
+
+                      {planActual !== "free" && (
+                        <>
+                          {!showCancelConfirm ? (
+                            <button
+                              onClick={() => setShowCancelConfirm(true)}
+                              className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            >
+                              Cancelar suscripción
+                            </button>
+                          ) : (
+                            <div className="px-3 py-2 space-y-2">
+                              <p className="text-xs text-gray-600">¿Confirmás que querés cancelar? Perdés acceso al plan pago.</p>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => setShowCancelConfirm(false)}
+                                  className="flex-1 text-xs py-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
+                                >
+                                  No, quedarse
+                                </button>
+                                <button
+                                  onClick={handleCancelar}
+                                  disabled={canceling}
+                                  className="flex-1 text-xs py-1 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                                >
+                                  {canceling ? "Cancelando..." : "Sí, cancelar"}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                          {cancelError && (
+                            <p className="px-3 text-xs text-red-600">{cancelError}</p>
+                          )}
+                        </>
+                      )}
+
                       <button
                         onClick={handleSignOut}
                         disabled={signingOut}
