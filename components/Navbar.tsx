@@ -21,28 +21,22 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   const [canceling, setCanceling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [clientEmail, setClientEmail] = useState<string | null>(email ?? null);
+  const [clientEmail] = useState<string | null>(email ?? null);
   const [clientName, setClientName] = useState<string | null>(null);
-  const [userData, setUserData] = useState<{
-    plan: string;
-    analisis_restantes: number;
-  } | null>(null);
+  const [userData, setUserData] = useState({
+    email: email ?? null,
+    plan: plan ?? "free",
+    analisis_restantes: analisisRestantes ?? 0,
+  });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
+    supabase.auth.getUser().then(({ data }) => {
       const u = data.user;
       if (!u) return;
-      setClientEmail(u.email ?? null);
       setClientName(
         u.user_metadata?.full_name ?? u.user_metadata?.name ?? null
       );
-      const { data: ud } = await supabase
-        .from("users")
-        .select("plan, analisis_restantes")
-        .eq("id", u.id)
-        .single();
-      if (ud) setUserData(ud);
     }).catch((err) => {
       console.error("[navbar] error obteniendo usuario:", err);
     });
@@ -62,8 +56,8 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  const planActual = userData?.plan ?? plan ?? "free";
-  const analisis = userData?.analisis_restantes ?? analisisRestantes ?? 0;
+  const planActual = userData.plan;
+  const analisis = userData.analisis_restantes;
   const nombre = clientName ?? clientEmail ?? "";
   const nombreCorto = clientName
     ? clientName.split(" ")[0]
@@ -88,7 +82,7 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
         setCancelError(data.error ?? "Error al cancelar. Intentá de nuevo.");
         return;
       }
-      setUserData(prev => prev ? { ...prev, plan: "free" } : prev);
+      setUserData(prev => ({ ...prev, plan: "free", analisis_restantes: 1 }));
       setShowCancelConfirm(false);
       router.refresh();
     } finally {
