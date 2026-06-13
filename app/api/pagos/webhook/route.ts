@@ -9,7 +9,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-function verifyMPSignature(req: Request, body: unknown): boolean {
+function verifyMPSignature(req: Request, body: unknown, dataId: string): boolean {
   const webhookSecret = process.env.MP_WEBHOOK_SECRET;
   if (!webhookSecret) return false;
 
@@ -29,7 +29,6 @@ function verifyMPSignature(req: Request, body: unknown): boolean {
   const now = Math.floor(Date.now() / 1000);
   if (Math.abs(now - tsNum) > 300) return false;
 
-  const dataId = (body as { data?: { id?: string } })?.data?.id ?? "";
   const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
   const hash = createHmac("sha256", webhookSecret).update(manifest).digest("hex");
 
@@ -42,7 +41,12 @@ function verifyMPSignature(req: Request, body: unknown): boolean {
 export async function POST(req: Request) {
   const body = await req.json();
 
-  if (!verifyMPSignature(req, body)) {
+  const url = new URL(req.url);
+  const dataId = url.searchParams.get("data.id") ??
+                 url.searchParams.get("id") ??
+                 (body as { data?: { id?: string } })?.data?.id ?? "";
+
+  if (!verifyMPSignature(req, body, dataId)) {
     console.error("[webhook] firma inválida — request rechazado");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
