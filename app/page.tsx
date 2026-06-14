@@ -327,7 +327,7 @@ export default async function LandingPage() {
         </section>
 
         {/* Pricing */}
-        <section className="bg-[#F9FAFB] py-20 border-y border-[#E5E7EB]">
+        <section id="planes" className="bg-[#F9FAFB] py-20 border-y border-[#E5E7EB]">
           <div className="container">
             <h2 className="text-center text-3xl font-bold text-[#0A0A0A]">
               Planes

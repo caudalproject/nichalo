@@ -512,7 +512,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
               <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-3 border border-gray-100">
                 <span className="text-2xl">🔒</span>
                 <p className="text-sm font-medium text-gray-700">Disponible en Plan Pro</p>
-                <a href="/planes" className="text-xs text-green-600 hover:underline">Ver planes →</a>
+                <a href="/#planes" className="text-xs text-green-600 hover:underline">Ver planes →</a>
               </div>
             )}
           </div>
@@ -550,7 +550,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
                 Actualizá tu plan para seguir validando productos
               </p>
               <div className="flex gap-2 justify-center flex-wrap">
-                <a href="/planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
+                <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
                   Starter — 10 análisis por $17.000/mes →
                 </a>
               </div>
