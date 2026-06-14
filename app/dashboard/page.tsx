@@ -117,7 +117,7 @@ export default async function DashboardPage() {
         {list.length > 0 && (
           <div className="grid grid-cols-3 gap-3 mb-6 mt-8">
             <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center">
-              <div className="text-2xl font-bold text-[#16A34A]">{viables}</div>
+              <div className={`text-2xl font-bold ${viables > 0 ? 'text-[#16A34A]' : 'text-[#6B7280]'}`}>{viables}</div>
               <div className="text-xs text-[#6B7280] mt-1">productos viables</div>
             </div>
             <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center">
