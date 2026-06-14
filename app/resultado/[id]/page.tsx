@@ -362,7 +362,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 6: Competencia + Margen */}
-          <LockedSection locked={isFree} isLoggedIn={!!user}>
+          <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -471,7 +471,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 7: Top vendedores */}
           {hasTopVendedores && (
-            <LockedSection locked={isFree} isLoggedIn={!!user}>
+            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Top vendedores</CardTitle>
@@ -547,7 +547,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 8: Distribución de precios */}
           {hasChart && (
-            <LockedSection locked={isFree} isLoggedIn={!!user}>
+            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Distribución de precios</CardTitle>
@@ -574,7 +574,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 9: Palabras clave */}
           {hasKeywords && (
-            <LockedSection locked={isFree} isLoggedIn={!!user}>
+            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Palabras clave en títulos</CardTitle>
@@ -593,7 +593,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 10: Tendencia + Estacionalidad */}
-          <LockedSection locked={isFree} isLoggedIn={!!user}>
+          <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -619,7 +619,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 11: Oportunidades de diferenciación */}
           {hasDiferenciadores && (
-            <LockedSection locked={isFree} isLoggedIn={!!user}>
+            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Oportunidades de diferenciación</CardTitle>
@@ -642,7 +642,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 11b: Productos alternativos */}
           {resultadoParaMostrar.productos_alternativos && resultadoParaMostrar.productos_alternativos.length > 0 && (
-            <LockedSection locked={isFree} isLoggedIn={!!user}>
+            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-1">
                 Productos con mejor oportunidad
@@ -681,7 +681,7 @@ export default async function ResultadoPage({ params }: Params) {
           {resultadoParaMostrar.analisis_costo_proveedor &&
             resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado &&
             !resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado.toLowerCase().includes("no disponible") && (
-            <LockedSection locked={isFree} isLoggedIn={!!user}>
+            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Análisis de costo vs. proveedores</CardTitle>
@@ -708,7 +708,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 13: Riesgos */}
-          <LockedSection locked={isFree} isLoggedIn={!!user}>
+          <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Riesgos a tener en cuenta</CardTitle>
@@ -730,7 +730,7 @@ export default async function ResultadoPage({ params }: Params) {
           </LockedSection>
 
           {/* CAPA 14: Recomendación */}
-          <LockedSection locked={isFree} isLoggedIn={!!user}>
+          <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Recomendación</CardTitle>
@@ -797,10 +797,12 @@ function LockedSection({
   children,
   locked,
   isLoggedIn = true,
+  veredicto,
 }: {
   children: React.ReactNode;
   locked: boolean;
   isLoggedIn?: boolean;
+  veredicto?: string;
 }) {
   if (!locked) return <>{children}</>;
   return (
@@ -813,10 +815,18 @@ function LockedSection({
         {isLoggedIn ? (
           <>
             <p className="text-sm font-semibold text-[#0A0A0A] mb-1">
-              Disponible en Starter y Pro
+              {veredicto === "VIABLE"
+                ? "¿Es viable? Ahora desbloqueá quién lo vende y a qué precio"
+                : veredicto === "SATURADO"
+                ? "Mercado saturado — desbloqueá los productos alternativos con más chances"
+                : "Desbloqueá el análisis completo"}
             </p>
             <p className="text-xs text-[#6B7280] mb-3 text-center px-4">
-              Desbloqueá el análisis completo
+              {veredicto === "VIABLE"
+                ? "Top vendedores, precios, keywords y recomendación completa"
+                : veredicto === "SATURADO"
+                ? "3 nichos relacionados con mejor oportunidad te esperan desbloqueados"
+                : "Competencia, márgenes, top vendedores y más"}
             </p>
             <Link href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
               Ver planes →
