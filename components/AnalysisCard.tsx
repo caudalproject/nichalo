@@ -42,10 +42,10 @@ export function AnalysisCard({ analysis, onDelete }: Props) {
                 </div>
                 <div className="text-xs text-[#6B7280] mt-0.5" suppressHydrationWarning>
                   {PAIS_LABEL[analysis.pais] ?? analysis.pais} ·{" "}
-                  {new Date(analysis.created_at).toLocaleString("es-AR", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
+                  {new Date(analysis.created_at).toLocaleString(
+                    ({ AR: "es-AR", MX: "es-MX", CO: "es-CO" } as Record<string, string>)[analysis.pais] ?? "es-AR",
+                    { dateStyle: "medium", timeStyle: "short" }
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">

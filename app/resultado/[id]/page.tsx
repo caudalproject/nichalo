@@ -161,7 +161,9 @@ export default async function ResultadoPage({ params }: Params) {
   const precioVentaUsd = moneda ? (tasaCambio > 0 ? precioVentaLocal / tasaCambio : 0) : precioVentaLocal;
   const margenBruto = precioVentaUsd > 0 ? ((precioVentaUsd - costo) / precioVentaUsd) * 100 : 0;
   const roi = costo > 0 ? ((precioVentaUsd - costo) / costo) * 100 : 0;
-  const fecha = new Date(analysis.created_at).toLocaleString("es-AR", {
+  const localeMap: Record<string, string> = { AR: "es-AR", MX: "es-MX", CO: "es-CO" };
+  const locale = localeMap[analysis.pais] ?? "es-AR";
+  const fecha = new Date(analysis.created_at).toLocaleString(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   });
@@ -747,12 +749,12 @@ export default async function ResultadoPage({ params }: Params) {
                 <p className="text-xs text-gray-500">
                   Desbloqueá competencia, márgenes, top vendedores y más.
                 </p>
-                <a
+                <Link
                   href="/#planes"
                   className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors"
                 >
                   Ver planes →
-                </a>
+                </Link>
               </>
             ) : (
               <>
@@ -798,9 +800,9 @@ function LockedSection({
             <p className="text-xs text-[#6B7280] mb-3 text-center px-4">
               Desbloqueá el análisis completo
             </p>
-            <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
+            <Link href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
               Ver planes →
-            </a>
+            </Link>
           </>
         ) : (
           <>
@@ -810,9 +812,9 @@ function LockedSection({
             <p className="text-xs text-[#6B7280] mb-3 text-center px-4">
               Para ver el análisis completo
             </p>
-            <a href="/login" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
+            <Link href="/login" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
               Registrarse gratis →
-            </a>
+            </Link>
           </>
         )}
       </div>
