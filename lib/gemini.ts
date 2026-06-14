@@ -140,6 +140,7 @@ function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, c
   const FALLBACK_RATES: Record<string, number> = { ARS: 1400, MXN: 17, COP: 4200 };
   const rate = exchangeRate ?? FALLBACK_RATES[currencyCode] ?? 1400;
   const perfil = perfilVendedor ?? "principiante";
+  const costoEnMonedaLocal = Math.round(costoEstimadoUsd * rate);
   const preciosCalculados = precioStats ? `
 ESTADÍSTICAS DE PRECIOS (calculadas del scrape — usá estos valores exactos, NO los recalcules):
 - Precio mínimo: ${precioStats.precio_minimo} ${currencyCode}
@@ -275,6 +276,11 @@ Usá estos datos para la sección de tendencia y demanda del análisis.
 
 ` : ''}MONEDA LOCAL: ${currencyName} (${currencyCode})
 TASA DE CAMBIO HOY: 1 USD = ${rate} ${currencyCode}
+REGLA DE COSTO EN RESUMEN Y RECOMENDACIÓN:
+El costo del producto en moneda local es ${costoEnMonedaLocal} ${currencyCode}.
+Cuando menciones el costo en el resumen o recomendación, usá SIEMPRE ${costoEnMonedaLocal} ${currencyCode}, NUNCA el valor en USD.
+Ejemplo correcto: "tu costo de ${costoEnMonedaLocal} ${currencyCode}"
+Ejemplo incorrecto: "tu costo de 55.69 USD"
 REGLA DE PRECIOS CRÍTICA:
 - Todos los precios del scraping ya están en ${currencyCode} (moneda local)
 - Reportá precio_promedio, precio_minimo, precio_maximo y precio_sugerido en ${currencyCode} (moneda local) — NO convertir a USD
