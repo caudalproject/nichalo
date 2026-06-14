@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatCurrency } from "@/lib/utils";
+import { ScoreDisplay } from "@/components/ScoreDisplay";
 
 export const dynamic = "force-dynamic";
 
@@ -251,16 +252,7 @@ export default async function ResultadoPage({ params }: Params) {
               </div>
 
               <div className="mb-8">
-                <div className="flex items-baseline gap-2">
-                  <span className={`text-8xl font-black leading-none ${
-                    analysis.veredicto === 'VIABLE' ? 'text-green-500' :
-                    analysis.veredicto === 'MARGINAL' ? 'text-yellow-400' :
-                    'text-red-500'
-                  }`}>
-                    {analysis.score}
-                  </span>
-                  <span className="text-2xl text-gray-300 font-light">/100</span>
-                </div>
+                <ScoreDisplay score={analysis.score} veredicto={analysis.veredicto} />
 
                 <div className="mt-4 h-1.5 bg-gray-100 rounded-full w-64">
                   <div className={`h-full rounded-full transition-all ${
