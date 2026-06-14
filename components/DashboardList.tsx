@@ -96,12 +96,30 @@ export function DashboardList({ initialList, userId, queryFailed }: Props) {
             <p className="text-xs text-gray-500 mt-1">Recargá la página para intentar de nuevo.</p>
           </>
         ) : (
-          <>
-            <p className="text-sm font-medium text-gray-900">Todavía no hiciste ningún análisis</p>
-            <p className="text-xs text-gray-500 mt-2">
-              <a href="/analizar" className="text-[#16A34A] hover:underline">Hacé tu primer análisis →</a>
-            </p>
-          </>
+          <div className="space-y-4">
+            <p className="text-sm text-[#6B7280] text-center">Así se ve un análisis cuando lo hagas:</p>
+            {/* Mockup de análisis */}
+            <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 opacity-50 pointer-events-none select-none">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-[#0A0A0A]">Cafetera moka inducción 6 tazas</p>
+                  <p className="text-xs text-[#6B7280] mt-0.5">Argentina · 12 jun 2026</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-xs text-[#6B7280]">Score</p>
+                    <p className="text-lg font-bold text-[#0A0A0A]">82</p>
+                  </div>
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">VIABLE</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-center pt-2">
+              <a href="/analizar" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
+                Validar mi primer producto →
+              </a>
+            </div>
+          </div>
         )}
       </div>
     );
