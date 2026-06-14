@@ -234,6 +234,10 @@ export default async function LandingPage() {
                   ))}
                 </div>
 
+                <p className="text-xs text-gray-500 mb-6">
+                  El precio sugerido no garantiza ganancia: comisión ML (~17%) + envío + impuestos consumen el margen.
+                </p>
+
                 {/* Resumen visible */}
                 <div className="rounded-xl border border-gray-100 p-4 mb-4">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Resumen</p>
