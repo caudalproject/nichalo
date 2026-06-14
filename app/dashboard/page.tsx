@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { DashboardList } from "@/components/DashboardList";
 import { UpgradeBanner } from "@/components/UpgradeBanner";
 import { PixelRegistration } from "@/components/PixelRegistration";
-import type { AnalysisRow, UserRow } from "@/lib/supabase";
+import type { AnalysisRow, UserRow, Plan } from "@/lib/supabase";
+import { PLAN_CONFIG } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,11 @@ export default async function DashboardPage() {
     AnalysisRow,
     "id" | "producto" | "pais" | "score" | "veredicto" | "created_at"
   >[];
+
+  const viables = list.filter(a => a.veredicto === "VIABLE").length;
+  const mejorScore = list.length > 0 ? Math.max(...list.map(a => a.score ?? 0)) : 0;
+  const totalPlan = PLAN_CONFIG[profile?.plan as Plan]?.analisisPorMes ?? 1;
+  const totalUsados = totalPlan - (profile?.analisis_restantes ?? 0);
 
   return (
     <>
@@ -105,6 +111,23 @@ export default async function DashboardPage() {
         {(profile?.analisis_restantes ?? 0) <= 0 && profile?.plan !== "pro" && (
           <div className="mt-6">
             <UpgradeBanner />
+          </div>
+        )}
+
+        {list.length > 0 && (
+          <div className="grid grid-cols-3 gap-3 mb-6 mt-8">
+            <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-2xl font-bold text-[#16A34A]">{viables}</div>
+              <div className="text-xs text-[#6B7280] mt-1">productos viables</div>
+            </div>
+            <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-2xl font-bold text-[#0A0A0A]">{mejorScore > 0 ? mejorScore : "—"}</div>
+              <div className="text-xs text-[#6B7280] mt-1">mejor score</div>
+            </div>
+            <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-2xl font-bold text-[#0A0A0A]">{Math.max(0, totalUsados)}/{totalPlan}</div>
+              <div className="text-xs text-[#6B7280] mt-1">análisis usados</div>
+            </div>
           </div>
         )}
 

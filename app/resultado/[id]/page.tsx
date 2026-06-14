@@ -283,8 +283,8 @@ export default async function ResultadoPage({ params }: Params) {
                   {PAIS_LABEL[analysis.pais] ?? analysis.pais} · Costo {formatLocal(costo)} · {fecha}
                 </p>
                 {publicaciones > 0 && (
-                  <p className="text-xs text-gray-300 mt-1">
-                    Análisis basado en {publicaciones} publicaciones de Mercado Libre
+                  <p className="text-xs text-gray-500 mt-1 font-medium">
+                    Datos de {publicaciones} publicaciones reales de Mercado Libre
                   </p>
                 )}
               </div>
