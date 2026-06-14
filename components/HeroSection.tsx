@@ -1,23 +1,14 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { createSupabaseBrowserClient } from "@/lib/supabase";
 
-export function HeroSection() {
-  const [loggedIn, setLoggedIn] = useState(false);
+interface Props {
+  isLoggedIn?: boolean;
+}
 
-  useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setLoggedIn(!!data.user);
-    });
-  }, []);
-
+export function HeroSection({ isLoggedIn = false }: Props) {
   return (
     <>
-      {loggedIn ? (
+      {isLoggedIn ? (
         <div className="mt-8 flex flex-col gap-3 sm:flex-row justify-center">
           <Link href="/dashboard">
             <Button size="lg" className="w-full sm:w-auto rounded-md">
@@ -48,6 +39,6 @@ export function HeroSection() {
           </p>
         </>
       )}
-</>
+    </>
   );
 }
