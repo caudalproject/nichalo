@@ -79,7 +79,7 @@ export default async function LandingPage() {
       name: "Starter",
       price: precios.starter,
       period: "/mes",
-      priceNote: "~$6 por análisis" as null | string,
+      priceNote: (pais === "MX" ? "~$21 MXN por análisis" : pais === "CO" ? "~$5.000 COP por análisis" : "~$1.700 ARS por análisis") as null | string,
       popular: true,
       badge: "Más popular" as null | string,
       mpPlan: "starter" as const,
@@ -148,7 +148,7 @@ export default async function LandingPage() {
             </p>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-xl mx-auto text-center">
               <div>
-                <div className="text-3xl font-bold text-[#0A0A0A]">500+</div>
+                <div className="text-3xl font-bold text-[#0A0A0A]">100+</div>
                 <div className="text-sm text-[#6B7280] mt-1">
                   productos analizados
                 </div>
@@ -159,7 +159,7 @@ export default async function LandingPage() {
               </div>
               <div>
                 <div className="text-3xl font-bold text-[#0A0A0A]">
-                  ~2 min
+                  ~3 min
                 </div>
                 <div className="text-sm text-[#6B7280] mt-1">
                   por análisis
@@ -204,32 +204,32 @@ export default async function LandingPage() {
           <div className="mx-auto max-w-3xl relative">
             {/* Card de resultado mockeado */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="h-1.5 w-full bg-yellow-400" />
+              <div className="h-1.5 w-full bg-red-500" />
               <div className="px-8 py-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-yellow-50 text-yellow-700">
-                    MARGINAL
+                  <span className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-red-50 text-red-700">
+                    SATURADO
                   </span>
-                  <span className="text-sm text-gray-400">Es marginal — con cuidado</span>
+                  <span className="text-sm text-gray-400">Mercado sin espacio para entrar</span>
                 </div>
                 <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-8xl font-black leading-none text-yellow-400">65</span>
+                  <span className="text-8xl font-black leading-none text-red-500">38</span>
                   <span className="text-2xl text-gray-300 font-light">/100</span>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-1">Termo Stanley 473ml</h3>
-                <p className="text-sm text-gray-400 mb-6">Argentina · Costo $ 18.000 · Análisis basado en 50 publicaciones de Mercado Libre</p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">Auriculares Bluetooth genéricos</h3>
+                <p className="text-sm text-gray-400 mb-6">Argentina · Costo $ 12.000 · Análisis basado en 60 publicaciones de Mercado Libre</p>
 
                 {/* Métricas */}
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4 mb-6">
                   {[
-                    { label: "Ganancia por unidad", value: "$ 8.200" },
-                    { label: "Margen bruto", value: "31.4%" },
-                    { label: "Publicaciones", value: "50" },
-                    { label: "Precio sugerido", value: "$ 26.100" },
+                    { label: "Ganancia por unidad", value: "- $ 2.100" },
+                    { label: "Margen bruto", value: "-8.3%" },
+                    { label: "Publicaciones", value: "60" },
+                    { label: "Precio sugerido", value: "$ 18.500" },
                   ].map((m) => (
                     <div key={m.label} className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-center">
                       <div className="text-xs text-gray-500">{m.label}</div>
-                      <div className="mt-1 text-lg font-bold text-gray-900">{m.value}</div>
+                      <div className={`mt-1 text-lg font-bold ${m.value.startsWith("-") ? "text-red-600" : "text-gray-900"}`}>{m.value}</div>
                     </div>
                   ))}
                 </div>
@@ -238,7 +238,7 @@ export default async function LandingPage() {
                 <div className="rounded-xl border border-gray-100 p-4 mb-4">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Resumen</p>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    Competencia moderada con 50 vendedores activos. Tu costo es competitivo pero el mercado tiene jugadores establecidos con alta reputación. La oportunidad está en diferenciarte por variantes de color y combos.
+                    Mercado saturado con 60+ vendedores establecidos. Tu costo no te permite competir en precio. Explorá los productos alternativos sugeridos.
                   </p>
                 </div>
               </div>
@@ -247,32 +247,22 @@ export default async function LandingPage() {
             {/* Contenido bloqueado */}
             <div className="relative overflow-hidden">
               <div className="blur-sm pointer-events-none select-none opacity-100 bg-white rounded-2xl border border-gray-100 p-8 space-y-4">
+                {/* Alternativas sugeridas falsas */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Productos con mejor oportunidad</p>
+                  <div className="space-y-1">
+                    <div className="flex gap-2 text-sm"><span className="text-green-600">1.</span><span className="text-gray-600">Auriculares TWS con cancelación de ruido ANC</span></div>
+                    <div className="flex gap-2 text-sm"><span className="text-green-600">2.</span><span className="text-gray-600">Auriculares óseos deportivos para running</span></div>
+                  </div>
+                </div>
                 {/* Competencia falsa */}
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Competencia</p>
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex justify-between"><span className="text-gray-400">Precio mínimo</span><span className="font-medium">$ 19.500</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Precio promedio</span><span className="font-medium">$ 34.800</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Precio máximo</span><span className="font-medium">$ 58.000</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Vendedores top</span><span className="font-medium">3 perfiles</span></div>
-                  </div>
-                </div>
-                {/* Palabras clave falsas */}
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Palabras clave</p>
-                  <div className="flex flex-wrap gap-2">
-                    {["Stanley", "Termo", "473ml", "Original", "Verde"].map(kw => (
-                      <span key={kw} className="px-2 py-1 rounded-full border border-gray-200 text-xs text-gray-600">{kw}</span>
-                    ))}
-                  </div>
-                </div>
-                {/* Recomendación falsa */}
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Recomendación</p>
-                  <div className="space-y-1">
-                    <div className="flex gap-2 text-sm"><span className="text-green-600 font-bold">1.</span><span className="text-gray-600">Entrá al percentil 10 de precios para las primeras ventas</span></div>
-                    <div className="flex gap-2 text-sm"><span className="text-green-600 font-bold">2.</span><span className="text-gray-600">Ofrecé envío gratis los primeros 30 días</span></div>
-                    <div className="flex gap-2 text-sm"><span className="text-green-600 font-bold">3.</span><span className="text-gray-600">Armá combo termo + mate para diferenciarte</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Precio mínimo</span><span className="font-medium">$ 9.800</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Precio promedio</span><span className="font-medium">$ 16.400</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Precio máximo</span><span className="font-medium">$ 28.000</span></div>
+                    <div className="flex justify-between"><span className="text-gray-400">Vendedores top</span><span className="font-medium">12 perfiles</span></div>
                   </div>
                 </div>
                 {/* Riesgos falsos */}
