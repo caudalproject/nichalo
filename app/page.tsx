@@ -30,20 +30,6 @@ const FEATURES = [
   },
 ];
 
-const STEPS = [
-  {
-    title: "Ingresás tu producto y costo",
-    description: "Escribís el nombre del producto, tu costo de proveedor y tu perfil de vendedor. Sin stock, sin riesgo.",
-  },
-  {
-    title: "Analizamos cientos de publicaciones reales",
-    description: "Scrapeamos Mercado Libre en tiempo real — competencia, precios, volumen de ventas y tendencias del mercado argentino.",
-  },
-  {
-    title: "Recibís un veredicto claro con números",
-    description: "VIABLE, MARGINAL o SATURADO — con score, margen real, precio sugerido según tu perfil y recomendaciones accionables.",
-  },
-];
 
 export default async function LandingPage() {
   const pais = getPaisFromHeaders();
@@ -491,25 +477,67 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* How it works */}
-        <section id="como-funciona" className="container py-20">
-          <h2 className="text-center text-3xl font-bold text-[#0A0A0A]">
-            Cómo funciona
-          </h2>
-          <div className="mt-12 mx-auto grid max-w-3xl gap-10 md:grid-cols-3">
-            {STEPS.map((step, i) => (
-              <div key={i} className="text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#0A0A0A] text-white text-lg font-bold">
-                  {i + 1}
+        {/* Antes y después */}
+        <section className="container py-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-[#0A0A0A]">
+              Lo que cambia cuando usás Nichalo
+            </h2>
+            <p className="mt-3 text-sm text-[#6B7280]">
+              De intuición a certeza, antes de gastar un peso
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-4xl">
+            <div className="flex flex-col md:flex-row items-stretch md:gap-6 gap-4">
+              {/* Columna ANTES */}
+              <div className="flex-1 bg-gray-100 rounded-xl border-l-4 border-gray-500 p-6">
+                <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Antes</h3>
+                <ul className="space-y-3">
+                  {[
+                    "\"Me parece que este producto va a vender\"",
+                    "Comprás stock sin saber si hay mercado real",
+                    "Publicás y esperás semanas para descubrir que el precio no cierra",
+                    "Perdés capital en productos que no rotan",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-[#0A0A0A]">
+                      <span className="text-gray-500 font-bold mt-0.5 shrink-0">✗</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Flecha — solo desktop */}
+              <div className="hidden md:flex items-center justify-center text-gray-400 text-2xl font-light px-1">
+                →
+              </div>
+
+              {/* Columna DESPUÉS */}
+              <div className="flex-1 bg-white rounded-xl border-l-4 border-[#16A34A] shadow-sm p-6">
+                <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Después</h3>
+                <div className="mb-4">
+                  <span className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-green-50 text-[#16A34A]">
+                    Score 82 · VIABLE
+                  </span>
                 </div>
-                <h3 className="mt-4 text-sm font-bold text-[#0A0A0A]">
-                  {step.title}
-                </h3>
-                <p className="mt-1 text-sm text-[#6B7280] leading-relaxed">
-                  {step.description}
+                <ul className="space-y-3 mb-4">
+                  {[
+                    "Margen real: +18.4% con tu costo de proveedor",
+                    "Precio sugerido según tu perfil de vendedor",
+                    "Datos reales de Mercado Libre al momento del análisis",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-[#0A0A0A]">
+                      <span className="text-[#16A34A] font-bold mt-0.5 shrink-0">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-[#6B7280] italic">
+                  Todo esto antes de comprar una sola unidad.
                 </p>
               </div>
-            ))}
+            </div>
           </div>
         </section>
 
