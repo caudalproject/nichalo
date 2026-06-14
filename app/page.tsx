@@ -204,32 +204,32 @@ export default async function LandingPage() {
           <div className="mx-auto max-w-3xl relative">
             {/* Card de resultado mockeado */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="h-1.5 w-full bg-red-500" />
+              <div className="h-1.5 w-full bg-green-500" />
               <div className="px-8 py-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-red-50 text-red-700">
-                    SATURADO
+                  <span className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-green-50 text-green-700">
+                    VIABLE
                   </span>
-                  <span className="text-sm text-gray-400">Mercado sin espacio para entrar</span>
+                  <span className="text-sm text-gray-400">Mercado con oportunidad real</span>
                 </div>
                 <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-8xl font-black leading-none text-red-500">38</span>
+                  <span className="text-8xl font-black leading-none text-green-500">78</span>
                   <span className="text-2xl text-gray-300 font-light">/100</span>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-1">Auriculares Bluetooth genéricos</h3>
-                <p className="text-sm text-gray-400 mb-6">Argentina · Costo $ 12.000 · Análisis basado en 60 publicaciones de Mercado Libre</p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">Cargador inalámbrico 15W para auto</h3>
+                <p className="text-sm text-gray-400 mb-6">Argentina · Costo $ 8.500 · Análisis basado en 45 publicaciones de Mercado Libre</p>
 
                 {/* Métricas */}
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4 mb-6">
                   {[
-                    { label: "Ganancia por unidad", value: "- $ 2.100" },
-                    { label: "Margen bruto", value: "-8.3%" },
-                    { label: "Publicaciones", value: "60" },
-                    { label: "Precio sugerido", value: "$ 18.500" },
+                    { label: "Ganancia por unidad", value: "+ $ 4.200", green: true },
+                    { label: "Margen bruto", value: "+18.4%", green: true },
+                    { label: "Publicaciones", value: "45", green: false },
+                    { label: "Precio sugerido", value: "$ 18.900", green: false },
                   ].map((m) => (
                     <div key={m.label} className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-center">
                       <div className="text-xs text-gray-500">{m.label}</div>
-                      <div className={`mt-1 text-lg font-bold ${m.value.startsWith("-") ? "text-red-600" : "text-gray-900"}`}>{m.value}</div>
+                      <div className={`mt-1 text-lg font-bold ${m.green ? "text-green-600" : "text-gray-900"}`}>{m.value}</div>
                     </div>
                   ))}
                 </div>
@@ -242,7 +242,7 @@ export default async function LandingPage() {
                 <div className="rounded-xl border border-gray-100 p-4 mb-4">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Resumen</p>
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    Mercado saturado con 60+ vendedores establecidos. Tu costo no te permite competir en precio. Explorá los productos alternativos sugeridos.
+                    Mercado con demanda sostenida y pocos vendedores consolidados. Tu costo te permite competir en precio con margen saludable.
                   </p>
                 </div>
               </div>
