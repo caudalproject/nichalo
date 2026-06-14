@@ -1,8 +1,22 @@
 import { Resend } from 'resend'
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+if (!RESEND_API_KEY) {
+  console.error("[resend] RESEND_API_KEY no configurada");
+}
+export const resend = new Resend(RESEND_API_KEY)
 
-const BASE_URL = 'https://nichalo.com'
+const BASE_URL = process.env.SITE_URL ?? 'https://nichalo.com'
+
+function escapeHtml(str: unknown): string {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 const logoHtml = `<div style="margin-bottom:32px"><span style="font-size:24px;font-weight:700;color:#16a34a">N</span><span style="font-size:24px;font-weight:700;color:#111827">ichalo</span></div>`
 
@@ -17,17 +31,21 @@ function wrap(content: string) {
 }
 
 export async function sendWelcomeEmail(email: string, nombre: string) {
+  const nombreSeguro = escapeHtml(nombre || 'vendedor');
   try {
-    await resend.emails.send({
-      from: 'hola@nichalo.com',
+    const { error: resendError } = await resend.emails.send({
+      from: 'Nichalo <hola@nichalo.com>',
       to: email,
       subject: 'Bienvenido a Nichalo 👋',
       html: wrap(`
-        <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 16px">¡Hola ${nombre}! Ya podés validar tu primer producto</h1>
+        <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 16px">¡Hola ${nombreSeguro}! Ya podés validar tu primer producto</h1>
         <p style="font-size:15px;color:#374151;line-height:1.6;margin:0">Nichalo analiza el mercado de Mercado Libre en segundos y te dice si tu producto tiene oportunidad real de venta.</p>
         ${btnHtml(`${BASE_URL}/analizar`, 'Hacer mi primer análisis')}
       `),
     })
+    if (resendError) {
+      console.error("[resend] error enviando email:", resendError);
+    }
   } catch (err) {
     console.error('[Resend] Error enviando bienvenida:', err)
   }
@@ -47,21 +65,27 @@ export async function sendAnalysisReadyEmail(
   analysisId: string,
 ) {
   const color = veredictoColor[veredicto] ?? '#6b7280'
+  const productoSeguro = escapeHtml(producto);
+  const veredictoSeguro = escapeHtml(veredicto);
+  const scoreSeguro = Number.isFinite(score) ? score : '—';
   try {
-    await resend.emails.send({
-      from: 'hola@nichalo.com',
+    const { error: resendError } = await resend.emails.send({
+      from: 'Nichalo <hola@nichalo.com>',
       to: email,
-      subject: `Tu análisis de ${producto} está listo`,
+      subject: `Tu análisis de ${productoSeguro} está listo`,
       html: wrap(`
         <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 24px">Tu análisis está listo</h1>
         <div style="border:1px solid #e5e7eb;border-radius:12px;padding:24px;display:inline-block;min-width:260px">
-          <div style="font-size:13px;color:#6b7280;margin-bottom:8px">${producto}</div>
-          <div style="font-size:28px;font-weight:700;color:${color};margin-bottom:4px">${veredicto}</div>
-          <div style="font-size:15px;color:#374151">Score: <strong>${score}/100</strong></div>
+          <div style="font-size:13px;color:#6b7280;margin-bottom:8px">${productoSeguro}</div>
+          <div style="font-size:28px;font-weight:700;color:${color};margin-bottom:4px">${veredictoSeguro}</div>
+          <div style="font-size:15px;color:#374151">Score: <strong>${scoreSeguro}/100</strong></div>
         </div>
-        ${btnHtml(`${BASE_URL}/resultado/${analysisId}`, 'Ver análisis completo')}
+        ${btnHtml(`${BASE_URL}/resultado/${encodeURIComponent(analysisId)}`, 'Ver análisis completo')}
       `),
     })
+    if (resendError) {
+      console.error("[resend] error enviando email:", resendError);
+    }
   } catch (err) {
     console.error('[Resend] Error enviando resultado:', err)
   }
@@ -69,10 +93,10 @@ export async function sendAnalysisReadyEmail(
 
 export async function sendUpsellEmail(email: string) {
   try {
-    await resend.emails.send({
-      from: 'hola@nichalo.com',
+    const { error: resendError } = await resend.emails.send({
+      from: 'Nichalo <hola@nichalo.com>',
       to: email,
-      subject: 'Te quedaste sin análisis — upgrade a Starter o Pro',
+      subject: `Desbloqueá más análisis en Nichalo 🚀`,
       html: wrap(`
         <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 16px">Se te acabaron los análisis</h1>
         <p style="font-size:15px;color:#374151;line-height:1.6;margin:0 0 24px">Hacé upgrade para seguir validando productos y encontrar tu próximo nicho.</p>
@@ -89,8 +113,15 @@ export async function sendUpsellEmail(email: string) {
           </tr>
         </table>
         ${btnHtml(`${BASE_URL}/#planes`, 'Ver planes')}
+        <p style="text-align:center;font-size:11px;color:#9CA3AF;margin-top:24px;">
+          No querés recibir estos emails?
+          <a href="${BASE_URL}/unsubscribe" style="color:#9CA3AF;">Cancelar suscripción</a>
+        </p>
       `),
     })
+    if (resendError) {
+      console.error("[resend] error enviando email:", resendError);
+    }
   } catch (err) {
     console.error('[Resend] Error enviando upsell:', err)
   }
