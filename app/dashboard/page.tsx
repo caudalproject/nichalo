@@ -87,6 +87,21 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
+        {/* Banner reverse trial para Free con crédito disponible */}
+        {profile?.plan === "free" && (profile?.analisis_restantes ?? 0) > 0 && (
+          <div className="rounded-xl bg-green-50 border border-green-200 p-4 flex items-center justify-between mb-4 mt-6">
+            <div>
+              <p className="text-sm font-semibold text-green-800">🎁 Tu primer análisis es completamente gratis</p>
+              <p className="text-xs text-gray-600 mt-0.5">Vas a ver el análisis completo — sin restricciones.</p>
+            </div>
+            <Link href="/analizar">
+              <Button size="sm" className="bg-[#16A34A] hover:bg-[#15803D] text-white rounded-full whitespace-nowrap">
+                Analizar ahora →
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {(profile?.analisis_restantes ?? 0) <= 0 && profile?.plan !== "pro" && (
           <div className="mt-6">
             <UpgradeBanner />
