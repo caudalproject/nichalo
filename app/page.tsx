@@ -489,9 +489,9 @@ export default async function LandingPage() {
           </div>
 
           <div className="mx-auto max-w-4xl">
-            <div className="flex flex-col md:flex-row items-stretch md:gap-6 gap-4">
+            <div className="flex flex-col md:flex-row items-stretch md:gap-0 gap-4">
               {/* Columna ANTES */}
-              <div className="flex-1 bg-gray-100 rounded-xl border-l-4 border-gray-500 p-6">
+              <div className="flex-1 h-full bg-gray-100 rounded-xl border-l-4 border-gray-500 p-6">
                 <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Antes</h3>
                 <ul className="space-y-3">
                   {[
@@ -509,12 +509,14 @@ export default async function LandingPage() {
               </div>
 
               {/* Flecha — solo desktop */}
-              <div className="hidden md:flex items-center justify-center text-gray-400 text-2xl font-light px-1">
-                →
+              <div className="hidden md:flex items-center justify-center px-3">
+                <div className="w-10 h-10 rounded-full bg-[#374151] flex items-center justify-center shrink-0">
+                  <span className="text-white text-base leading-none">→</span>
+                </div>
               </div>
 
               {/* Columna DESPUÉS */}
-              <div className="flex-1 bg-white rounded-xl border-l-4 border-[#16A34A] shadow-sm p-6">
+              <div className="flex-1 h-full bg-white rounded-xl border-l-4 border-[#16A34A] shadow-sm p-6">
                 <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Después</h3>
                 <div className="mb-4">
                   <span className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-green-50 text-[#16A34A]">
