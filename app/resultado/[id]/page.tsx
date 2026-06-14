@@ -759,9 +759,9 @@ export default async function ResultadoPage({ params }: Params) {
                   Este fue tu análisis completo gratuito. Para seguir validando productos necesitás un plan.
                 </p>
                 <div className="flex gap-3 justify-center flex-wrap">
-                  <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
+                  <Link href="/#planes" scroll={true} className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
                     Ver planes desde $17.000/mes →
-                  </a>
+                  </Link>
                 </div>
               </>
             ) : isFree ? (
