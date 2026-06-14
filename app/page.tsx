@@ -331,7 +331,7 @@ export default async function LandingPage() {
         </section>
 
         {/* CTA intermedio */}
-        <section className="py-12 text-center">
+        {!isLoggedIn && <section className="py-12 text-center">
           <div className="container">
             <p className="text-2xl font-bold text-[#0A0A0A]">
               ¿Listo para validar tu próximo producto?
@@ -347,7 +347,7 @@ export default async function LandingPage() {
               1 análisis gratis · Sin tarjeta de crédito
             </p>
           </div>
-        </section>
+        </section>}
 
         {/* Pricing */}
         <section id="planes" className="bg-[#F9FAFB] py-20 border-y border-[#E5E7EB]">
