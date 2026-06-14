@@ -148,6 +148,15 @@ export default async function ResultadoPage({ params }: Params) {
       ).data
     : null;
 
+  const totalAnalisis = user ? (
+    await supabase
+      .from("analyses")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+  ).count ?? 0 : 0;
+
+  const isPrimerAnalisis = totalAnalisis <= 1 && profile?.plan === "free";
+
   const result = analysis.resultado_json as AnalysisResult;
   const styles = veredictoStyles(analysis.veredicto);
 
@@ -168,7 +177,7 @@ export default async function ResultadoPage({ params }: Params) {
     timeStyle: "short",
   });
 
-  const isFree = !user || !profile || profile.plan === "free";
+  const isFree = (!user || !profile || profile.plan === "free") && !isPrimerAnalisis;
 
   const resultadoParaMostrar = isFree ? {
     ...result,
@@ -741,7 +750,21 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CTA final */}
           <div className="rounded-2xl border border-gray-100 bg-white p-6 text-center space-y-3">
-            {isFree ? (
+            {isPrimerAnalisis ? (
+              <>
+                <p className="text-sm font-semibold text-gray-900">
+                  ¿Te sirvió el análisis?
+                </p>
+                <p className="text-xs text-gray-500">
+                  Este fue tu análisis completo gratuito. Para seguir validando productos necesitás un plan.
+                </p>
+                <div className="flex gap-3 justify-center flex-wrap">
+                  <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
+                    Ver planes desde $17.000/mes →
+                  </a>
+                </div>
+              </>
+            ) : isFree ? (
               <>
                 <p className="text-sm font-semibold text-gray-900">
                   ¿Querés ver el análisis completo?
@@ -749,12 +772,9 @@ export default async function ResultadoPage({ params }: Params) {
                 <p className="text-xs text-gray-500">
                   Desbloqueá competencia, márgenes, top vendedores y más.
                 </p>
-                <Link
-                  href="/#planes"
-                  className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors"
-                >
+                <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
                   Ver planes →
-                </Link>
+                </a>
               </>
             ) : (
               <>
@@ -762,9 +782,7 @@ export default async function ResultadoPage({ params }: Params) {
                   ¿Querés validar otro producto?
                 </p>
                 <Link href="/analizar">
-                  <Button className="rounded-full">
-                    + Nuevo análisis
-                  </Button>
+                  <Button className="rounded-full">+ Nuevo análisis</Button>
                 </Link>
               </>
             )}
