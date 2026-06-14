@@ -70,9 +70,9 @@ export default async function LandingPage() {
         { label: "1 análisis por mes", included: true, subItems: null as string[] | null },
         { label: "30 publicaciones analizadas", included: true, subItems: null as string[] | null },
         { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
-        { label: "Análisis mayormente bloqueado — solo veredicto, score y resumen", included: false, subItems: null as string[] | null },
+        { label: "Primer análisis completo — sin restricciones", included: true, subItems: null as string[] | null },
       ],
-      cta: "Probar gratis",
+      cta: "Empezar gratis",
       href: "/login",
     },
     {
