@@ -349,7 +349,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 6: Competencia + Margen */}
-          <LockedSection locked={isFree}>
+          <LockedSection locked={isFree} isLoggedIn={!!user}>
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -458,7 +458,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 7: Top vendedores */}
           {hasTopVendedores && (
-            <LockedSection locked={isFree}>
+            <LockedSection locked={isFree} isLoggedIn={!!user}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Top vendedores</CardTitle>
@@ -534,7 +534,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 8: Distribución de precios */}
           {hasChart && (
-            <LockedSection locked={isFree}>
+            <LockedSection locked={isFree} isLoggedIn={!!user}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Distribución de precios</CardTitle>
@@ -561,7 +561,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 9: Palabras clave */}
           {hasKeywords && (
-            <LockedSection locked={isFree}>
+            <LockedSection locked={isFree} isLoggedIn={!!user}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Palabras clave en títulos</CardTitle>
@@ -580,7 +580,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 10: Tendencia + Estacionalidad */}
-          <LockedSection locked={isFree}>
+          <LockedSection locked={isFree} isLoggedIn={!!user}>
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -606,7 +606,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 11: Oportunidades de diferenciación */}
           {hasDiferenciadores && (
-            <LockedSection locked={isFree}>
+            <LockedSection locked={isFree} isLoggedIn={!!user}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Oportunidades de diferenciación</CardTitle>
@@ -629,7 +629,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 11b: Productos alternativos */}
           {resultadoParaMostrar.productos_alternativos && resultadoParaMostrar.productos_alternativos.length > 0 && (
-            <LockedSection locked={isFree}>
+            <LockedSection locked={isFree} isLoggedIn={!!user}>
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-1">
                 Productos con mejor oportunidad
@@ -668,7 +668,7 @@ export default async function ResultadoPage({ params }: Params) {
           {resultadoParaMostrar.analisis_costo_proveedor &&
             resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado &&
             !resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado.toLowerCase().includes("no disponible") && (
-            <LockedSection locked={isFree}>
+            <LockedSection locked={isFree} isLoggedIn={!!user}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Análisis de costo vs. proveedores</CardTitle>
@@ -695,7 +695,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 13: Riesgos */}
-          <LockedSection locked={isFree}>
+          <LockedSection locked={isFree} isLoggedIn={!!user}>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Riesgos a tener en cuenta</CardTitle>
@@ -717,7 +717,7 @@ export default async function ResultadoPage({ params }: Params) {
           </LockedSection>
 
           {/* CAPA 14: Recomendación */}
-          <LockedSection locked={isFree}>
+          <LockedSection locked={isFree} isLoggedIn={!!user}>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Recomendación</CardTitle>
@@ -774,9 +774,11 @@ export default async function ResultadoPage({ params }: Params) {
 function LockedSection({
   children,
   locked,
+  isLoggedIn = true,
 }: {
   children: React.ReactNode;
   locked: boolean;
+  isLoggedIn?: boolean;
 }) {
   if (!locked) return <>{children}</>;
   return (
@@ -786,18 +788,31 @@ function LockedSection({
       </div>
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 rounded-lg border border-[#E5E7EB] backdrop-blur-sm">
         <span className="text-2xl mb-2">🔒</span>
-        <p className="text-sm font-semibold text-[#0A0A0A] mb-1">
-          Disponible en Starter y Pro
-        </p>
-        <p className="text-xs text-[#6B7280] mb-3 text-center px-4">
-          Desbloqueá el análisis completo
-        </p>
-        <a
-          href="/#planes"
-          className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors"
-        >
-          Ver planes →
-        </a>
+        {isLoggedIn ? (
+          <>
+            <p className="text-sm font-semibold text-[#0A0A0A] mb-1">
+              Disponible en Starter y Pro
+            </p>
+            <p className="text-xs text-[#6B7280] mb-3 text-center px-4">
+              Desbloqueá el análisis completo
+            </p>
+            <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
+              Ver planes →
+            </a>
+          </>
+        ) : (
+          <>
+            <p className="text-sm font-semibold text-[#0A0A0A] mb-1">
+              Creá una cuenta gratis
+            </p>
+            <p className="text-xs text-[#6B7280] mb-3 text-center px-4">
+              Para ver el análisis completo
+            </p>
+            <a href="/login" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
+              Registrarse gratis →
+            </a>
+          </>
+        )}
       </div>
     </div>
   );
