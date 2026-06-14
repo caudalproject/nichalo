@@ -51,6 +51,11 @@ export default async function LandingPage() {
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   const isLoggedIn = !!user;
+  const profile = user ? (await supabase
+    .from("users")
+    .select("plan, analisis_restantes")
+    .eq("id", user.id)
+    .maybeSingle()).data : null;
 
   const PLANS = [
     {
@@ -114,7 +119,11 @@ export default async function LandingPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar
+          email={user?.email}
+          plan={profile?.plan}
+          analisisRestantes={profile?.analisis_restantes}
+        />
       <main>
         {/* Hero */}
         <section className="py-16 md:py-32">
