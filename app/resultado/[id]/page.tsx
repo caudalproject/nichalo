@@ -166,13 +166,30 @@ export default async function ResultadoPage({ params }: Params) {
 
   const isFree = !user || !profile || profile.plan === "free";
 
+  const resultadoParaMostrar = isFree ? {
+    ...result,
+    competencia: {
+      ...result.competencia,
+      top_vendedores: [],
+      palabras_clave_titulos: [],
+      distribucion_precios: [],
+    },
+    tendencia: null,
+    estacionalidad: null,
+    diferenciadores_oportunidad: [],
+    riesgos: [],
+    recomendacion: null,
+    productos_alternativos: [],
+    analisis_costo_proveedor: null,
+  } : result;
+
   const publicaciones =
     result.publicaciones_analizadas ?? result.competencia?.cantidad_vendedores ?? 0;
 
-  const hasChart = result.competencia?.distribucion_precios?.length > 0;
-  const hasTopVendedores = result.competencia?.top_vendedores?.length > 0;
-  const hasKeywords = result.competencia?.palabras_clave_titulos?.length > 0;
-  const hasDiferenciadores = result.diferenciadores_oportunidad?.length > 0;
+  const hasChart = resultadoParaMostrar.competencia?.distribucion_precios?.length > 0;
+  const hasTopVendedores = resultadoParaMostrar.competencia?.top_vendedores?.length > 0;
+  const hasKeywords = resultadoParaMostrar.competencia?.palabras_clave_titulos?.length > 0;
+  const hasDiferenciadores = resultadoParaMostrar.diferenciadores_oportunidad?.length > 0;
 
   return (
     <>
@@ -448,7 +465,7 @@ export default async function ResultadoPage({ params }: Params) {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 sm:grid-cols-3">
-                  {result.competencia.top_vendedores.slice(0, 3).map((v, i) => {
+                  {resultadoParaMostrar.competencia.top_vendedores.slice(0, 3).map((v, i) => {
                     const displayName = sellerDisplayName(v.nombre, i);
                     const repValida = ["ALTA", "MEDIA", "BAJA"].includes(v.reputacion);
                     return (
@@ -524,7 +541,7 @@ export default async function ResultadoPage({ params }: Params) {
               </CardHeader>
               <CardContent>
                 <PriceDistributionChart
-                  data={result.competencia.distribucion_precios}
+                  data={resultadoParaMostrar.competencia.distribucion_precios}
                   precioSugerido={result.margen.precio_sugerido_venta}
                 />
                 <div className="mt-3 flex items-center justify-center gap-6 text-xs text-[#6B7280]">
@@ -551,7 +568,7 @@ export default async function ResultadoPage({ params }: Params) {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {result.competencia.palabras_clave_titulos.map((kw, i) => (
+                  {resultadoParaMostrar.competencia.palabras_clave_titulos.map((kw, i) => (
                     <Badge key={i} variant="outline" className="text-sm">
                       {kw}
                     </Badge>
@@ -570,17 +587,17 @@ export default async function ResultadoPage({ params }: Params) {
                 <CardTitle className="text-lg">Tendencia y demanda</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm">{sanitizeText(result.tendencia)}</p>
+                <p className="text-sm">{resultadoParaMostrar.tendencia ? sanitizeText(resultadoParaMostrar.tendencia) : ""}</p>
               </CardContent>
             </Card>
 
-            {result.estacionalidad && (
+            {resultadoParaMostrar.estacionalidad && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Estacionalidad</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm">{sanitizeText(result.estacionalidad)}</p>
+                  <p className="text-sm">{sanitizeText(resultadoParaMostrar.estacionalidad)}</p>
                 </CardContent>
               </Card>
             )}
@@ -596,7 +613,7 @@ export default async function ResultadoPage({ params }: Params) {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {result.diferenciadores_oportunidad.map((d, i) => (
+                  {resultadoParaMostrar.diferenciadores_oportunidad.map((d, i) => (
                     <Badge
                       key={i}
                       className="bg-green-100 text-[#16A34A] border-green-200 hover:bg-green-100"
@@ -611,7 +628,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 11b: Productos alternativos */}
-          {result.productos_alternativos && result.productos_alternativos.length > 0 && (
+          {resultadoParaMostrar.productos_alternativos && resultadoParaMostrar.productos_alternativos.length > 0 && (
             <LockedSection locked={isFree}>
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-1">
@@ -621,7 +638,7 @@ export default async function ResultadoPage({ params }: Params) {
                 Este nicho está difícil, pero estos productos relacionados tienen más chances:
               </p>
               <div className="space-y-3">
-                {result.productos_alternativos.map((alt, i) => (
+                {resultadoParaMostrar.productos_alternativos.map((alt, i) => (
                   <div key={i} className="flex items-start gap-3 p-3 bg-green-50 rounded-xl border border-green-100">
                     <span className="text-green-600 font-bold text-sm mt-0.5">{i + 1}</span>
                     <div className="flex-1">
@@ -648,9 +665,9 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 12: Análisis de costo vs proveedores */}
-          {result.analisis_costo_proveedor &&
-            result.analisis_costo_proveedor.rango_mayorista_estimado &&
-            !result.analisis_costo_proveedor.rango_mayorista_estimado.toLowerCase().includes("no disponible") && (
+          {resultadoParaMostrar.analisis_costo_proveedor &&
+            resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado &&
+            !resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado.toLowerCase().includes("no disponible") && (
             <LockedSection locked={isFree}>
             <Card>
               <CardHeader>
@@ -659,7 +676,7 @@ export default async function ResultadoPage({ params }: Params) {
               <CardContent className="space-y-3 text-sm">
                 <Row label="Rango mayorista estimado (importación)">
                   <span className="font-medium">
-                    {result.analisis_costo_proveedor.rango_mayorista_estimado}
+                    {resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado}
                   </span>
                 </Row>
                 {result.margen.costo_evaluacion && (
@@ -670,7 +687,7 @@ export default async function ResultadoPage({ params }: Params) {
                   </Row>
                 )}
                 <p className="text-muted-foreground">
-                  {sanitizeText(result.analisis_costo_proveedor.evaluacion)}
+                  {sanitizeText(resultadoParaMostrar.analisis_costo_proveedor.evaluacion)}
                 </p>
               </CardContent>
             </Card>
@@ -684,13 +701,13 @@ export default async function ResultadoPage({ params }: Params) {
               <CardTitle className="text-lg">Riesgos a tener en cuenta</CardTitle>
             </CardHeader>
             <CardContent>
-              {result.riesgos.length === 0 ? (
+              {resultadoParaMostrar.riesgos.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   Sin riesgos relevantes detectados.
                 </p>
               ) : (
                 <ul className="list-disc space-y-1 pl-5 text-sm">
-                  {result.riesgos.map((r, i) => (
+                  {resultadoParaMostrar.riesgos.map((r, i) => (
                     <li key={i}>{sanitizeText(r)}</li>
                   ))}
                 </ul>
@@ -707,7 +724,7 @@ export default async function ResultadoPage({ params }: Params) {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {result.recomendacion.split(' | ').map((bullet, i) => (
+                {(resultadoParaMostrar.recomendacion ?? "").split(' | ').map((bullet, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm">
                     <span className="text-[#16A34A] font-bold mt-0.5">{i + 1}.</span>
                     <span>{sanitizeText(bullet)}</span>
