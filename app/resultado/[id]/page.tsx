@@ -759,9 +759,9 @@ export default async function ResultadoPage({ params }: Params) {
                   Este fue tu análisis completo gratuito. Para seguir validando productos necesitás un plan.
                 </p>
                 <div className="flex gap-3 justify-center flex-wrap">
-                  <Link href="/#planes" scroll={true} className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
+                  <a href="https://nichalo.com/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
                     Ver planes desde $17.000/mes →
-                  </Link>
+                  </a>
                 </div>
               </>
             ) : isFree ? (
@@ -772,7 +772,7 @@ export default async function ResultadoPage({ params }: Params) {
                 <p className="text-xs text-gray-500">
                   Desbloqueá competencia, márgenes, top vendedores y más.
                 </p>
-                <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
+                <a href="https://nichalo.com/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
                   Ver planes →
                 </a>
               </>
@@ -828,9 +828,9 @@ function LockedSection({
                 ? "3 nichos relacionados con mejor oportunidad te esperan desbloqueados"
                 : "Competencia, márgenes, top vendedores y más"}
             </p>
-            <Link href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
+            <a href="https://nichalo.com/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
               Ver planes →
-            </Link>
+            </a>
           </>
         ) : (
           <>
