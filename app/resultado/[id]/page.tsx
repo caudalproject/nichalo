@@ -67,6 +67,7 @@ function costoLabel(ev: string) {
 }
 
 function sanitizeText(text: string): string {
+  if (!text) return '';
   return text
     .replace(/\b[a-z][a-zA-Z0-9]*(?:_[a-zA-Z0-9]+)+:\s*\S+/gi, "")
     .replace(/\bsold(?:_?[Qq]uantity)?:\s*\d+/gi, "")
@@ -152,7 +153,8 @@ export default async function ResultadoPage({ params }: Params) {
 
   const costo = Number(analysis.costo_estimado);
   const moneda = result.moneda;
-  const tasaCambio = result.tasa_cambio ?? 1400;
+  const FALLBACK_RATES: Record<string, number> = { ARS: 1400, MXN: 17, COP: 4200 };
+  const tasaCambio = result.tasa_cambio ?? FALLBACK_RATES[result.moneda ?? 'ARS'] ?? 1400;
   const usdToLocal = (usd: number) => usd * tasaCambio;
   const formatLocal = (usd: number) => formatLocalPrice(usdToLocal(usd), moneda ?? 'ARS');
   const precioVentaLocal = result.margen.precio_sugerido_venta;
@@ -293,7 +295,7 @@ export default async function ResultadoPage({ params }: Params) {
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Publicaciones scrapeadas</div>
               <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
-                {String(result.publicaciones_analizadas ?? result.competencia.cantidad_vendedores)}
+                {String(result.publicaciones_analizadas ?? result.competencia?.cantidad_vendedores ?? 0)}
               </div>
             </div>
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
@@ -357,17 +359,17 @@ export default async function ResultadoPage({ params }: Params) {
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <Row label="Publicaciones scrapeadas">
-                  {result.publicaciones_analizadas ?? result.competencia.cantidad_vendedores}
+                  {result.publicaciones_analizadas ?? result.competencia?.cantidad_vendedores ?? 0}
                 </Row>
 
                 <Row label="Precio mínimo">
-                  {formatLocalPrice(result.competencia.precio_minimo, moneda)}
+                  {formatLocalPrice(result.competencia?.precio_minimo ?? 0, moneda)}
                 </Row>
                 <Row label="Precio promedio">
-                  {formatLocalPrice(result.competencia.precio_promedio, moneda)}
+                  {formatLocalPrice(result.competencia?.precio_promedio ?? 0, moneda)}
                 </Row>
                 <Row label="Precio máximo">
-                  {formatLocalPrice(result.competencia.precio_maximo, moneda)}
+                  {formatLocalPrice(result.competencia?.precio_maximo ?? 0, moneda)}
                 </Row>
               </CardContent>
             </Card>
@@ -701,13 +703,13 @@ export default async function ResultadoPage({ params }: Params) {
               <CardTitle className="text-lg">Riesgos a tener en cuenta</CardTitle>
             </CardHeader>
             <CardContent>
-              {resultadoParaMostrar.riesgos.length === 0 ? (
+              {(resultadoParaMostrar.riesgos?.length ?? 0) === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   Sin riesgos relevantes detectados.
                 </p>
               ) : (
                 <ul className="list-disc space-y-1 pl-5 text-sm">
-                  {resultadoParaMostrar.riesgos.map((r, i) => (
+                  {(resultadoParaMostrar.riesgos ?? []).map((r, i) => (
                     <li key={i}>{sanitizeText(r)}</li>
                   ))}
                 </ul>
@@ -724,7 +726,7 @@ export default async function ResultadoPage({ params }: Params) {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {(resultadoParaMostrar.recomendacion ?? "").split(' | ').map((bullet, i) => (
+                {(resultadoParaMostrar.recomendacion ?? '').split(' | ').filter(Boolean).map((bullet, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm">
                     <span className="text-[#16A34A] font-bold mt-0.5">{i + 1}.</span>
                     <span>{sanitizeText(bullet)}</span>
