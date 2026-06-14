@@ -32,16 +32,16 @@ const FEATURES = [
 
 const STEPS = [
   {
-    title: "Ingresá tu producto",
-    description: "Ingresás tu producto y costo estimado",
+    title: "Ingresás tu producto y costo",
+    description: "Escribís el nombre del producto, tu costo de proveedor y tu perfil de vendedor. Sin stock, sin riesgo.",
   },
   {
-    title: "Analizamos el mercado",
-    description: "Analizamos cientos de publicaciones reales en ML",
+    title: "Analizamos cientos de publicaciones reales",
+    description: "Scrapeamos Mercado Libre en tiempo real — competencia, precios, volumen de ventas y tendencias del mercado argentino.",
   },
   {
-    title: "Recibís tu veredicto",
-    description: "Recibís un veredicto claro con recomendaciones accionables",
+    title: "Recibís un veredicto claro con números",
+    description: "VIABLE, MARGINAL o SATURADO — con score, margen real, precio sugerido según tu perfil y recomendaciones accionables.",
   },
 ];
 
