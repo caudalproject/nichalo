@@ -289,8 +289,8 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="AR">Argentina (MLA)</SelectItem>
-                <SelectItem value="MX">México (MLM)</SelectItem>
-                <SelectItem value="CO">Colombia (MCO)</SelectItem>
+                <SelectItem value="MX" disabled>México — próximamente</SelectItem>
+                <SelectItem value="CO" disabled>Colombia — próximamente</SelectItem>
               </SelectContent>
             </Select>
           </div>

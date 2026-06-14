@@ -5,8 +5,8 @@ import { ChevronDown } from "lucide-react";
 
 const FAQS = [
   {
-    q: "¿Funciona para Argentina, México y Chile?",
-    a: "Sí. Analizamos publicaciones reales de Mercado Libre en Argentina (MLA), México (MLM) y Chile (MLC).",
+    q: "¿En qué país funciona?",
+    a: "Por ahora Nichalo funciona exclusivamente para Argentina (Mercado Libre Argentina). Próximamente estará disponible para México y Colombia.",
   },
   {
     q: "¿Necesito tener el producto en stock para analizarlo?",

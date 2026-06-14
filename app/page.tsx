@@ -154,8 +154,8 @@ export default async function LandingPage() {
                 </div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-[#0A0A0A]">3</div>
-                <div className="text-sm text-[#6B7280] mt-1">países</div>
+                <div className="text-3xl font-bold text-[#0A0A0A]">🇦🇷</div>
+                <div className="text-sm text-[#6B7280] mt-1">Argentina</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-[#0A0A0A]">
@@ -306,7 +306,7 @@ export default async function LandingPage() {
                 {
                   texto: "Validé 3 productos en una tarde. El único VIABLE fue el que terminé vendiendo. Los datos son reales.",
                   autor: "Vendedor de hogar",
-                  pais: "México",
+                  pais: "Argentina",
                 },
                 {
                   texto: "Lo que más me sirvió fue el precio sugerido según mi perfil. No el promedio del mercado, el que yo podía poner.",
