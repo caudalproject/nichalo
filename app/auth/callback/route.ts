@@ -77,9 +77,10 @@ export async function GET(request: NextRequest) {
       });
 
       // Señalizar al cliente para disparar el evento de píxel
-      const newUserUrl = new URL(response.headers.get("location") ?? `${origin}${safeNext}`);
+      const newUserUrl = new URL(`${origin}${safeNext}`);
       newUserUrl.searchParams.set("registered", "1");
-      return NextResponse.redirect(newUserUrl.toString(), { headers: response.headers });
+      response.headers.set("location", newUserUrl.toString());
+      return response;
     }
   }
 
