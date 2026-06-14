@@ -67,8 +67,7 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   async function handleSignOut() {
     setSigningOut(true);
     await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
+    window.location.href = "/";
   }
 
   async function handleCancelar() {
