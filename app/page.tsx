@@ -499,10 +499,10 @@ export default async function LandingPage() {
         <div className="container flex flex-col items-center gap-4 sm:flex-row sm:justify-between text-sm text-[#6B7280]">
           <p>© 2026 Nichalo</p>
           <nav className="flex gap-6">
-            <Link href="#" className="hover:text-[#0A0A0A] transition-colors">
+            <Link href="/terminos" className="hover:text-[#0A0A0A] transition-colors">
               Términos
             </Link>
-            <Link href="#" className="hover:text-[#0A0A0A] transition-colors">
+            <Link href="/privacidad" className="hover:text-[#0A0A0A] transition-colors">
               Privacidad
             </Link>
           </nav>
