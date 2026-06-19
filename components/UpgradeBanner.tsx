@@ -43,8 +43,7 @@ export function UpgradeBanner() {
       <div className="flex flex-col gap-2 sm:flex-row sm:shrink-0">
         <Button
           size="sm"
-          variant="outline"
-          className="border-amber-300 text-amber-800 hover:bg-amber-100"
+          className="bg-[#16A34A] hover:bg-[#15803D] text-white"
           onClick={() => handleUpgrade("starter")}
           disabled={loadingPlan !== null}
         >
@@ -52,7 +51,8 @@ export function UpgradeBanner() {
         </Button>
         <Button
           size="sm"
-          className="bg-[#16A34A] hover:bg-[#15803D] text-white"
+          variant="outline"
+          className="border-amber-300 text-amber-800 hover:bg-amber-100"
           onClick={() => handleUpgrade("pro")}
           disabled={loadingPlan !== null}
         >
