@@ -458,14 +458,14 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
       costo_evaluacion: costoEval,
     },
     tendencia: typeof r.tendencia === "string" ? r.tendencia : "No pudimos estimar la tendencia para este producto en este momento. El resto del análisis no se ve afectado.",
-    estacionalidad: typeof r.estacionalidad === "string" ? r.estacionalidad : "Sin datos de estacionalidad.",
+    estacionalidad: typeof r.estacionalidad === "string" ? r.estacionalidad : "No pudimos identificar patrones estacionales para este producto en este momento.",
     diferenciadores_oportunidad: Array.isArray(r.diferenciadores_oportunidad)
       ? (r.diferenciadores_oportunidad as unknown[]).map(String).slice(0, 5)
       : [],
     riesgos: Array.isArray(r.riesgos)
       ? (r.riesgos as unknown[]).map((x) => String(x)).slice(0, 5)
       : [],
-    recomendacion: typeof r.recomendacion === "string" ? r.recomendacion : "Revisar manualmente.",
+    recomendacion: typeof r.recomendacion === "string" ? r.recomendacion : "No pudimos generar una recomendación específica para este producto. Revisá el resumen y los datos de competencia para decidir.",
     titulo_sugerido_publicacion: typeof r.titulo_sugerido_publicacion === "string"
       ? r.titulo_sugerido_publicacion
       : "",
