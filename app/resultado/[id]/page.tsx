@@ -691,9 +691,6 @@ export default async function ResultadoPage({ params }: Params) {
                     </Badge>
                   </Row>
                 )}
-                <p className="text-muted-foreground">
-                  {sanitizeText(resultadoParaMostrar.analisis_costo_proveedor.evaluacion)}
-                </p>
               </CardContent>
             </Card>
             </LockedSection>
