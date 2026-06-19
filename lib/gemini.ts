@@ -457,7 +457,7 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
       margen_porcentaje: toNumber(margen.margen_porcentaje, 0),
       costo_evaluacion: costoEval,
     },
-    tendencia: typeof r.tendencia === "string" ? r.tendencia : "Sin datos de tendencia.",
+    tendencia: typeof r.tendencia === "string" ? r.tendencia : "No pudimos estimar la tendencia para este producto en este momento. El resto del análisis no se ve afectado.",
     estacionalidad: typeof r.estacionalidad === "string" ? r.estacionalidad : "Sin datos de estacionalidad.",
     diferenciadores_oportunidad: Array.isArray(r.diferenciadores_oportunidad)
       ? (r.diferenciadores_oportunidad as unknown[]).map(String).slice(0, 5)
