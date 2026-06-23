@@ -84,7 +84,7 @@ function sellerDisplayName(nombre: string, index: number): string {
 }
 
 function formatLocalPrice(value: number, currencyCode: string | undefined): string {
-  if (!currencyCode) return formatCurrency(value, "USD");
+  if (!currencyCode) return formatCurrency(value, "ARS");
   const locale = currencyCode === "MXN" ? "es-MX" : currencyCode === "COP" ? "es-CO" : "es-AR";
   return new Intl.NumberFormat(locale, {
     style: "currency",
