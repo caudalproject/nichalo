@@ -287,23 +287,23 @@ export default async function ResultadoPage({ params }: Params) {
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Ganancia por unidad</div>
-              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
+              <div className="mt-1 font-mono text-xl font-bold text-[#0A0A0A]">
                 {result.margen?.ganancia_estimada != null ? formatLocal(result.margen.ganancia_estimada) : "—"}
               </div>
             </div>
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Margen bruto</div>
-              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">{margenBruto.toFixed(1)}%</div>
+              <div className="mt-1 font-mono text-xl font-bold text-[#0A0A0A]">{margenBruto.toFixed(1)}%</div>
             </div>
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Publicaciones scrapeadas</div>
-              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
+              <div className="mt-1 font-mono text-xl font-bold text-[#0A0A0A]">
                 {String(result.publicaciones_analizadas ?? result.competencia?.cantidad_vendedores ?? 0)}
               </div>
             </div>
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Precio sugerido</div>
-              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
+              <div className="mt-1 font-mono text-xl font-bold text-[#0A0A0A]">
                 {formatLocalPrice(result.margen.precio_sugerido_venta, moneda)}
               </div>
             </div>
