@@ -15,6 +15,10 @@ const config: Config = {
         "2xl": "1400px",
       },
     },
+    fontFamily: {
+      sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+      mono: ["var(--font-geist-mono)", "monospace"],
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",

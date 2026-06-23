@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Nichalo — Validá tu producto en Mercado Libre",
@@ -20,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${inter.className} min-h-screen bg-background text-foreground antialiased`}
+        className={`${GeistSans.variable} ${GeistMono.variable} min-h-screen bg-background text-foreground antialiased`}
       >
         {children}
         <Script id="meta-pixel" strategy="afterInteractive">
