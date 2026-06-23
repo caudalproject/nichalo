@@ -28,14 +28,14 @@ export function ScoreDisplay({ score, veredicto }: Props) {
 
   const colorClass =
     veredicto === "VIABLE"
-      ? "text-[#16A34A]"
+      ? "text-green-500"
       : veredicto === "MARGINAL"
-      ? "text-[#F59E0B]"
-      : "text-[#DC2626]";
+      ? "text-yellow-400"
+      : "text-red-500";
 
   return (
     <div className="flex items-baseline gap-2">
-      <span className={`text-7xl font-bold font-mono leading-none ${colorClass}`}>
+      <span className={`text-8xl font-black leading-none ${colorClass}`}>
         {displayed}
       </span>
       <span className="text-2xl text-gray-300 font-light">/100</span>

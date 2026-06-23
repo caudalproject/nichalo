@@ -31,6 +31,7 @@ function veredictoStyles(v: AnalysisRow["veredicto"]) {
       pillBorder: "border-green-200",
       pillText: "text-[#16A34A]",
       title: "text-[#16A34A]",
+      emoji: "🟢",
       headline: "Es viable — adelante",
     };
   }
@@ -38,8 +39,9 @@ function veredictoStyles(v: AnalysisRow["veredicto"]) {
     return {
       pillBg: "bg-yellow-100",
       pillBorder: "border-yellow-200",
-      pillText: "text-[#F59E0B]",
-      title: "text-[#F59E0B]",
+      pillText: "text-[#CA8A04]",
+      title: "text-[#CA8A04]",
+      emoji: "🟡",
       headline: "Es marginal — con cuidado",
     };
   }
@@ -48,12 +50,15 @@ function veredictoStyles(v: AnalysisRow["veredicto"]) {
     pillBorder: "border-red-200",
     pillText: "text-[#DC2626]",
     title: "text-[#DC2626]",
+    emoji: "🔴",
     headline: "Saturado — buscá otro nicho",
   };
 }
 
-function costoBadgeClasses(_ev: string): string {
-  return "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-100";
+function costoBadgeClasses(ev: string): string {
+  if (ev === "COMPETITIVO") return "bg-green-100 text-[#16A34A] border-green-200 hover:bg-green-100";
+  if (ev === "ALTO") return "bg-yellow-100 text-[#CA8A04] border-yellow-200 hover:bg-yellow-100";
+  return "bg-red-100 text-[#DC2626] border-red-200 hover:bg-red-100";
 }
 
 function costoLabel(ev: string) {
@@ -208,7 +213,7 @@ export default async function ResultadoPage({ params }: Params) {
         plan={profile?.plan}
       />
       <main className="container py-10">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-3xl space-y-6">
           <div className="flex items-center justify-between">
             <Link
               href="/dashboard"
@@ -226,20 +231,20 @@ export default async function ResultadoPage({ params }: Params) {
             </div>
           </div>
 
-          {/* NIVEL 1 — Score + Veredicto */}
-          <div className="mt-8 bg-white rounded-lg border border-gray-200 overflow-hidden">
+          {/* CAPA 1: Veredicto hero */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className={`h-1.5 w-full ${
-              analysis.veredicto === 'VIABLE' ? 'bg-[#16A34A]' :
-              analysis.veredicto === 'MARGINAL' ? 'bg-[#F59E0B]' :
-              'bg-[#DC2626]'
+              analysis.veredicto === 'VIABLE' ? 'bg-green-500' :
+              analysis.veredicto === 'MARGINAL' ? 'bg-yellow-400' :
+              'bg-red-500'
             }`} />
 
-            <div className="px-8 py-12">
+            <div className="px-8 py-10">
               <div className="flex items-center gap-3 mb-8">
                 <span className={`text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full ${
-                  analysis.veredicto === 'VIABLE' ? 'bg-green-50 text-[#16A34A]' :
-                  analysis.veredicto === 'MARGINAL' ? 'bg-amber-50 text-[#F59E0B]' :
-                  'bg-red-50 text-[#DC2626]'
+                  analysis.veredicto === 'VIABLE' ? 'bg-green-50 text-green-700' :
+                  analysis.veredicto === 'MARGINAL' ? 'bg-yellow-50 text-yellow-700' :
+                  'bg-red-50 text-red-700'
                 }`}>
                   {analysis.veredicto}
                 </span>
@@ -251,9 +256,9 @@ export default async function ResultadoPage({ params }: Params) {
 
                 <div className="mt-4 h-1.5 bg-gray-100 rounded-full w-64">
                   <div className={`h-full rounded-full transition-all ${
-                    analysis.veredicto === 'VIABLE' ? 'bg-[#16A34A]' :
-                    analysis.veredicto === 'MARGINAL' ? 'bg-[#F59E0B]' :
-                    'bg-[#DC2626]'
+                    analysis.veredicto === 'VIABLE' ? 'bg-green-500' :
+                    analysis.veredicto === 'MARGINAL' ? 'bg-yellow-400' :
+                    'bg-red-500'
                   }`} style={{ width: `${analysis.score}%` }} />
                 </div>
 
@@ -278,36 +283,33 @@ export default async function ResultadoPage({ params }: Params) {
             </div>
           </div>
 
-          {/* NIVEL 2 — Métricas clave */}
-          <div className="mt-16 grid grid-cols-2 gap-6 md:grid-cols-4">
-            <div className="rounded-md border border-gray-200 bg-white p-4 text-center">
-              <div className="text-xs text-gray-500">Ganancia por unidad</div>
-              <div className="mt-2 text-2xl font-bold font-mono text-[#0A0A0A]">
+          {/* CAPA 2: Resumen ejecutivo */}
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-xs text-[#6B7280]">Ganancia por unidad</div>
+              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
                 {result.margen?.ganancia_estimada != null ? formatLocal(result.margen.ganancia_estimada) : "—"}
               </div>
             </div>
-            <div className="rounded-md border border-gray-200 bg-white p-4 text-center">
-              <div className="text-xs text-gray-500">Margen bruto</div>
-              <div className="mt-2 text-2xl font-bold font-mono text-[#0A0A0A]">{margenBruto.toFixed(1)}%</div>
+            <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-xs text-[#6B7280]">Margen bruto</div>
+              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">{margenBruto.toFixed(1)}%</div>
             </div>
-            <div className="rounded-md border border-gray-200 bg-white p-4 text-center">
-              <div className="text-xs text-gray-500">Publicaciones scrapeadas</div>
-              <div className="mt-2 text-2xl font-bold font-mono text-[#0A0A0A]">
+            <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-xs text-[#6B7280]">Publicaciones scrapeadas</div>
+              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
                 {String(result.publicaciones_analizadas ?? result.competencia?.cantidad_vendedores ?? 0)}
               </div>
             </div>
-            <div className="rounded-md border border-gray-200 bg-white p-4 text-center">
-              <div className="text-xs text-gray-500">Precio sugerido</div>
-              <div className="mt-2 text-2xl font-bold font-mono text-[#0A0A0A]">
+            <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
+              <div className="text-xs text-[#6B7280]">Precio sugerido</div>
+              <div className="mt-1 text-xl font-bold text-[#0A0A0A]">
                 {formatLocalPrice(result.margen.precio_sugerido_venta, moneda)}
               </div>
             </div>
           </div>
 
-          {/* NIVEL 3 — Detalle */}
-          <div className="mt-16 space-y-6">
-
-          {/* Imagen analizada */}
+          {/* CAPA 3: Imagen analizada */}
           {result.imagen_url && (
             <Card>
               <CardHeader>
@@ -355,7 +357,8 @@ export default async function ResultadoPage({ params }: Params) {
           {result.competencia?.precio_minimo > 0 &&
             result.competencia?.precio_maximo > 0 &&
             result.competencia.precio_maximo / result.competencia.precio_minimo > 10 && (
-            <div className="rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+            <div className="flex items-start gap-3 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+              <span className="mt-0.5 shrink-0">⚠️</span>
               <p>
                 Los resultados de este análisis incluyen productos con precios muy
                 distintos entre sí — esto puede indicar que el término de búsqueda
@@ -397,8 +400,13 @@ export default async function ResultadoPage({ params }: Params) {
                 <div>
                   <div className="flex items-center justify-between border-b pb-1.5">
                     <span className="text-muted-foreground">Precio sugerido de venta</span>
-                    <span>
+                    <span className="flex items-center gap-1.5">
                       {formatLocalPrice(result.margen.precio_sugerido_venta, moneda)}
+                      {margenBruto >= 0 ? (
+                        <span className="text-green-500 text-sm">✓</span>
+                      ) : (
+                        <span className="text-amber-500 text-sm">⚠</span>
+                      )}
                     </span>
                   </div>
                   {margenBruto < 0 && (
@@ -418,7 +426,7 @@ export default async function ResultadoPage({ params }: Params) {
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                           result.comision_detalle.tipo_publicacion === 'Premium'
-                            ? 'bg-gray-100 text-gray-700'
+                            ? 'bg-yellow-50 text-yellow-700'
                             : 'bg-gray-100 text-gray-500'
                         }`}>
                           {result.comision_detalle.tipo_publicacion}
@@ -440,14 +448,30 @@ export default async function ResultadoPage({ params }: Params) {
                   <strong>{formatLocal(result.margen.ganancia_estimada)}</strong>
                 </Row>
                 <Row label="Margen bruto">
-                  <span className="font-mono font-medium text-sm">
+                  <Badge
+                    variant={
+                      margenBruto >= 25
+                        ? "success"
+                        : margenBruto >= 10
+                          ? "warning"
+                          : "destructive"
+                    }
+                  >
                     {margenBruto.toFixed(1)}%
-                  </span>
+                  </Badge>
                 </Row>
                 <Row label="ROI">
-                  <span className="font-mono font-medium text-sm">
+                  <Badge
+                    variant={
+                      roi >= 30
+                        ? "success"
+                        : roi >= 15
+                          ? "warning"
+                          : "destructive"
+                    }
+                  >
                     {roi.toFixed(1)}%
-                  </span>
+                  </Badge>
                 </Row>
                 {result.margen.costo_evaluacion && (
                   <Row label="Costo ingresado">
@@ -503,14 +527,18 @@ export default async function ResultadoPage({ params }: Params) {
                             v.reputacion === "BAJA" ? (
                               <Badge
                                 variant="outline"
-                                className="text-xs"
+                                className="text-xs bg-orange-100 text-orange-700 border-orange-300"
                                 title="Oportunidad de entrada"
                               >
                                 BAJA · Oportunidad
                               </Badge>
                             ) : (
                             <Badge
-                              variant="secondary"
+                              variant={
+                                v.reputacion === "ALTA"
+                                  ? "success"
+                                  : "warning"
+                              }
                               className="text-xs"
                             >
                               {v.reputacion}
@@ -620,8 +648,7 @@ export default async function ResultadoPage({ params }: Params) {
                   {resultadoParaMostrar.diferenciadores_oportunidad.map((d, i) => (
                     <Badge
                       key={i}
-                      variant="outline"
-                      className="text-sm"
+                      className="bg-green-100 text-[#16A34A] border-green-200 hover:bg-green-100"
                     >
                       {sanitizeText(d)}
                     </Badge>
@@ -635,7 +662,7 @@ export default async function ResultadoPage({ params }: Params) {
           {/* CAPA 11b: Productos alternativos */}
           {resultadoParaMostrar.productos_alternativos && resultadoParaMostrar.productos_alternativos.length > 0 && (
             <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-1">
                 Productos con mejor oportunidad
               </h2>
@@ -644,12 +671,12 @@ export default async function ResultadoPage({ params }: Params) {
               </p>
               <div className="space-y-3">
                 {resultadoParaMostrar.productos_alternativos.map((alt, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-md border border-gray-200">
-                    <span className="text-gray-500 font-bold text-sm mt-0.5">{i + 1}</span>
+                  <div key={i} className="flex items-start gap-3 p-3 bg-green-50 rounded-xl border border-green-100">
+                    <span className="text-green-600 font-bold text-sm mt-0.5">{i + 1}</span>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium text-gray-900">{alt.nombre}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-white border border-gray-200 text-gray-600">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-white border border-green-200 text-green-700">
                           {alt.nicho === 'específico' ? 'Más específico' :
                            alt.nicho === 'adyacente' ? 'Nicho adyacente' : 'Nuevo segmento'}
                         </span>
@@ -657,7 +684,7 @@ export default async function ResultadoPage({ params }: Params) {
                       <p className="text-xs text-gray-500">{alt.razon}</p>
                       <Link
                         href={`/analizar?producto=${encodeURIComponent(alt.nombre)}&pais=${analysis.pais}`}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-gray-700 hover:text-gray-900 mt-2"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-green-700 hover:text-green-800 mt-2"
                       >
                         Analizar este producto →
                       </Link>
@@ -728,7 +755,7 @@ export default async function ResultadoPage({ params }: Params) {
               <div className="space-y-2">
                 {(resultadoParaMostrar.recomendacion ?? '').split(' | ').filter(Boolean).map((bullet, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm">
-                    <span className="text-gray-400 font-bold mt-0.5">{i + 1}.</span>
+                    <span className="text-[#16A34A] font-bold mt-0.5">{i + 1}.</span>
                     <span>{sanitizeText(bullet)}</span>
                   </div>
                 ))}
@@ -738,7 +765,7 @@ export default async function ResultadoPage({ params }: Params) {
           </LockedSection>
 
           {/* CTA final */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center space-y-3">
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 text-center space-y-3">
             {isPrimerAnalisis ? (
               <>
                 <p className="text-sm font-semibold text-gray-900">
@@ -776,7 +803,6 @@ export default async function ResultadoPage({ params }: Params) {
               </>
             )}
           </div>
-          </div>
         </div>
       </main>
     </>
@@ -801,6 +827,7 @@ function LockedSection({
         {children}
       </div>
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 rounded-lg border border-[#E5E7EB] backdrop-blur-sm">
+        <span className="text-2xl mb-2">🔒</span>
         {isLoggedIn ? (
           <>
             <p className="text-sm font-semibold text-[#0A0A0A] mb-1">
