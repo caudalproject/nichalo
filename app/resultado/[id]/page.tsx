@@ -353,6 +353,21 @@ export default async function ResultadoPage({ params }: Params) {
             </Card>
           )}
 
+          {/* Alerta de dispersión de precios */}
+          {result.competencia?.precio_minimo > 0 &&
+            result.competencia?.precio_maximo > 0 &&
+            result.competencia.precio_maximo / result.competencia.precio_minimo > 10 && (
+            <div className="flex items-start gap-3 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+              <span className="mt-0.5 shrink-0">⚠️</span>
+              <p>
+                Los resultados de este análisis incluyen productos con precios muy
+                distintos entre sí — esto puede indicar que el término de búsqueda
+                mezcló categorías diferentes. El análisis puede ser menos preciso.
+                Te recomendamos buscar con un término más específico.
+              </p>
+            </div>
+          )}
+
           {/* CAPA 6: Competencia + Margen */}
           <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
           <div className="grid gap-4 md:grid-cols-2">
