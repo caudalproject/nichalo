@@ -385,8 +385,20 @@ export default async function ResultadoPage({ params }: Params) {
                 <div>
                   <div className="flex items-center justify-between border-b pb-1.5">
                     <span className="text-muted-foreground">Precio sugerido de venta</span>
-                    <span>{formatLocalPrice(result.margen.precio_sugerido_venta, moneda)}</span>
+                    <span className="flex items-center gap-1.5">
+                      {formatLocalPrice(result.margen.precio_sugerido_venta, moneda)}
+                      {margenBruto >= 0 ? (
+                        <span className="text-green-500 text-sm">✓</span>
+                      ) : (
+                        <span className="text-amber-500 text-sm">⚠</span>
+                      )}
+                    </span>
                   </div>
+                  {margenBruto < 0 && (
+                    <p className="mt-1 text-xs text-[#6B7280]">
+                      Este precio no genera ganancia con tu costo actual — ver Recomendación abajo.
+                    </p>
+                  )}
                   <p className="mt-1 text-xs text-[#6B7280]">
                     Percentil según perfil con margen mínimo garantizado
                   </p>
