@@ -239,7 +239,7 @@ export default async function ResultadoPage({ params }: Params) {
               'bg-red-500'
             }`} />
 
-            <div className="px-8 py-10">
+            <div className="px-8 py-12">
               <div className="flex items-center gap-3 mb-8">
                 <span className={`text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full ${
                   analysis.veredicto === 'VIABLE' ? 'bg-green-50 text-green-700' :
