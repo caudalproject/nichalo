@@ -17,9 +17,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body
-        className={`${GeistSans.variable} ${GeistMono.variable} font-sans min-h-screen bg-background text-foreground antialiased`}
+        className="font-sans min-h-screen bg-background text-foreground antialiased"
       >
         {children}
         <Script id="meta-pixel" strategy="afterInteractive">
