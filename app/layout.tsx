@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${GeistSans.variable} ${GeistMono.variable} min-h-screen bg-background text-foreground antialiased`}
+        className={`${GeistSans.variable} ${GeistMono.variable} font-sans min-h-screen bg-background text-foreground antialiased`}
       >
         {children}
         <Script id="meta-pixel" strategy="afterInteractive">
