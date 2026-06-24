@@ -648,7 +648,7 @@ export default async function ResultadoPage({ params }: Params) {
                   {resultadoParaMostrar.diferenciadores_oportunidad.map((d, i) => (
                     <Badge
                       key={i}
-                      className="bg-green-100 text-[#16A34A] border-green-200 hover:bg-green-100"
+                      className="bg-gray-50 text-gray-900 border-gray-200 hover:bg-gray-50"
                     >
                       {sanitizeText(d)}
                     </Badge>
@@ -671,12 +671,12 @@ export default async function ResultadoPage({ params }: Params) {
               </p>
               <div className="space-y-3">
                 {resultadoParaMostrar.productos_alternativos.map((alt, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 bg-green-50 rounded-xl border border-green-100">
-                    <span className="text-green-600 font-bold text-sm mt-0.5">{i + 1}</span>
+                  <div key={i} className="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-200">
+                    <span className="text-gray-900 font-bold text-sm mt-0.5">{i + 1}</span>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium text-gray-900">{alt.nombre}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-white border border-green-200 text-green-700">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-50 border border-gray-200 text-gray-700">
                           {alt.nicho === 'específico' ? 'Más específico' :
                            alt.nicho === 'adyacente' ? 'Nicho adyacente' : 'Nuevo segmento'}
                         </span>
@@ -684,7 +684,7 @@ export default async function ResultadoPage({ params }: Params) {
                       <p className="text-xs text-gray-500">{alt.razon}</p>
                       <Link
                         href={`/analizar?producto=${encodeURIComponent(alt.nombre)}&pais=${analysis.pais}`}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-green-700 hover:text-green-800 mt-2"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-gray-700 hover:text-gray-900 mt-2"
                       >
                         Analizar este producto →
                       </Link>
