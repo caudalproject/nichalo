@@ -232,22 +232,28 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
       </div>
 
       {clientEmail && mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#E5E7EB] bg-white px-4 py-3 flex flex-col gap-2 text-sm">
-          <Link
-            href="/dashboard"
-            className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors py-1"
+        <>
+          <div
+            className="fixed inset-0 top-14 bg-black/20 z-20 md:hidden"
             onClick={() => setMobileMenuOpen(false)}
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/analizar"
-            className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors py-1"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Nuevo análisis
-          </Link>
-        </div>
+          />
+          <div className="md:hidden relative z-30 border-t border-[#E5E7EB] bg-white px-4 py-3 flex flex-col gap-2 text-sm shadow-lg">
+            <Link
+              href="/dashboard"
+              className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors py-1"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/analizar"
+              className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors py-1"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Nuevo análisis
+            </Link>
+          </div>
+        </>
       )}
     </header>
   );

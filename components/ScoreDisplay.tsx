@@ -34,11 +34,11 @@ export function ScoreDisplay({ score, veredicto }: Props) {
       : "text-red-500";
 
   return (
-    <div className="flex items-baseline gap-2">
-      <span className={`text-6xl sm:text-8xl font-black leading-none font-mono ${colorClass}`}>
+    <div className="flex items-baseline gap-2 sm:gap-3">
+      <span className={`text-5xl sm:text-8xl font-black leading-none font-mono ${colorClass}`}>
         {displayed}
       </span>
-      <span className="text-2xl text-gray-300 font-light">/100</span>
+      <span className="text-xl sm:text-2xl text-gray-300 font-light">/100</span>
     </div>
   );
 }
