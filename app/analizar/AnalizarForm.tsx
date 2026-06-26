@@ -508,7 +508,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
               </div>
             </div>
 
-            {plan !== 'pro' && (
+            {plan !== 'pro' && !noCredits && (
               <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-3 border border-gray-100">
                 <span className="text-2xl">🔒</span>
                 <p className="text-sm font-medium text-gray-700">Disponible en Plan Pro</p>
