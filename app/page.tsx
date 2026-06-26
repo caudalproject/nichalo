@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
+import { MiniPriceDistributionChart } from "@/components/MiniPriceDistributionChart";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { getPaisFromHeaders, getPreciosPorPais } from "@/lib/geolocation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
@@ -167,6 +168,7 @@ export default async function LandingPage() {
               {/* Columna DESPUÉS */}
               <div className="flex-1 bg-white rounded-xl border-l-4 border-[#16A34A] shadow-sm px-6 py-8">
                 <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Después</h3>
+                <p className="text-xs text-[#6B7280] mb-3">Ejemplo real: cargador inalámbrico</p>
                 <div className="mb-4">
                   <span className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-green-50 text-[#16A34A]">
                     Score 82 · VIABLE
@@ -184,6 +186,10 @@ export default async function LandingPage() {
                     </li>
                   ))}
                 </ul>
+                <div className="mb-4">
+                  <p className="text-[11px] text-[#6B7280] mb-1">Distribución de precios — publicaciones reales</p>
+                  <MiniPriceDistributionChart />
+                </div>
                 <p className="text-xs text-[#6B7280] italic">
                   Todo esto antes de comprar una sola unidad.
                 </p>
