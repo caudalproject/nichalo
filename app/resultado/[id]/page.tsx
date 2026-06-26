@@ -239,7 +239,7 @@ export default async function ResultadoPage({ params }: Params) {
               'bg-red-500'
             }`} />
 
-            <div className="px-8 py-12">
+            <div className="px-4 sm:px-8 py-12">
               <div className="flex items-center gap-3 mb-8">
                 <span className={`text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full ${
                   analysis.veredicto === 'VIABLE' ? 'bg-green-50 text-green-700' :
@@ -254,7 +254,7 @@ export default async function ResultadoPage({ params }: Params) {
               <div className="mb-8">
                 <ScoreDisplay score={analysis.score} veredicto={analysis.veredicto} />
 
-                <div className="mt-4 h-1.5 bg-gray-100 rounded-full w-64">
+                <div className="mt-4 h-1.5 bg-gray-100 rounded-full w-full max-w-64">
                   <div className={`h-full rounded-full transition-all ${
                     analysis.veredicto === 'VIABLE' ? 'bg-green-500' :
                     analysis.veredicto === 'MARGINAL' ? 'bg-yellow-400' :
