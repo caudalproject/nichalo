@@ -140,7 +140,7 @@ export default async function LandingPage() {
                 </div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-[#0A0A0A]">🇦🇷</div>
+                <div className="text-3xl font-bold text-[#0A0A0A]">AR</div>
                 <div className="text-sm text-[#6B7280] mt-1">Argentina</div>
               </div>
               <div>
@@ -161,9 +161,7 @@ export default async function LandingPage() {
             {FEATURES.map((f) => (
               <Card key={f.title} className="border-[#E5E7EB] rounded-lg">
                 <CardContent className="p-6">
-                  <div className="inline-flex items-center justify-center rounded-xl bg-[#DCFCE7] p-3">
-                    <f.Icon className="h-8 w-8 text-[#16A34A]" />
-                  </div>
+                  <f.Icon className="h-5 w-5 text-[#16A34A]" />
                   <h3 className="mt-4 text-base font-semibold text-[#0A0A0A]">
                     {f.title}
                   </h3>
