@@ -134,9 +134,9 @@ export default async function LandingPage() {
             </p>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-xl mx-auto text-center">
               <div>
-                <div className="text-3xl font-bold text-[#0A0A0A]">100+</div>
+                <div className="text-3xl font-bold text-[#0A0A0A]">100%</div>
                 <div className="text-sm text-[#6B7280] mt-1">
-                  productos analizados
+                  datos reales de ML
                 </div>
               </div>
               <div>
