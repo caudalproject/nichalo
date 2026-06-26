@@ -91,150 +91,152 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   }
 
   return (
-    <header className="border-b border-[#E5E7EB] bg-white/80 backdrop-blur sticky top-0 z-30">
-      <div className="container flex h-14 items-center justify-between">
-        <Link
-          href="/"
-          className="font-semibold text-xl tracking-tight select-none"
-        >
-          <span className="text-[#16A34A]">N</span>
-          <span className="text-[#0A0A0A]">ichalo</span>
-        </Link>
+    <>
+      <header className="border-b border-[#E5E7EB] bg-white/80 backdrop-blur sticky top-0 z-30">
+        <div className="container flex h-14 items-center justify-between">
+          <Link
+            href="/"
+            className="font-semibold text-xl tracking-tight select-none"
+          >
+            <span className="text-[#16A34A]">N</span>
+            <span className="text-[#0A0A0A]">ichalo</span>
+          </Link>
 
-        <nav className="flex items-center gap-3 text-sm">
-          {clientEmail ? (
-            <>
-              <Link
-                href="/dashboard"
-                className="hidden md:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/analizar"
-                className="hidden md:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
-              >
-                Nuevo análisis
-              </Link>
-
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-1 text-gray-600 hover:text-gray-900 transition-colors"
-                aria-label="Menú"
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setOpen(!open)}
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          <nav className="flex items-center gap-3 text-sm">
+            {clientEmail ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="hidden md:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium text-sm">
-                    {inicial}
-                  </div>
-                  <span className="hidden md:block">{nombreCorto}</span>
-                  <ChevronDown className="w-3 h-3" />
+                  Dashboard
+                </Link>
+                <Link
+                  href="/analizar"
+                  className="hidden md:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
+                >
+                  Nuevo análisis
+                </Link>
+
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="md:hidden p-1 text-gray-600 hover:text-gray-900 transition-colors"
+                  aria-label="Menú"
+                >
+                  {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
 
-                {open && (
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl border border-gray-100 shadow-lg z-50 py-2">
-                    <div className="px-4 py-3 border-b border-gray-50">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-900 truncate max-w-[140px]">
-                          {nombre}
-                        </span>
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                            planActual === "pro"
-                              ? "bg-green-50 text-green-700"
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setOpen(!open)}
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium text-sm">
+                      {inicial}
+                    </div>
+                    <span className="hidden md:block">{nombreCorto}</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+
+                  {open && (
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl border border-gray-100 shadow-lg z-50 py-2">
+                      <div className="px-4 py-3 border-b border-gray-50">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-900 truncate max-w-[140px]">
+                            {nombre}
+                          </span>
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              planActual === "pro"
+                                ? "bg-green-50 text-green-700"
+                                : planActual === "starter"
+                                  ? "bg-blue-50 text-blue-700"
+                                  : "bg-gray-100 text-gray-500"
+                            }`}
+                          >
+                            {planActual === "pro"
+                              ? "Pro"
                               : planActual === "starter"
-                                ? "bg-blue-50 text-blue-700"
-                                : "bg-gray-100 text-gray-500"
-                          }`}
-                        >
-                          {planActual === "pro"
-                            ? "Pro"
-                            : planActual === "starter"
-                              ? "Starter"
-                              : "Free"}
-                        </span>
+                                ? "Starter"
+                                : "Free"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-400">
+                          {analisis} análisis restantes
+                        </p>
                       </div>
-                      <p className="text-xs text-gray-400">
-                        {analisis} análisis restantes
-                      </p>
-                    </div>
 
-                    <div className="py-1">
-                      {(planActual === "free" || planActual === "starter") && (
-                        <a
-                          href="/#planes"
-                          className="block px-3 py-2 text-xs font-semibold text-[#16A34A] hover:bg-green-50 rounded-md transition-colors"
-                          onClick={() => setOpen(false)}
-                        >
-                          ⬆️ Mejorar plan →
-                        </a>
-                      )}
+                      <div className="py-1">
+                        {(planActual === "free" || planActual === "starter") && (
+                          <a
+                            href="/#planes"
+                            className="block px-3 py-2 text-xs font-semibold text-[#16A34A] hover:bg-green-50 rounded-md transition-colors"
+                            onClick={() => setOpen(false)}
+                          >
+                            ⬆️ Mejorar plan →
+                          </a>
+                        )}
 
-                      {planActual !== "free" && (
-                        <>
-                          {!showCancelConfirm ? (
-                            <button
-                              onClick={() => setShowCancelConfirm(true)}
-                              className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                            >
-                              Cancelar suscripción
-                            </button>
-                          ) : (
-                            <div className="px-3 py-2 space-y-2">
-                              <p className="text-xs text-gray-600">¿Confirmás que querés cancelar? Perdés acceso al plan pago.</p>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => setShowCancelConfirm(false)}
-                                  className="flex-1 text-xs py-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
-                                >
-                                  No, quedarse
-                                </button>
-                                <button
-                                  onClick={handleCancelar}
-                                  disabled={canceling}
-                                  className="flex-1 text-xs py-1 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-                                >
-                                  {canceling ? "Cancelando..." : "Sí, cancelar"}
-                                </button>
+                        {planActual !== "free" && (
+                          <>
+                            {!showCancelConfirm ? (
+                              <button
+                                onClick={() => setShowCancelConfirm(true)}
+                                className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                              >
+                                Cancelar suscripción
+                              </button>
+                            ) : (
+                              <div className="px-3 py-2 space-y-2">
+                                <p className="text-xs text-gray-600">¿Confirmás que querés cancelar? Perdés acceso al plan pago.</p>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => setShowCancelConfirm(false)}
+                                    className="flex-1 text-xs py-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
+                                  >
+                                    No, quedarse
+                                  </button>
+                                  <button
+                                    onClick={handleCancelar}
+                                    disabled={canceling}
+                                    className="flex-1 text-xs py-1 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                                  >
+                                    {canceling ? "Cancelando..." : "Sí, cancelar"}
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          )}
-                          {cancelError && (
-                            <p className="px-3 text-xs text-red-600">{cancelError}</p>
-                          )}
-                        </>
-                      )}
+                            )}
+                            {cancelError && (
+                              <p className="px-3 text-xs text-red-600">{cancelError}</p>
+                            )}
+                          </>
+                        )}
 
-                      <button
-                        onClick={handleSignOut}
-                        disabled={signingOut}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-                      >
-                        {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
-                      </button>
+                        <button
+                          onClick={handleSignOut}
+                          disabled={signingOut}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                          {signingOut ? "Cerrando sesión…" : "Cerrar sesión"}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <Link href="/login">
-              <Button size="sm">Ingresar</Button>
-            </Link>
-          )}
-        </nav>
-      </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <Link href="/login">
+                <Button size="sm">Ingresar</Button>
+              </Link>
+            )}
+          </nav>
+        </div>
+      </header>
 
       {clientEmail && mobileMenuOpen && (
         <>
           <div
-            className="fixed inset-x-0 top-14 bottom-0 bg-black/35 z-40 md:hidden"
+            className="fixed inset-0 bg-black/35 z-40 md:hidden"
             onClick={() => setMobileMenuOpen(false)}
           />
           <div className="fixed inset-x-0 top-14 z-50 md:hidden">
@@ -257,6 +259,6 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
           </div>
         </>
       )}
-    </header>
+    </>
   );
 }
