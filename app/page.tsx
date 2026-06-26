@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
-import { MiniPriceDistributionChart } from "@/components/MiniPriceDistributionChart";
+
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { getPaisFromHeaders, getPreciosPorPais } from "@/lib/geolocation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
@@ -129,7 +129,7 @@ export default async function LandingPage() {
 
         {/* Antes y después */}
         <section className="container py-20">
-          <div className="text-center mb-12">
+          <div className="text-center" style={{ marginBottom: "2.5rem" }}>
             <h2 className="text-3xl font-bold text-[#0A0A0A]">
               Lo que cambia cuando usás Nichalo
             </h2>
@@ -141,9 +141,9 @@ export default async function LandingPage() {
           <div className="mx-auto max-w-4xl">
             <div className="flex flex-col md:flex-row md:gap-0 gap-4">
               {/* Columna ANTES */}
-              <div className="flex-1 bg-gray-100 rounded-xl border-l-4 border-gray-500 p-6">
+              <div className="flex-1 bg-gray-100 rounded-xl p-6 flex flex-col">
                 <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Antes</h3>
-                <ul className="space-y-3">
+                <ul className="space-y-3 flex-1">
                   {[
                     "\"Me parece que este producto va a vender\"",
                     "Comprás stock sin saber si hay mercado real",
@@ -156,6 +156,9 @@ export default async function LandingPage() {
                     </li>
                   ))}
                 </ul>
+                <p className="text-xs text-[#6B7280] italic" style={{ borderTop: "0.5px solid var(--border, #E5E7EB)", paddingTop: "16px", marginTop: "20px" }}>
+                  Lo que pasa hoy, sin datos.
+                </p>
               </div>
 
               {/* Flecha — solo desktop */}
@@ -166,7 +169,7 @@ export default async function LandingPage() {
               </div>
 
               {/* Columna DESPUÉS */}
-              <div className="flex-1 bg-white rounded-xl border-l-4 border-[#16A34A] shadow-sm px-6 py-8">
+              <div className="flex-1 bg-gray-100 rounded-xl p-6 flex flex-col">
                 <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Después</h3>
                 <p className="text-xs text-[#6B7280] mb-3">Ejemplo real: cargador inalámbrico</p>
                 <div className="mb-4">
@@ -174,7 +177,7 @@ export default async function LandingPage() {
                     Score 82 · VIABLE
                   </span>
                 </div>
-                <ul className="space-y-3 mb-4">
+                <ul className="space-y-3 flex-1">
                   {[
                     "Margen real: +18.4% con tu costo de proveedor",
                     "Precio sugerido según tu perfil de vendedor",
@@ -186,11 +189,7 @@ export default async function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <div className="mb-4">
-                  <p className="text-[11px] text-[#6B7280] mb-1">Distribución de precios — publicaciones reales</p>
-                  <MiniPriceDistributionChart />
-                </div>
-                <p className="text-xs text-[#6B7280] italic">
+                <p className="text-xs text-[#6B7280] italic" style={{ borderTop: "0.5px solid var(--border, #E5E7EB)", paddingTop: "16px", marginTop: "20px" }}>
                   Todo esto antes de comprar una sola unidad.
                 </p>
               </div>
