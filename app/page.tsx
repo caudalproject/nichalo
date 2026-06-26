@@ -450,21 +450,25 @@ export default async function LandingPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E5E7EB]">
-                  {[
-                    { label: "Análisis/mes", free: "1", starter: "10", pro: "30" },
-                    { label: "Publicaciones", free: "30", starter: "50", pro: "100" },
-                    { label: "Imagen del producto", free: "✅", starter: "✅", pro: "✅" },
-                    { label: "Análisis avanzado", free: "❌", starter: "❌", pro: "✅" },
-                    { label: "Precio sugerido", free: "✅", starter: "✅", pro: "✅" },
-                    { label: "Secciones completas", free: "❌", starter: "✅", pro: "✅" },
-                  ].map((row) => (
-                    <tr key={row.label}>
-                      <td className="py-3 px-5 text-[#0A0A0A]">{row.label}</td>
-                      <td className="py-3 px-4 text-center text-[#6B7280]">{row.free}</td>
-                      <td className="py-3 px-4 text-center text-[#6B7280]">{row.starter}</td>
-                      <td className="py-3 px-4 text-center font-medium text-[#0A0A0A] bg-[#F0FDF4] border-x border-[#16A34A]/25">{row.pro}</td>
-                    </tr>
-                  ))}
+                  {(() => {
+                    const yes = <Check className="inline-block text-green-600" size={18} />;
+                    const no = <X className="inline-block text-gray-400" size={18} />;
+                    return [
+                      { label: "Análisis/mes", free: "1", starter: "10", pro: "30" },
+                      { label: "Publicaciones", free: "30", starter: "50", pro: "100" },
+                      { label: "Imagen del producto", free: yes, starter: yes, pro: yes },
+                      { label: "Análisis avanzado", free: no, starter: no, pro: yes },
+                      { label: "Precio sugerido", free: yes, starter: yes, pro: yes },
+                      { label: "Secciones completas", free: no, starter: yes, pro: yes },
+                    ].map((row) => (
+                      <tr key={row.label}>
+                        <td className="py-3 px-5 text-[#0A0A0A]">{row.label}</td>
+                        <td className="py-3 px-4 text-center text-[#6B7280]">{row.free}</td>
+                        <td className="py-3 px-4 text-center text-[#6B7280]">{row.starter}</td>
+                        <td className="py-3 px-4 text-center font-medium text-[#0A0A0A] bg-[#F0FDF4] border-x border-[#16A34A]/25">{row.pro}</td>
+                      </tr>
+                    ));
+                  })()}
                 </tbody>
               </table>
             </div>
