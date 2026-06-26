@@ -214,7 +214,7 @@ export default async function ResultadoPage({ params }: Params) {
       />
       <main className="container py-10">
         <div className="mx-auto max-w-3xl space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Link
               href="/dashboard"
               className="text-sm text-muted-foreground hover:underline"
