@@ -772,7 +772,7 @@ export default async function ResultadoPage({ params }: Params) {
                   ¿Te sirvió el análisis?
                 </p>
                 <p className="text-xs text-gray-500">
-                  Este fue tu análisis completo gratuito. Para seguir validando productos necesitás un plan.
+                  Usaste tu análisis gratis. Para seguir validando productos antes de invertir en stock, elegí un plan:
                 </p>
                 <div className="flex gap-3 justify-center flex-wrap">
                   <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">

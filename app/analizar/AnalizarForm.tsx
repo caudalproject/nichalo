@@ -544,10 +544,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
           {noCredits && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center space-y-3">
               <p className="text-sm font-semibold text-amber-800">
-                Te quedaste sin análisis este mes
-              </p>
-              <p className="text-xs text-amber-700">
-                Actualizá tu plan para seguir validando productos
+                Usaste tu análisis gratis. Para seguir validando productos antes de invertir en stock, elegí un plan:
               </p>
               <div className="flex gap-2 justify-center flex-wrap">
                 <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">

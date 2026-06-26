@@ -37,7 +37,7 @@ export function UpgradeBanner() {
       <div className="flex items-center gap-2 text-amber-800">
         <AlertTriangle className="h-4 w-4 shrink-0" />
         <span className="text-sm font-medium">
-          Te quedaste sin análisis este mes.
+          Usaste tu análisis gratis. Para seguir validando productos antes de invertir en stock, elegí un plan.
         </span>
       </div>
       <div className="flex flex-col gap-2 sm:flex-row sm:shrink-0">
