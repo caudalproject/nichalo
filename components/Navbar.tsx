@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 
 interface NavbarProps {
   email?: string | null;
@@ -21,6 +21,7 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   const [canceling, setCanceling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [clientEmail] = useState<string | null>(email ?? null);
   const [clientName, setClientName] = useState<string | null>(null);
   const [userData, setUserData] = useState({
@@ -105,16 +106,24 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
             <>
               <Link
                 href="/dashboard"
-                className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
+                className="hidden md:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
               >
                 Dashboard
               </Link>
               <Link
                 href="/analizar"
-                className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
+                className="hidden md:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
               >
                 Nuevo análisis
               </Link>
+
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-1 text-gray-600 hover:text-gray-900 transition-colors"
+                aria-label="Menú"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
 
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -221,6 +230,25 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
           )}
         </nav>
       </div>
+
+      {clientEmail && mobileMenuOpen && (
+        <div className="md:hidden border-t border-[#E5E7EB] bg-white px-4 py-3 flex flex-col gap-2 text-sm">
+          <Link
+            href="/dashboard"
+            className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors py-1"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/analizar"
+            className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors py-1"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Nuevo análisis
+          </Link>
+        </div>
+      )}
     </header>
   );
 }

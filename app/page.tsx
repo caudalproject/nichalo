@@ -268,7 +268,7 @@ export default async function LandingPage() {
                   <span className="text-sm text-gray-400">Mercado con oportunidad real</span>
                 </div>
                 <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-8xl font-black leading-none text-green-500">78</span>
+                  <span className="text-6xl md:text-8xl font-black leading-none text-green-500">78</span>
                   <span className="text-2xl text-gray-300 font-light">/100</span>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-1">Cargador inalámbrico 15W para auto</h3>
@@ -510,7 +510,7 @@ export default async function LandingPage() {
             </div>
 
             {/* Comparison table */}
-            <div className="mt-16 max-w-3xl mx-auto overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
+            <div className="mt-16 max-w-3xl mx-auto overflow-x-auto rounded-xl border border-[#E5E7EB] bg-white">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
