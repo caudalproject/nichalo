@@ -219,7 +219,7 @@ export default async function ResultadoPage({ params }: Params) {
               href="/dashboard"
               className="text-sm text-muted-foreground hover:underline"
             >
-              ← Volver al dashboard
+              <span className="whitespace-nowrap">← Volver al dashboard</span>
             </Link>
             <div className="flex items-center gap-2">
               <ShareButton />

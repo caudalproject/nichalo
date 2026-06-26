@@ -234,24 +234,26 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
       {clientEmail && mobileMenuOpen && (
         <>
           <div
-            className="fixed inset-0 top-14 bg-black/20 z-20 md:hidden"
+            className="fixed inset-x-0 top-14 bottom-0 bg-black/35 z-40 md:hidden"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="md:hidden relative z-30 border-t border-[#E5E7EB] bg-white px-4 py-3 flex flex-col gap-2 text-sm shadow-lg">
-            <Link
-              href="/dashboard"
-              className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors py-1"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/analizar"
-              className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors py-1"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Nuevo análisis
-            </Link>
+          <div className="fixed inset-x-0 top-14 z-50 md:hidden">
+            <div className="mx-3 mt-2 bg-white rounded-xl shadow-lg overflow-hidden">
+              <Link
+                href="/dashboard"
+                className="block px-5 py-4 text-sm text-[#6B7280] hover:text-[#0A0A0A] hover:bg-gray-50 border-b border-gray-100 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/analizar"
+                className="block px-5 py-4 text-sm text-[#6B7280] hover:text-[#0A0A0A] hover:bg-gray-50 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Nuevo análisis
+              </Link>
+            </div>
           </div>
         </>
       )}
