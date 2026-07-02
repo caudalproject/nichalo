@@ -98,6 +98,18 @@ El caché de análisis es **silencioso** — el usuario nunca debe saber si est�
 - Si algo no está claro, preguntás antes de asumir
 - Si tomás una decisión técnica durante la implementación, la documentás en el momento
 
+## Deploy — regla obligatoria
+
+**Al terminar cualquier desarrollo, siempre hacer commit + push a GitHub. Sin excepción.**
+
+Flujo estándar al cerrar cada tarea de código:
+1. `git add <archivos modificados>` — nunca `git add .` para evitar incluir archivos sensibles
+2. `git commit -m "..."` — mensaje en inglés, estilo conventional commits (`feat:`, `fix:`, `docs:`, etc.)
+3. `git push` — Vercel auto-deploya desde `main`
+4. Confirmar que el working tree quedó limpio (`git status`)
+
+No esperar que Juan Pedro lo pida. El push es parte del trabajo, no un paso opcional.
+
 ### Git: commit y push son parte de la tarea
 **Regla dura:** cada vez que se implementa código, el flujo termina con `git add` + `git commit` + `git push`. Sin push, la tarea no está hecha — el código solo existe localmente y Vercel no lo despliega. No hay que esperar que Juan Pedro lo pida: el push es el paso final implícito de toda implementación.
 
