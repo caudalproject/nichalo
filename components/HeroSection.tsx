@@ -1,11 +1,21 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+
+declare function fbq(...args: unknown[]): void;
 
 interface Props {
   isLoggedIn?: boolean;
 }
 
 export function HeroSection({ isLoggedIn = false }: Props) {
+  function handleCtaClick() {
+    if (typeof fbq !== "undefined") {
+      fbq("track", "Lead");
+    }
+  }
+
   return (
     <>
       {isLoggedIn ? (
@@ -28,9 +38,9 @@ export function HeroSection({ isLoggedIn = false }: Props) {
       ) : (
         <>
           <div className="mt-8 flex justify-center">
-            <Link href="/login">
+            <Link href="/login" onClick={handleCtaClick}>
               <Button size="lg" className="rounded-md">
-                Empezar gratis
+                Analizar mi producto gratis →
               </Button>
             </Link>
           </div>

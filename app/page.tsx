@@ -7,6 +7,8 @@ import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
 
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
+import { HeroMock } from "@/components/HeroMock";
+import { PixelTracking } from "@/components/PixelTracking";
 import { getPaisFromHeaders, getPreciosPorPais } from "@/lib/geolocation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
@@ -112,18 +114,21 @@ export default async function LandingPage() {
           analisisRestantes={profile?.analisis_restantes}
         />
       <main>
+        <PixelTracking />
         {/* Hero */}
-        <section className="py-16 md:py-32">
+        <section className="py-10 md:py-32">
           <div className="max-w-6xl mx-auto px-6 text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#0A0A0A] leading-tight max-w-4xl mx-auto">
-              ¿Tu producto va a vender en{" "}
-              <span className="text-[#16A34A] whitespace-nowrap">Mercado Libre</span>?
+              Sabé si tu producto tiene mercado en{" "}
+              <span className="text-[#16A34A] whitespace-nowrap">ML</span>{" "}
+              — antes de poner un peso en stock.
             </h1>
             <p className="mt-6 text-lg text-[#6B7280] leading-relaxed max-w-xl mx-auto">
               Antes de comprar stock, sabé exactamente si el mercado tiene
               espacio para vos. Análisis real con datos de ML en segundos.
             </p>
             <HeroSection isLoggedIn={!!user} />
+            {!user && <HeroMock />}
           </div>
         </section>
 
