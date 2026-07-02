@@ -6,6 +6,8 @@ import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 
 function LoginContent() {
@@ -15,12 +17,39 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // Magic link state
+  const [email, setEmail] = useState("");
+  const [magicLoading, setMagicLoading] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
+  const [magicError, setMagicError] = useState<string | null>(null);
+
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) router.replace("/dashboard");
     });
   }, []);
+
+  async function handleMagicLink(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setMagicLoading(true);
+    setMagicError(null);
+    const supabase = createSupabaseBrowserClient();
+    const origin = window.location.origin;
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: {
+        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
+      },
+    });
+    setMagicLoading(false);
+    if (error) {
+      setMagicError(error.message);
+    } else {
+      setMagicSent(true);
+    }
+  }
 
   async function handleGoogle() {
     setLoading(true);
@@ -73,6 +102,55 @@ function LoginContent() {
             </svg>
             {loading ? "Redirigiendo…" : "Continuar con Google"}
           </Button>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">o</span>
+            </div>
+          </div>
+
+          {/* Magic link */}
+          {magicSent ? (
+            <div className="rounded-md border border-green-200 bg-green-50 p-4 text-center text-sm text-green-700">
+              <p className="font-medium">Revisá tu email 📬</p>
+              <p className="mt-1 text-xs text-green-600">
+                Te mandamos un link. Tocalo y entrás directo, sin contraseña.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleMagicLink} className="space-y-2">
+              <Input
+                type="email"
+                placeholder="tu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={magicLoading}
+                autoComplete="email"
+                inputMode="email"
+                className="w-full"
+              />
+              {magicError && (
+                <p className="text-xs text-destructive">{magicError}</p>
+              )}
+              <Button
+                type="submit"
+                variant="outline"
+                size="lg"
+                className="w-full"
+                disabled={magicLoading || !email.trim()}
+              >
+                {magicLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                {magicLoading ? "Enviando…" : "Enviarme un link"}
+              </Button>
+            </form>
+          )}
+
           <p className="text-center text-xs text-muted-foreground">
             Al continuar aceptás nuestros términos.{" "}
             <Link href="/" className="underline">
