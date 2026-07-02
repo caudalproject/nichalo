@@ -119,9 +119,8 @@ export default async function LandingPage() {
         <section className="py-10 md:py-32">
           <div className="max-w-6xl mx-auto px-6 text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#0A0A0A] leading-tight max-w-4xl mx-auto">
-              Sabé si tu producto tiene mercado en{" "}
-              <span className="text-[#16A34A] whitespace-nowrap">ML</span>{" "}
-              — antes de poner un peso en stock.
+              ¿Tu producto va a vender en{" "}
+              <span className="text-[#16A34A] whitespace-nowrap">Mercado Libre</span>?
             </h1>
             <p className="mt-6 text-lg text-[#6B7280] leading-relaxed max-w-xl mx-auto">
               Antes de comprar stock, sabé exactamente si el mercado tiene
