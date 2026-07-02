@@ -21,13 +21,33 @@ Leé las notas relevantes del segundo cerebro según el área de trabajo:
 | Cualquier tarea | `00-Inicio/Nichalo — Segundo Cerebro.md` (siempre) |
 
 ### Cuándo actualizar el segundo cerebro
-Actualizá el segundo cerebro **al terminar** una tarea cuando:
-- Implementaste una feature relevante (no fixes menores)
-- Tomaste una decisión técnica o de producto importante
-- Encontraste algo que vale la pena recordar (bug raro, limitación de una librería, patrón útil)
-- Juan Pedro te dice explícitamente "anotá esto"
 
-**No** actualizés por cada cambio de CSS, fix de typo o ajuste menor.
+#### Actualizá automáticamente (sin preguntar)
+Hacelo en el momento, apenas ocurra cada situación:
+
+- **Después de un `git commit` que cierre una feature o fix relevante** — relevante = afecta lógica de negocio, flujo de usuario, integración externa, o comportamiento del sistema. No aplica a commits de CSS, typos, o copy.
+- **Cuando se resuelva un bug que tomó más de un intento o cuya causa raíz no era obvia** — si el problema requirió investigar, descartar hipótesis, o reveló algo sobre el sistema que no era evidente, documentarlo en Aprendizajes.
+- **Cuando se tome una decisión técnica con trade-offs reales** — elegir entre dos enfoques, descartar una librería, cambiar de estrategia. Aunque Juan Pedro no lo pida, anotarlo en el Diario de Decisiones.
+- **Si Juan Pedro dice explícitamente "anotá esto"** — siempre.
+
+#### No actualizés automáticamente por
+- Cambios cosméticos (colores, spacing, animaciones)
+- Ajustes de copy o texto de UI
+- Fixes de una sola línea cuya causa era obvia
+- Refactors menores sin cambio de comportamiento
+
+Para estos casos, esperá a que Juan Pedro lo pida.
+
+#### Resumen al cerrar la sesión
+Siempre que se cierre una sesión de trabajo (cuando Juan Pedro lo indique o cuando la tarea concluya), mostrá un bloque de cierre con este formato:
+
+```
+## Resumen de sesión — [fecha]
+**Actualizaciones al segundo cerebro:**
+- [nota actualizada]: [qué se anotó] — o bien "ninguna" si no hubo cambios relevantes
+
+**Próximos pasos sugeridos:** [opcional, solo si hay algo claro pendiente]
+```
 
 ### Cómo actualizar
 Según lo que hiciste, actualizá la nota correspondiente:
@@ -73,6 +93,14 @@ El caché de análisis es **silencioso** — el usuario nunca debe saber si est�
 
 ## Cómo trabajamos
 - Juan Pedro manda tareas concretas
-- Vos implementás, después actualizás el cerebro si corresponde
+- Vos implementás y actualizás el cerebro automáticamente cuando corresponda (ver reglas arriba) — sin esperar que te lo pida
+- Al cierre de cada sesión, mostrás el resumen de qué se actualizó (o que no hubo cambios relevantes)
 - Si algo no está claro, preguntás antes de asumir
-- Si tomás una decisión técnica durante la implementación, la documentás
+- Si tomás una decisión técnica durante la implementación, la documentás en el momento
+
+### Git: commit y push son parte de la tarea
+**Regla dura:** cada vez que se implementa código, el flujo termina con `git add` + `git commit` + `git push`. Sin push, la tarea no está hecha — el código solo existe localmente y Vercel no lo despliega. No hay que esperar que Juan Pedro lo pida: el push es el paso final implícito de toda implementación.
+
+- Solo agregar al commit los archivos que se modificaron en esa tarea.
+- No tocar archivos que ya tenían cambios previos no relacionados.
+- Mensaje de commit en inglés, formato `tipo(scope): descripción`.
