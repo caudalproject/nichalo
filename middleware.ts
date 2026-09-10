@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { PAIS_COOKIE, normalizarPais } from "@/lib/geolocation";
 
 const PROTECTED_PREFIXES = ["/dashboard", "/analizar"];
 
@@ -59,6 +60,27 @@ export async function middleware(request: NextRequest) {
     url.pathname = "/login";
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
+  }
+
+  // Deteccion de pais en el edge. Antes vivia en la landing via headers(), lo
+  // que forzaba render dinamico de "/" en cada visita solo para los precios,
+  // que estan muy abajo en la pagina. Ahora el pais viaja en una cookie legible
+  // por el cliente y la landing se sirve prerenderizada.
+  const pais = normalizarPais(
+    request.headers.get("x-vercel-ip-country") ??
+      request.headers.get("cf-ipcountry") ??
+      request.geo?.country
+  );
+
+  if (request.cookies.get(PAIS_COOKIE)?.value !== pais) {
+    response.cookies.set({
+      name: PAIS_COOKIE,
+      value: pais,
+      path: "/",
+      sameSite: "lax",
+      httpOnly: false, // lo lee el componente de precios en el browser
+      maxAge: 60 * 60 * 24 * 30,
+    });
   }
 
   return response;

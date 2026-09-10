@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { Check, X, Search, Bot, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,12 +6,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
-
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { HeroMock } from "@/components/HeroMock";
 import { PixelTracking } from "@/components/PixelTracking";
-import { getPaisFromHeaders, getPreciosPorPais } from "@/lib/geolocation";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import {
+  MonedaPais,
+  NotaPrecioStarter,
+  PrecioPlan,
+} from "@/components/PreciosPais";
+
+// Landing 100% estática (○ en el build): sin Supabase y sin headers().
+// El Navbar hidrata su propia sesión del lado cliente y los precios por país
+// salen de la cookie que setea el middleware, así que ni la sesión ni la
+// geolocalización cuestan TTFB en el hero.
 
 const FEATURES = [
   {
@@ -33,86 +41,70 @@ const FEATURES = [
   },
 ];
 
+const PLANS = [
+  {
+    name: "Free",
+    price: "Gratis" as ReactNode,
+    period: "",
+    priceNote: null as ReactNode,
+    popular: false,
+    badge: null as null | string,
+    mpPlan: null as null,
+    features: [
+      { label: "1 análisis por mes", included: true, subItems: null as string[] | null },
+      { label: "30 publicaciones analizadas", included: true, subItems: null as string[] | null },
+      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+      { label: "Primer análisis completo — sin restricciones", included: true, subItems: null as string[] | null },
+    ],
+    cta: "Empezar gratis",
+    href: "/login",
+  },
+  {
+    name: "Starter",
+    price: <PrecioPlan plan="starter" /> as ReactNode,
+    period: "/mes",
+    priceNote: <NotaPrecioStarter /> as ReactNode,
+    popular: true,
+    badge: "Más popular" as null | string,
+    mpPlan: "starter" as const,
+    features: [
+      { label: "10 análisis por mes", included: true, subItems: null as string[] | null },
+      { label: "50 publicaciones analizadas", included: true, subItems: null as string[] | null },
+      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+      { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
+    ],
+    cta: "Empezar ahora",
+    href: null,
+  },
+  {
+    name: "Pro",
+    price: <PrecioPlan plan="pro" /> as ReactNode,
+    period: "/mes",
+    priceNote: "El análisis más completo del mercado" as ReactNode,
+    popular: false,
+    badge: "⭐ Más completo" as null | string,
+    mpPlan: "pro" as const,
+    features: [
+      { label: "30 análisis por mes", included: true, subItems: null as string[] | null },
+      { label: "100 publicaciones analizadas", included: true, subItems: null as string[] | null },
+      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+      {
+        label: "Análisis avanzado Pro",
+        included: true,
+        subItems: ["Origen del producto", "Presupuesto inicial", "Variantes del producto", "Canal de distribución"] as string[] | null,
+      },
+      { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
+      { label: "Mayor profundidad de datos", included: true, subItems: null as string[] | null },
+    ],
+    cta: "Empezar ahora",
+    href: null,
+  },
+];
 
-export default async function LandingPage() {
-  const pais = getPaisFromHeaders();
-  const precios = getPreciosPorPais(pais);
-  const supabase = createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const isLoggedIn = !!user;
-  const profile = user ? (await supabase
-    .from("users")
-    .select("plan, analisis_restantes")
-    .eq("id", user.id)
-    .maybeSingle()).data : null;
-
-  const PLANS = [
-    {
-      name: "Free",
-      price: "Gratis",
-      period: "",
-      priceNote: null as null | string,
-      popular: false,
-      badge: null as null | string,
-      mpPlan: null as null,
-      features: [
-        { label: "1 análisis por mes", included: true, subItems: null as string[] | null },
-        { label: "30 publicaciones analizadas", included: true, subItems: null as string[] | null },
-        { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
-        { label: "Primer análisis completo — sin restricciones", included: true, subItems: null as string[] | null },
-      ],
-      cta: "Empezar gratis",
-      href: "/login",
-    },
-    {
-      name: "Starter",
-      price: precios.starter,
-      period: "/mes",
-      priceNote: (pais === "MX" ? "~$21 MXN por análisis" : pais === "CO" ? "~$5.000 COP por análisis" : "~$1.700 ARS por análisis") as null | string,
-      popular: true,
-      badge: "Más popular" as null | string,
-      mpPlan: "starter" as const,
-      features: [
-        { label: "10 análisis por mes", included: true, subItems: null as string[] | null },
-        { label: "50 publicaciones analizadas", included: true, subItems: null as string[] | null },
-        { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
-        { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
-      ],
-      cta: "Empezar ahora",
-      href: null,
-    },
-    {
-      name: "Pro",
-      price: precios.pro,
-      period: "/mes",
-      priceNote: "El análisis más completo del mercado" as null | string,
-      popular: false,
-      badge: "⭐ Más completo" as null | string,
-      mpPlan: "pro" as const,
-      features: [
-        { label: "30 análisis por mes", included: true, subItems: null as string[] | null },
-        { label: "100 publicaciones analizadas", included: true, subItems: null as string[] | null },
-        { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
-        {
-          label: "Análisis avanzado Pro",
-          included: true,
-          subItems: ["Origen del producto", "Presupuesto inicial", "Variantes del producto", "Canal de distribución"] as string[] | null,
-        },
-        { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
-        { label: "Mayor profundidad de datos", included: true, subItems: null as string[] | null },
-      ],
-      cta: "Empezar ahora",
-      href: null,
-    },
-  ];
-
+export default function LandingPage() {
   return (
     <>
-      <Navbar
-          email={user?.email}
-          plan={profile?.plan}
-          analisisRestantes={profile?.analisis_restantes}
-        />
+      <Navbar />
       <main>
         <PixelTracking />
         {/* Hero */}
@@ -126,8 +118,8 @@ export default async function LandingPage() {
               Antes de comprar stock, sabé exactamente si el mercado tiene
               espacio para vos. Análisis real con datos de ML en segundos.
             </p>
-            <HeroSection isLoggedIn={!!user} />
-            {!user && <HeroMock />}
+            <HeroSection isLoggedIn={false} />
+            <HeroMock />
           </div>
         </section>
 
@@ -249,7 +241,7 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {!isLoggedIn && (
+        {/* Preview del análisis — siempre visible para usuarios anónimos */}
         <section className="container py-20">
           <div className="mx-auto max-w-3xl text-center mb-10">
             <h2 className="text-3xl font-bold text-[#0A0A0A]">
@@ -354,7 +346,6 @@ export default async function LandingPage() {
             </div>
           </div>
         </section>
-        )}
 
         {/* Testimonios */}
         <section className="bg-[#F9FAFB] py-16 border-y border-[#E5E7EB]">
@@ -389,14 +380,14 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* CTA intermedio */}
-        {!isLoggedIn && <section className="py-12 text-center">
+        {/* CTA intermedio — siempre visible para usuarios anónimos */}
+        <section className="py-12 text-center">
           <div className="container">
             <p className="text-2xl font-bold text-[#0A0A0A]">
               ¿Listo para validar tu próximo producto?
             </p>
             <div className="mt-6">
-              <Link href={isLoggedIn ? "/analizar" : "/login"}>
+              <Link href="/login">
                 <Button size="lg" className="rounded-md">
                   Empezar gratis →
                 </Button>
@@ -406,7 +397,7 @@ export default async function LandingPage() {
               1 análisis gratis · Sin tarjeta de crédito
             </p>
           </div>
-        </section>}
+        </section>
 
         {/* Pricing */}
         <section id="planes" className="bg-[#F9FAFB] py-20 border-y border-[#E5E7EB]">
@@ -418,7 +409,7 @@ export default async function LandingPage() {
               Elegí el plan que mejor se adapta a tu ritmo de trabajo.
             </p>
             <p className="mt-1 text-center text-sm text-[#6B7280]">
-              Precios en {pais === "MX" ? "pesos mexicanos (MXN)" : pais === "CO" ? "pesos colombianos (COP)" : "pesos argentinos (ARS)"}
+              Precios en <MonedaPais />
             </p>
             <div className="mt-12 mx-auto grid max-w-5xl gap-6 md:grid-cols-3 items-start">
               {PLANS.map((plan) => (

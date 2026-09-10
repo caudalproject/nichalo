@@ -2,10 +2,37 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Menu, X } from "lucide-react";
+
+type SupabaseBrowser = ReturnType<
+  typeof import("@/lib/supabase")["createSupabaseBrowserClient"]
+>;
+
+// El SDK de Supabase pesa ~85 kB y antes entraba en el First Load JS de toda
+// pagina que monta el Navbar — incluida la landing estatica, que la ve trafico
+// anonimo de Meta Ads en Android. Se carga bajo demanda y una sola vez.
+let supabasePromise: Promise<SupabaseBrowser> | null = null;
+
+function getSupabase(): Promise<SupabaseBrowser> {
+  if (!supabasePromise) {
+    supabasePromise = import("@/lib/supabase").then((m) =>
+      m.createSupabaseBrowserClient()
+    );
+  }
+  return supabasePromise;
+}
+
+/**
+ * Hay cookie de sesion de Supabase? Evita bajar el SDK para el visitante
+ * anonimo, que es el caso comun en la landing. Supabase parte el token en
+ * `sb-<ref>-auth-token.0`, `.1`, ... cuando no entra en una cookie.
+ */
+function haySesionEnCookies(): boolean {
+  if (typeof document === "undefined") return false;
+  return /(?:^|;\s*)sb-[^=;]*-auth-token(?:\.\d+)?=/.test(document.cookie);
+}
 
 interface NavbarProps {
   email?: string | null;
@@ -15,14 +42,13 @@ interface NavbarProps {
 
 export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   const router = useRouter();
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [canceling, setCanceling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [clientEmail] = useState<string | null>(email ?? null);
+  const [clientEmail, setClientEmail] = useState<string | null>(email ?? null);
   const [clientName, setClientName] = useState<string | null>(null);
   const [userData, setUserData] = useState({
     email: email ?? null,
@@ -31,17 +57,49 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // El Navbar hidrata su propia sesion. Las paginas que ya la resolvieron en el
+  // servidor (dashboard, analizar, resultado) siguen pasando props y solo se
+  // usan como valor inicial; la landing estatica no pasa ninguna.
+  const tieneDatosDeServidor = email != null;
+
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    if (!haySesionEnCookies()) return;
+
+    let cancelado = false;
+
+    (async () => {
+      const supabase = await getSupabase();
+      const { data, error } = await supabase.auth.getUser();
       const u = data.user;
-      if (!u) return;
+      if (cancelado || error || !u) return;
+
+      setClientEmail(u.email ?? null);
       setClientName(
         u.user_metadata?.full_name ?? u.user_metadata?.name ?? null
       );
-    }).catch((err) => {
-      console.error("[navbar] error obteniendo usuario:", err);
+
+      if (tieneDatosDeServidor) return;
+
+      const { data: perfil } = await supabase
+        .from("users")
+        .select("plan, analisis_restantes")
+        .eq("id", u.id)
+        .maybeSingle();
+
+      if (cancelado || !perfil) return;
+      setUserData({
+        email: u.email ?? null,
+        plan: perfil.plan ?? "free",
+        analisis_restantes: perfil.analisis_restantes ?? 0,
+      });
+    })().catch((err) => {
+      console.error("[navbar] error hidratando sesion:", err);
     });
-  }, [supabase]);
+
+    return () => {
+      cancelado = true;
+    };
+  }, [tieneDatosDeServidor]);
 
   useEffect(() => {
     if (!open) return;
@@ -67,7 +125,12 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
 
   async function handleSignOut() {
     setSigningOut(true);
-    await supabase.auth.signOut();
+    try {
+      const supabase = await getSupabase();
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("[navbar] error cerrando sesion:", err);
+    }
     window.location.href = "/";
   }
 
