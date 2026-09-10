@@ -85,9 +85,13 @@ Corre en `localhost:3002` (o 3000/3001 si ese puerto está ocupado)
 El caché de análisis es **silencioso** — el usuario nunca debe saber si está viendo caché o análisis fresco.
 
 ### Planes
-- Free: 1 análisis, 30 publicaciones, sin imagen
-- Starter: $12/mes, 10 análisis, 200 publicaciones, sin imagen  
-- Pro: $29/mes, 30 análisis, 500 publicaciones, con imagen
+Fuente de verdad: `lib/plans.ts` (`PLAN_CONFIG`) y `lib/geolocation.ts` (precios por país). Los tres planes permiten subir imagen — no hay plan sin imagen.
+
+- **Free**: 1 análisis/mes, 30 publicaciones analizadas, con imagen. Secciones completas del resultado solo en el primer análisis de la cuenta (`isPrimerAnalisis` en `app/resultado/[id]/page.tsx`); del segundo análisis en adelante quedan bloqueadas/blureadas aunque siga en Free.
+- **Starter**: $17.000 ARS/mes (geolocalizado — ver `lib/geolocation.ts` para MX/CO), 10 análisis/mes, 50 publicaciones analizadas, con imagen, secciones completas siempre.
+- **Pro**: $41.000 ARS/mes (geolocalizado), 30 análisis/mes, 100 publicaciones analizadas, con imagen, secciones completas siempre, más "Análisis avanzado Pro" exclusivo (origen del producto, presupuesto inicial, variantes, canal de distribución — gateado en `app/analizar/AnalizarForm.tsx:206` por `plan === 'pro'`).
+
+Ningún plan tiene análisis ilimitados.
 
 ---
 

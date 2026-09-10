@@ -525,7 +525,7 @@ export default function LandingPage() {
                       { label: "Imagen del producto", free: yes, starter: yes, pro: yes },
                       { label: "Análisis avanzado", free: no, starter: no, pro: yes },
                       { label: "Precio sugerido", free: yes, starter: yes, pro: yes },
-                      { label: "Secciones completas", free: no, starter: yes, pro: yes },
+                      { label: "Secciones completas", free: "1er análisis", starter: yes, pro: yes },
                     ].map((row) => (
                       <tr key={row.label}>
                         <td className="py-3 px-5 text-[#0A0A0A]">{row.label}</td>
