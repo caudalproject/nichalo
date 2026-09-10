@@ -39,14 +39,22 @@ export async function middleware(request: NextRequest) {
     },
   });
 
+  // getSession() lee el JWT del cookie localmente — sin network call a Supabase.
+  // Es suficiente para decisiones de routing. Las páginas sensibles validan con
+  // getUser() por su cuenta.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
   const pathname = request.nextUrl.pathname;
+
+  // NO redirigir "/" para usuarios logueados: /planes redirige al anchor #planes
+  // de la landing, así que sacar al usuario de "/" le corta el acceso al pricing
+  // y por lo tanto el upgrade path. La landing se sirve igual para todos.
+
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
 
-  if (isProtected && !user) {
+  if (isProtected && !session) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirect", pathname);
