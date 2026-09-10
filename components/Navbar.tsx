@@ -92,7 +92,7 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
 
   return (
     <>
-      <header className="border-b border-[#E5E7EB] bg-white/80 backdrop-blur sticky top-0 z-30">
+      <header className="border-b border-[#E5E7EB] bg-white sticky top-0 z-30">
         <div className="container flex h-14 items-center justify-between">
           <Link
             href="/"
