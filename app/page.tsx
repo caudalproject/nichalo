@@ -170,7 +170,7 @@ export default function LandingPage() {
                 <p className="text-xs text-[#6B7280] mb-3">Ejemplo real: cargador inalámbrico</p>
                 <div className="mb-4">
                   <span className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-green-50 text-[#16A34A]">
-                    Score 82 · VIABLE
+                    Score 78 · VIABLE
                   </span>
                 </div>
                 <ul className="space-y-3 flex-1">
@@ -335,7 +335,7 @@ export default function LandingPage() {
                   Competencia, márgenes y recomendaciones completas
                 </p>
                 <p className="text-xs text-gray-500 mb-4 text-center px-6">
-                  Creá una cuenta gratis y hacé tu primer análisis en 2 minutos
+                  Creá una cuenta gratis y hacé tu primer análisis en ~3 min
                 </p>
                 <Link href="/login">
                   <Button className="rounded-full bg-[#16A34A] hover:bg-[#15803D] text-white px-6">

@@ -87,7 +87,7 @@ export function HeroMock() {
 
       {/* Disclaimer demo */}
       <p className="mt-2 text-center text-xs text-gray-400">
-        Ejemplo real de análisis — datos de Mercado Libre
+        Ejemplo de análisis — así se ve tu resultado
       </p>
     </div>
   );
