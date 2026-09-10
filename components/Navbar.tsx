@@ -2,37 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Menu, X } from "lucide-react";
-
-type SupabaseBrowser = ReturnType<
-  typeof import("@/lib/supabase")["createSupabaseBrowserClient"]
->;
-
-// El SDK de Supabase pesa ~85 kB y antes entraba en el First Load JS de toda
-// pagina que monta el Navbar — incluida la landing estatica, que la ve trafico
-// anonimo de Meta Ads en Android. Se carga bajo demanda y una sola vez.
-let supabasePromise: Promise<SupabaseBrowser> | null = null;
-
-function getSupabase(): Promise<SupabaseBrowser> {
-  if (!supabasePromise) {
-    supabasePromise = import("@/lib/supabase").then((m) =>
-      m.createSupabaseBrowserClient()
-    );
-  }
-  return supabasePromise;
-}
-
-/**
- * Hay cookie de sesion de Supabase? Evita bajar el SDK para el visitante
- * anonimo, que es el caso comun en la landing. Supabase parte el token en
- * `sb-<ref>-auth-token.0`, `.1`, ... cuando no entra en una cookie.
- */
-function haySesionEnCookies(): boolean {
-  if (typeof document === "undefined") return false;
-  return /(?:^|;\s*)sb-[^=;]*-auth-token(?:\.\d+)?=/.test(document.cookie);
-}
+import { useSesionCliente } from "@/lib/useSesionCliente";
 
 interface NavbarProps {
   email?: string | null;
@@ -48,58 +21,28 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [clientEmail, setClientEmail] = useState<string | null>(email ?? null);
-  const [clientName, setClientName] = useState<string | null>(null);
-  const [userData, setUserData] = useState({
-    email: email ?? null,
-    plan: plan ?? "free",
-    analisis_restantes: analisisRestantes ?? 0,
-  });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // El Navbar hidrata su propia sesion. Las paginas que ya la resolvieron en el
-  // servidor (dashboard, analizar, resultado) siguen pasando props y solo se
-  // usan como valor inicial; la landing estatica no pasa ninguna.
-  const tieneDatosDeServidor = email != null;
+  // El SDK de Supabase, `auth.getUser()` y el query a
+  // `users(plan, analisis_restantes)` viven en un hook compartido con
+  // HeroSection: en la landing (sin props de servidor) ambos componentes se
+  // suscriben al mismo fetch en vez de dispararlo dos veces.
+  const sesion = useSesionCliente({ email, plan, analisisRestantes });
+  const clientEmail = sesion.clientEmail;
+  const clientName = sesion.clientName;
 
-  useEffect(() => {
-    if (!haySesionEnCookies()) return;
-
-    let cancelado = false;
-
-    (async () => {
-      const supabase = await getSupabase();
-      const { data, error } = await supabase.auth.getUser();
-      const u = data.user;
-      if (cancelado || error || !u) return;
-
-      setClientEmail(u.email ?? null);
-      setClientName(
-        u.user_metadata?.full_name ?? u.user_metadata?.name ?? null
-      );
-
-      if (tieneDatosDeServidor) return;
-
-      const { data: perfil } = await supabase
-        .from("users")
-        .select("plan, analisis_restantes")
-        .eq("id", u.id)
-        .maybeSingle();
-
-      if (cancelado || !perfil) return;
-      setUserData({
-        email: u.email ?? null,
-        plan: perfil.plan ?? "free",
-        analisis_restantes: perfil.analisis_restantes ?? 0,
-      });
-    })().catch((err) => {
-      console.error("[navbar] error hidratando sesion:", err);
-    });
-
-    return () => {
-      cancelado = true;
-    };
-  }, [tieneDatosDeServidor]);
+  // Cancelar la suscripcion cambia el plan sin pasar por un nuevo login: se
+  // guarda como override local por encima de lo que devuelva el hook.
+  const [overrideTrasCancelar, setOverrideTrasCancelar] = useState<{
+    plan: string;
+    analisis_restantes: number;
+  } | null>(null);
+  const userData = overrideTrasCancelar
+    ? {
+        plan: overrideTrasCancelar.plan,
+        analisis_restantes: overrideTrasCancelar.analisis_restantes,
+      }
+    : { plan: sesion.plan, analisis_restantes: sesion.analisisRestantes };
 
   useEffect(() => {
     if (!open) return;
@@ -126,7 +69,8 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   async function handleSignOut() {
     setSigningOut(true);
     try {
-      const supabase = await getSupabase();
+      const { createSupabaseBrowserClient } = await import("@/lib/supabase");
+      const supabase = createSupabaseBrowserClient();
       await supabase.auth.signOut();
     } catch (err) {
       console.error("[navbar] error cerrando sesion:", err);
@@ -145,7 +89,7 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
         setCancelError(data.error ?? "Error al cancelar. Intentá de nuevo.");
         return;
       }
-      setUserData(prev => ({ ...prev, plan: "free", analisis_restantes: 1 }));
+      setOverrideTrasCancelar({ plan: "free", analisis_restantes: 1 });
       setShowCancelConfirm(false);
       router.refresh();
     } finally {

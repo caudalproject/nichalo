@@ -118,7 +118,7 @@ export default function LandingPage() {
               Antes de comprar stock, sabé exactamente si el mercado tiene
               espacio para vos. Análisis real con datos de ML en segundos.
             </p>
-            <HeroSection isLoggedIn={false} />
+            <HeroSection />
             <HeroMock />
           </div>
         </section>
