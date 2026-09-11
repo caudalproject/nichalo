@@ -71,11 +71,15 @@ export async function POST(request: Request) {
 
   let restantes = profile?.analisis_restantes ?? 0;
   if (!profile) {
+    // No otorgar credito aca: el credito gratis solo lo otorga
+    // app/auth/callback/route.ts, despues de pasar el chequeo anti-fraude de
+    // multicuentas. Si no hay fila todavia (p. ej. se borro a mano), se crea
+    // con el default de columna (0) y el usuario se choca con el paywall en
+    // vez de regenerar un credito gratis borrando su perfil.
     const { error: insertErr } = await supabase.from("users").insert({
       id: user.id,
       email: user.email,
       plan: "free",
-      analisis_restantes: 1,
     });
     if (insertErr) {
       return NextResponse.json(
@@ -83,7 +87,7 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
-    restantes = 1;
+    restantes = 0;
   }
 
   if (restantes <= 0) {

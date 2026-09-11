@@ -13,7 +13,12 @@ import { PLAN_CONFIG } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const sinCredito = searchParams?.sin_credito === "1";
   const supabase = createSupabaseServerClient();
 
   const {
@@ -105,6 +110,13 @@ export default async function DashboardPage() {
                 Analizar ahora →
               </Button>
             </Link>
+          </div>
+        )}
+
+        {sinCredito && (
+          <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+            Ya usamos tu análisis gratis con este dispositivo o red. Para seguir
+            validando productos, elegí un plan más abajo 👇
           </div>
         )}
 

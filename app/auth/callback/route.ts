@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { sendWelcomeEmail } from "@/lib/resend";
+import { bootstrapNewUser } from "@/lib/new-user-bootstrap";
+
+export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -55,11 +57,6 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (user) {
-    // Usuario nuevo = creado hace menos de 10 segundos
-    const createdAt = new Date(user.created_at).getTime();
-    const now = Date.now();
-    const isNewUser = now - createdAt < 10000;
-
     const { error: upsertError } = await supabase
       .from("users")
       .upsert({ id: user.id, email: user.email }, { onConflict: "id" });
@@ -67,18 +64,20 @@ export async function GET(request: NextRequest) {
       console.error("[auth/callback] error en upsert de users:", upsertError.message);
     }
 
-    if (isNewUser && user.email) {
-      const nombre =
-        user.user_metadata?.full_name ??
-        user.user_metadata?.name ??
-        user.email.split("@")[0];
-      sendWelcomeEmail(user.email, nombre).catch((err) => {
-        console.error("[auth/callback] error enviando welcome email:", err);
-      });
+    const { ranFirstTime, sinCredito } = await bootstrapNewUser(
+      user,
+      request.headers,
+      request.cookies
+    );
 
-      // Señalizar al cliente para disparar el evento de píxel
+    if (ranFirstTime) {
+      // Señalizar al cliente para disparar el evento de píxel (y, si aplica,
+      // mostrar el mensaje de "ya usaste tu analisis gratis" en el dashboard).
       const newUserUrl = new URL(`${origin}${safeNext}`);
       newUserUrl.searchParams.set("registered", "1");
+      if (sinCredito) {
+        newUserUrl.searchParams.set("sin_credito", "1");
+      }
       response.headers.set("location", newUserUrl.toString());
       return response;
     }

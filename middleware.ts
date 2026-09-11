@@ -83,6 +83,32 @@ export async function middleware(request: NextRequest) {
     });
   }
 
+  // Atribucion de campana: si la visita trae utm_source, se guarda 30 dias en
+  // cookie httpOnly y auth/callback la persiste en public.users cuando el
+  // usuario se registra. Ultimo touch con UTM gana (se pisa en cada visita).
+  const utmSource = request.nextUrl.searchParams.get("utm_source");
+  if (utmSource) {
+    response.cookies.set({
+      name: "utm_source",
+      value: utmSource.slice(0, 100),
+      path: "/",
+      sameSite: "lax",
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 30,
+    });
+    const utmContent = request.nextUrl.searchParams.get("utm_content");
+    if (utmContent) {
+      response.cookies.set({
+        name: "utm_content",
+        value: utmContent.slice(0, 100),
+        path: "/",
+        sameSite: "lax",
+        httpOnly: true,
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
+  }
+
   return response;
 }
 

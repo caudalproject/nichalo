@@ -17,11 +17,25 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Magic link state
+  // OTP state — codigo de 6 digitos en vez de magic link (Hallazgo 2: el
+  // link se abre en OTRO navegador dentro de un WebView in-app y el usuario
+  // termina logueado donde no estaba).
   const [email, setEmail] = useState("");
   const [magicLoading, setMagicLoading] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
   const [magicError, setMagicError] = useState<string | null>(null);
+  const [otp, setOtp] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((s) => Math.max(0, s - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   // Google bloquea OAuth desde WebViews embebidos (disallowed_useragent).
   // El navegador in-app de Facebook/Instagram en Android es un WebView, y de ahí
@@ -41,24 +55,65 @@ function LoginContent() {
     });
   }, []);
 
-  async function handleMagicLink(e: React.FormEvent) {
-    e.preventDefault();
+  async function sendCode() {
     if (!email.trim()) return;
     setMagicLoading(true);
     setMagicError(null);
     const supabase = createSupabaseBrowserClient();
-    const origin = window.location.origin;
+    // Sin emailRedirectTo: la plantilla de mail manda {{ .Token }}, un codigo
+    // de 6 digitos, no un link — asi la sesion queda en el mismo navegador
+    // donde el usuario empezo, aunque sea el WebView de TikTok/Instagram.
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
-      options: {
-        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
-      },
     });
     setMagicLoading(false);
     if (error) {
       setMagicError(error.message);
     } else {
       setMagicSent(true);
+      setResendCooldown(60);
+    }
+  }
+
+  async function handleSendCode(e: React.FormEvent) {
+    e.preventDefault();
+    await sendCode();
+  }
+
+  async function handleResend() {
+    if (resendCooldown > 0) return;
+    await sendCode();
+  }
+
+  async function handleVerifyOtp(e: React.FormEvent) {
+    e.preventDefault();
+    if (otp.trim().length !== 6) return;
+    setOtpLoading(true);
+    setOtpError(null);
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.verifyOtp({
+      email: email.trim(),
+      token: otp.trim(),
+      type: "email",
+    });
+    if (error) {
+      setOtpLoading(false);
+      setOtpError(error.message);
+      return;
+    }
+
+    // verifyOtp ya dejo la sesion en las cookies (createBrowserClient usa
+    // @supabase/ssr) — este endpoint corre el bootstrap de usuario nuevo
+    // (anti-fraude de credito + UTM) que en el flujo de Google corre
+    // /auth/callback, y devuelve a donde redirigir.
+    try {
+      const res = await fetch(
+        `/api/auth/post-login?next=${encodeURIComponent(redirect)}`
+      );
+      const data = await res.json();
+      router.push(data.redirectTo ?? redirect);
+    } catch {
+      router.push(redirect);
     }
   }
 
@@ -95,17 +150,60 @@ function LoginContent() {
               No pudimos iniciar sesión: {errorParam}
             </div>
           ) : null}
-          {/* Magic link — metodo primario: es el unico que funciona en el
-              navegador in-app de Meta, de donde viene casi todo el trafico */}
+          {/* Codigo por email — metodo primario: funciona en el navegador
+              in-app de Meta/TikTok, de donde viene casi todo el trafico. Un
+              magic link ahi abriria OTRO navegador y perderia la sesion. */}
           {magicSent ? (
-            <div className="rounded-md border border-green-200 bg-green-50 p-4 text-center text-sm text-green-700">
-              <p className="font-medium">Revisá tu email 📬</p>
-              <p className="mt-1 text-xs text-green-600">
-                Te mandamos un link. Tocalo y entrás directo, sin contraseña.
-              </p>
-            </div>
+            <form onSubmit={handleVerifyOtp} className="space-y-2">
+              <div className="rounded-md border border-green-200 bg-green-50 p-3 text-center text-sm text-green-700">
+                Te mandamos un código a <strong>{email.trim()}</strong>. Revisá spam.
+              </div>
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                placeholder="000000"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                disabled={otpLoading}
+                autoComplete="one-time-code"
+                className="w-full text-center text-lg tracking-[0.5em]"
+              />
+              {otpError && <p className="text-xs text-destructive">{otpError}</p>}
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full"
+                disabled={otpLoading || otp.length !== 6}
+              >
+                {otpLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {otpLoading ? "Verificando…" : "Confirmar código"}
+              </Button>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMagicSent(false);
+                    setOtp("");
+                    setOtpError(null);
+                  }}
+                  className="underline"
+                >
+                  Usar otro email
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendCooldown > 0 || magicLoading}
+                  className="underline disabled:no-underline disabled:opacity-50"
+                >
+                  {resendCooldown > 0 ? `Reenviar (${resendCooldown}s)` : "Reenviar código"}
+                </button>
+              </div>
+            </form>
           ) : (
-            <form onSubmit={handleMagicLink} className="space-y-2">
+            <form onSubmit={handleSendCode} className="space-y-2">
               <Input
                 type="email"
                 placeholder="tu@email.com"
@@ -131,7 +229,7 @@ function LoginContent() {
                 {magicLoading ? "Enviando…" : "Entrar con mi email"}
               </Button>
               <p className="text-center text-xs text-muted-foreground">
-                Sin contraseña. Te llega un link y entrás.
+                Sin contraseña. Te llega un código de 6 dígitos.
               </p>
             </form>
           )}
