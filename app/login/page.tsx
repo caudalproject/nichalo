@@ -236,7 +236,7 @@ function LoginContent() {
                 {magicLoading ? "Enviando…" : "Entrar con mi email"}
               </Button>
               <p className="text-center text-xs text-muted-foreground">
-                Sin contraseña. Te llega un código de 6 dígitos.
+                Sin contraseña. Te llega un código por email.
               </p>
             </form>
           )}
