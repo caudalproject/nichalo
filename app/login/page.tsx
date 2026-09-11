@@ -112,15 +112,44 @@ function LoginContent() {
     // @supabase/ssr) — este endpoint corre el bootstrap de usuario nuevo
     // (anti-fraude de credito + UTM) que en el flujo de Google corre
     // /auth/callback, y devuelve a donde redirigir.
-    try {
+    const callPostLogin = async () => {
       const res = await fetch(
         `/api/auth/post-login?next=${encodeURIComponent(redirect)}`
       );
-      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(`post-login respondio ${res.status}`);
+      }
+      return res.json();
+    };
+
+    try {
+      const data = await callPostLogin();
       router.push(data.redirectTo ?? redirect);
-    } catch {
-      router.push(redirect);
+      return;
+    } catch (err) {
+      console.error("[login] error en post-login (intento 1):", err);
     }
+
+    // Un solo retry con backoff corto: el caso tipico es red mala en mobile,
+    // no un error permanente.
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    try {
+      const data = await callPostLogin();
+      router.push(data.redirectTo ?? redirect);
+      return;
+    } catch (err) {
+      console.error("[login] error en post-login (intento 2, sin mas reintentos):", err);
+    }
+
+    // No redirigir en silencio: si el credito no se pudo otorgar, el
+    // dashboard igual tiene una red de seguridad server-side
+    // (credit_bootstrap_done) que lo dispara al cargar, pero avisamos aca
+    // para no dar la falsa impresion de que ya quedo activado.
+    setOtpLoading(false);
+    setOtpError(
+      "No pudimos activar tu analisis gratis. Recarga la pagina o volve a intentar en unos segundos."
+    );
   }
 
   async function handleGoogle() {

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { bootstrapNewUser } from "@/lib/new-user-bootstrap";
+import { cookies, headers } from "next/headers";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,17 +31,36 @@ export default async function DashboardPage({
     redirect("/login?redirect=/dashboard");
   }
 
-  let profile: Pick<UserRow, "plan" | "analisis_restantes" | "email"> | null =
-    null;
+  let profile:
+    | (Pick<UserRow, "plan" | "analisis_restantes" | "email"> & {
+        credit_bootstrap_done?: boolean;
+      })
+    | null = null;
   const { data: profileData } = await supabase
     .from("users")
-    .select("plan, analisis_restantes, email")
+    .select("plan, analisis_restantes, email, credit_bootstrap_done")
     .eq("id", user.id)
     .maybeSingle();
   profile = profileData;
 
   if (!profile) {
     profile = { plan: "free", analisis_restantes: 1, email: user.email ?? "" };
+  }
+
+  // Red de seguridad: si el credito gratis nunca se otorgo (ej. el usuario
+  // se registro por OTP con mala red y cerro la pestana antes de que el
+  // retry del cliente terminara), disparamos el bootstrap aca. Es idempotente
+  // (bootstrapNewUser gatea con credit_bootstrap_done=false -> true).
+  if (profile?.credit_bootstrap_done === false) {
+    await bootstrapNewUser(user, headers(), cookies());
+    const { data: refreshed } = await supabase
+      .from("users")
+      .select("plan, analisis_restantes, email, credit_bootstrap_done")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (refreshed) {
+      profile = refreshed;
+    }
   }
 
   const { data: analyses, error: analysesError } = await supabase
