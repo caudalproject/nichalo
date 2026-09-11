@@ -10,6 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 
+// Supabase no siempre manda 6 digitos — depende de la config del proyecto
+// (este manda 8). En vez de asumir un largo fijo, se acepta un rango y se
+// deja pasar lo que sea al verifyOtp, que es quien realmente lo valida.
+const MIN_OTP_LENGTH = 6;
+const MAX_OTP_LENGTH = 8;
+
 function LoginContent() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/dashboard";
@@ -87,7 +93,7 @@ function LoginContent() {
 
   async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
-    if (otp.trim().length !== 6) return;
+    if (otp.trim().length < MIN_OTP_LENGTH) return;
     setOtpLoading(true);
     setOtpError(null);
     const supabase = createSupabaseBrowserClient();
@@ -162,10 +168,11 @@ function LoginContent() {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                maxLength={6}
-                placeholder="000000"
+                maxLength={MAX_OTP_LENGTH}
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) =>
+                  setOtp(e.target.value.replace(/\D/g, "").slice(0, MAX_OTP_LENGTH))
+                }
                 disabled={otpLoading}
                 autoComplete="one-time-code"
                 className="w-full text-center text-lg tracking-[0.5em]"
@@ -175,7 +182,7 @@ function LoginContent() {
                 type="submit"
                 size="lg"
                 className="w-full"
-                disabled={otpLoading || otp.length !== 6}
+                disabled={otpLoading || otp.length < MIN_OTP_LENGTH}
               >
                 {otpLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {otpLoading ? "Verificando…" : "Confirmar código"}
