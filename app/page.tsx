@@ -48,7 +48,7 @@ const PLANS = [
     badge: null as null | string,
     mpPlan: null as null,
     features: [
-      { label: "1 análisis por mes", included: true, subItems: null as string[] | null },
+      { label: "1 análisis gratis de cortesía", included: true, subItems: null as string[] | null },
       { label: "30 publicaciones analizadas", included: true, subItems: null as string[] | null },
       { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
       { label: "Primer análisis completo — sin restricciones", included: true, subItems: null as string[] | null },
@@ -514,12 +514,19 @@ export default function LandingPage() {
               </p>
               <div className="mt-8 grid gap-6 sm:grid-cols-2">
                 {PACKS_DISPLAY.map((p) => (
-                  <Card
-                    key={p.name}
-                    className={`rounded-lg ${
-                      p.popular ? "border-2 border-[#16A34A] shadow-md" : "border-[#E5E7EB]"
-                    }`}
-                  >
+                  <div key={p.name} className="relative">
+                    {p.popular && (
+                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap text-white bg-[#16A34A]">
+                          Más elegido
+                        </span>
+                      </div>
+                    )}
+                    <Card
+                      className={`rounded-lg ${
+                        p.popular ? "border-2 border-[#16A34A] shadow-md" : "border-[#E5E7EB]"
+                      }`}
+                    >
                     <CardContent className="p-6">
                       <h4 className="text-lg font-semibold text-[#0A0A0A]">{p.name}</h4>
                       <div className="mt-2 flex items-baseline gap-1">
@@ -549,7 +556,8 @@ export default function LandingPage() {
                         />
                       </div>
                     </CardContent>
-                  </Card>
+                    </Card>
+                  </div>
                 ))}
               </div>
             </div>

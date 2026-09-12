@@ -776,7 +776,7 @@ export default async function ResultadoPage({ params }: Params) {
                 </p>
                 <div className="flex gap-3 justify-center flex-wrap">
                   <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
-                    Ver planes desde $17.000/mes →
+                    Ver planes desde $4.500, pago único →
                   </a>
                 </div>
               </>

@@ -18,7 +18,7 @@ const FAQS = [
   },
   {
     q: "¿Qué incluye el plan Free?",
-    a: "1 análisis por mes, 30 publicaciones analizadas, sin necesidad de tarjeta de crédito.",
+    a: "1 análisis gratis de cortesía (no se recarga solo), 30 publicaciones analizadas, sin necesidad de tarjeta de crédito. Cuando lo uses, podés seguir validando con un pack de créditos o suscribiéndote a Pro.",
   },
   {
     q: "¿Puedo cancelar en cualquier momento?",
