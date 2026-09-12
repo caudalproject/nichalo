@@ -38,15 +38,21 @@ const FEATURES = [
   },
 ];
 
-const PLANS = [
+// Las 4 opciones se muestran en una sola fila, en orden ascendente de precio
+// (Free $0 → Pack 3 $4.500 → Pack 10 $12.000 → Pro $16.000/mes). El orden
+// importa para conversión: Pack 10 queda justo antes de Pro, así el pago
+// único de $12.000 sin vencimiento se ve barato al lado de la suscripción,
+// y la lectura de precio es una escalera, no un salto (ver
+// Negocios/Nichalo/AI-Sessions/2026-09-12 en el segundo cerebro).
+const PRICING_CARDS = [
   {
+    kind: "free" as const,
     name: "Free",
     price: "Gratis" as ReactNode,
     period: "",
     priceNote: null as ReactNode,
-    popular: false,
+    highlighted: false,
     badge: null as null | string,
-    mpPlan: null as null,
     features: [
       { label: "1 análisis gratis de cortesía", included: true, subItems: null as string[] | null },
       { label: "30 publicaciones analizadas", included: true, subItems: null as string[] | null },
@@ -55,15 +61,53 @@ const PLANS = [
     ],
     cta: "Empezar gratis",
     href: "/login",
+    mpPlan: null,
+    pack: null,
   },
   {
+    kind: "pack" as const,
+    name: "Pack 3",
+    price: "$4.500" as ReactNode,
+    period: "pago único",
+    priceNote: null as ReactNode,
+    highlighted: false,
+    badge: null as null | string,
+    features: [
+      { label: "3 análisis, no vencen", included: true, subItems: null as string[] | null },
+      { label: "50 publicaciones analizadas", included: true, subItems: null as string[] | null },
+      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+    ],
+    cta: "Comprar Pack 3",
+    href: null,
+    mpPlan: null,
+    pack: "pack_3" as const,
+  },
+  {
+    kind: "pack" as const,
+    name: "Pack 10",
+    price: "$12.000" as ReactNode,
+    period: "pago único",
+    priceNote: null as ReactNode,
+    highlighted: true,
+    badge: "Más elegido" as null | string,
+    features: [
+      { label: "10 análisis, no vencen", included: true, subItems: null as string[] | null },
+      { label: "50 publicaciones analizadas", included: true, subItems: null as string[] | null },
+      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
+    ],
+    cta: "Comprar Pack 10",
+    href: null,
+    mpPlan: null,
+    pack: "pack_10" as const,
+  },
+  {
+    kind: "pro" as const,
     name: "Pro",
     price: <PrecioPlan plan="pro" /> as ReactNode,
     period: "/mes",
     priceNote: "El análisis más completo del mercado" as ReactNode,
-    popular: true,
+    highlighted: true,
     badge: "⭐ Más completo" as null | string,
-    mpPlan: "pro" as const,
     features: [
       { label: "30 análisis por mes", included: true, subItems: null as string[] | null },
       { label: "100 publicaciones analizadas", included: true, subItems: null as string[] | null },
@@ -78,26 +122,8 @@ const PLANS = [
     ],
     cta: "Empezar ahora",
     href: null,
-  },
-];
-
-// Packs de créditos: pago único, sin vencimiento. No cambian el plan del
-// usuario (siguen en Free), solo suman análisis. Pensados para el uso
-// episódico — quien valida 2 o 3 productos y no necesita suscribirse.
-const PACKS_DISPLAY = [
-  {
-    name: "Pack 3",
-    price: "$4.500",
-    analisis: 3,
-    pack: "pack_3" as const,
-    popular: false,
-  },
-  {
-    name: "Pack 10",
-    price: "$12.000",
-    analisis: 10,
-    pack: "pack_10" as const,
-    popular: true,
+    mpPlan: "pro" as const,
+    pack: null,
   },
 ];
 
@@ -411,44 +437,43 @@ export default function LandingPage() {
             <p className="mt-1 text-center text-sm text-[#6B7280]">
               Precios en <MonedaPais />
             </p>
-            <div className="mt-12 mx-auto grid max-w-3xl gap-6 md:grid-cols-2 items-start">
-              {PLANS.map((plan) => (
-                <div key={plan.name} className="relative">
-                  {plan.badge && (
+            <p className="mt-1 text-center text-xs text-[#6B7280]">
+              Los packs se pagan una sola vez, los créditos no vencen y no hay nada que cancelar.
+            </p>
+            <div className="mt-12 mx-auto grid max-w-6xl gap-6 grid-cols-1 md:grid-cols-4 items-start">
+              {PRICING_CARDS.map((card) => (
+                <div key={card.name} className="relative">
+                  {card.badge && (
                     <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap text-white ${
-                          plan.popular ? "bg-[#16A34A]" : "bg-[#0A0A0A]"
-                        }`}
-                      >
-                        {plan.badge}
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap text-white bg-[#16A34A]">
+                        {card.badge}
                       </span>
                     </div>
                   )}
                   <Card
-                    className={`rounded-lg ${
-                      plan.popular
+                    className={`h-full rounded-lg ${
+                      card.highlighted
                         ? "border-2 border-[#16A34A] shadow-md"
                         : "border-[#E5E7EB]"
                     }`}
                   >
                     <CardContent className="p-6">
                       <h3 className="text-lg font-semibold text-[#0A0A0A]">
-                        {plan.name}
+                        {card.name}
                       </h3>
                       <div className="mt-2 flex items-baseline gap-1">
                         <span className="text-4xl font-bold text-[#0A0A0A]">
-                          {plan.price}
+                          {card.price}
                         </span>
                         <span className="text-[#6B7280] text-sm">
-                          {plan.period}
+                          {card.period}
                         </span>
                       </div>
-                      {plan.priceNote && (
-                        <p className="mt-1 text-xs text-[#6B7280]">{plan.priceNote}</p>
+                      {card.priceNote && (
+                        <p className="mt-1 text-xs text-[#6B7280]">{card.priceNote}</p>
                       )}
                       <ul className="mt-6 space-y-3">
-                        {plan.features.map((feat) => (
+                        {card.features.map((feat) => (
                           <li
                             key={feat.label}
                             className="flex items-start gap-2.5 text-sm"
@@ -481,19 +506,25 @@ export default function LandingPage() {
                         ))}
                       </ul>
                       <div className="mt-8">
-                        {plan.mpPlan ? (
+                        {card.mpPlan ? (
                           <PricingCheckoutButton
-                            plan={plan.mpPlan}
+                            plan={card.mpPlan}
                             variant="default"
-                            label={plan.cta}
+                            label={card.cta}
+                          />
+                        ) : card.pack ? (
+                          <PackCheckoutButton
+                            pack={card.pack}
+                            variant="default"
+                            label={card.cta}
                           />
                         ) : (
-                          <Link href={plan.href!} className="block">
+                          <Link href={card.href!} className="block">
                             <Button
                               className="w-full rounded-md"
                               variant="outline"
                             >
-                              {plan.cta}
+                              {card.cta}
                             </Button>
                           </Link>
                         )}
@@ -502,64 +533,6 @@ export default function LandingPage() {
                   </Card>
                 </div>
               ))}
-            </div>
-
-            {/* Packs de créditos — uso episódico, sin suscripción */}
-            <div className="mt-16 mx-auto max-w-3xl">
-              <h3 className="text-center text-xl font-semibold text-[#0A0A0A]">
-                ¿Validás pocos productos por mes?
-              </h3>
-              <p className="mt-2 text-center text-[#6B7280] text-sm">
-                Comprá un pack de créditos en vez de suscribirte. Sin vencimiento, se usan cuando quieras.
-              </p>
-              <div className="mt-8 grid gap-6 sm:grid-cols-2">
-                {PACKS_DISPLAY.map((p) => (
-                  <div key={p.name} className="relative">
-                    {p.popular && (
-                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap text-white bg-[#16A34A]">
-                          Más elegido
-                        </span>
-                      </div>
-                    )}
-                    <Card
-                      className={`rounded-lg ${
-                        p.popular ? "border-2 border-[#16A34A] shadow-md" : "border-[#E5E7EB]"
-                      }`}
-                    >
-                    <CardContent className="p-6">
-                      <h4 className="text-lg font-semibold text-[#0A0A0A]">{p.name}</h4>
-                      <div className="mt-2 flex items-baseline gap-1">
-                        <span className="text-4xl font-bold text-[#0A0A0A]">{p.price}</span>
-                        <span className="text-[#6B7280] text-sm">pago único</span>
-                      </div>
-                      <p className="mt-1 text-xs text-[#6B7280]">{p.analisis} análisis, sin vencimiento</p>
-                      <ul className="mt-6 space-y-3">
-                        <li className="flex items-start gap-2.5 text-sm">
-                          <Check className="h-4 w-4 text-[#16A34A] mt-0.5 shrink-0" />
-                          <span className="text-[#0A0A0A]">{p.analisis} análisis, no vencen</span>
-                        </li>
-                        <li className="flex items-start gap-2.5 text-sm">
-                          <Check className="h-4 w-4 text-[#16A34A] mt-0.5 shrink-0" />
-                          <span className="text-[#0A0A0A]">50 publicaciones analizadas</span>
-                        </li>
-                        <li className="flex items-start gap-2.5 text-sm">
-                          <Check className="h-4 w-4 text-[#16A34A] mt-0.5 shrink-0" />
-                          <span className="text-[#0A0A0A]">Subida de imagen del producto</span>
-                        </li>
-                      </ul>
-                      <div className="mt-8">
-                        <PackCheckoutButton
-                          pack={p.pack}
-                          variant="default"
-                          label={`Comprar ${p.name}`}
-                        />
-                      </div>
-                    </CardContent>
-                    </Card>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* Comparison table */}
