@@ -53,7 +53,7 @@ export async function POST(req: Request) {
           currency_id: "ARS",
         },
         back_url: `${process.env.SITE_URL}/dashboard?pago=exitoso`,
-payer_email: user.email,
+        payer_email: user.email,
         external_reference: externalRef,
       },
     });

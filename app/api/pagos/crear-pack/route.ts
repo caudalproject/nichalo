@@ -51,6 +51,11 @@ export async function POST(req: Request) {
           pending: `${siteUrl}/dashboard?compra=pendiente`,
           failure: `${siteUrl}/dashboard?compra=fallida`,
         },
+        // Explícito y no solo confiado al tópico "Pagos" tildado a mano en
+        // el panel de MP (Webhooks) — si alguien lo destilda, esta compra
+        // igual notifica. Debe apuntar a la URL con www. (nichalo.com sin
+        // www. redirige 307 y MP no sigue redirects en las notificaciones).
+        ...(isLocalUrl ? {} : { notification_url: `${siteUrl}/api/pagos/webhook` }),
         ...(isLocalUrl ? {} : { auto_return: "approved" as const }),
       },
     });
