@@ -5,7 +5,6 @@ import {
   PAIS_COOKIE,
   PAIS_DEFAULT,
   getMonedaLarga,
-  getNotaStarter,
   getPreciosPorPais,
   normalizarPais,
   type PaisDetectado,
@@ -33,14 +32,9 @@ function usePais(): PaisDetectado {
   return pais;
 }
 
-export function PrecioPlan({ plan }: { plan: "starter" | "pro" }) {
+export function PrecioPlan({ plan }: { plan: "pro" }) {
   const pais = usePais();
   return <>{getPreciosPorPais(pais)[plan]}</>;
-}
-
-export function NotaPrecioStarter() {
-  const pais = usePais();
-  return <>{getNotaStarter(pais)}</>;
 }
 
 export function MonedaPais() {

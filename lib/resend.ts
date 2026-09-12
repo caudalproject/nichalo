@@ -99,17 +99,22 @@ export async function sendUpsellEmail(email: string) {
       subject: `Desbloqueá más análisis en Nichalo 🚀`,
       html: wrap(`
         <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 16px">Se te acabaron los análisis</h1>
-        <p style="font-size:15px;color:#374151;line-height:1.6;margin:0 0 24px">Hacé upgrade para seguir validando productos y encontrar tu próximo nicho.</p>
+        <p style="font-size:15px;color:#374151;line-height:1.6;margin:0 0 24px">Comprá un pack para seguir validando productos, sin vencimiento — o pasate a Pro si validás varios por mes.</p>
         <table style="border-collapse:collapse;width:100%;max-width:400px">
           <tr style="background:#f9fafb">
-            <td style="padding:12px 16px;font-weight:600;color:#111827;border:1px solid #e5e7eb;border-radius:8px 0 0 0">Starter</td>
-            <td style="padding:12px 16px;color:#374151;border:1px solid #e5e7eb">$12 USD/mes</td>
-            <td style="padding:12px 16px;color:#374151;border:1px solid #e5e7eb;border-radius:0 8px 0 0">10 análisis</td>
+            <td style="padding:12px 16px;font-weight:600;color:#111827;border:1px solid #e5e7eb;border-radius:8px 0 0 0">Pack 3</td>
+            <td style="padding:12px 16px;color:#374151;border:1px solid #e5e7eb">$4.500 ARS</td>
+            <td style="padding:12px 16px;color:#374151;border:1px solid #e5e7eb;border-radius:0 8px 0 0">3 análisis, sin vencimiento</td>
+          </tr>
+          <tr style="background:#f9fafb">
+            <td style="padding:12px 16px;font-weight:600;color:#111827;border:1px solid #e5e7eb">Pack 10</td>
+            <td style="padding:12px 16px;color:#374151;border:1px solid #e5e7eb">$12.000 ARS</td>
+            <td style="padding:12px 16px;color:#374151;border:1px solid #e5e7eb">10 análisis, sin vencimiento</td>
           </tr>
           <tr>
             <td style="padding:12px 16px;font-weight:600;color:#111827;border:1px solid #e5e7eb;border-radius:0 0 0 8px">Pro</td>
-            <td style="padding:12px 16px;color:#374151;border:1px solid #e5e7eb">$29 USD/mes</td>
-            <td style="padding:12px 16px;color:#374151;border:1px solid #e5e7eb;border-radius:0 0 8px 0">30 análisis + imagen</td>
+            <td style="padding:12px 16px;color:#374151;border:1px solid #e5e7eb">$16.000 ARS/mes</td>
+            <td style="padding:12px 16px;color:#374151;border:1px solid #e5e7eb;border-radius:0 0 8px 0">30 análisis/mes + avanzado</td>
           </tr>
         </table>
         ${btnHtml(`${BASE_URL}/#planes`, 'Ver planes')}

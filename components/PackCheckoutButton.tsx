@@ -5,22 +5,23 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 interface Props {
-  plan: "pro";
+  pack: "pack_3" | "pack_10";
   variant?: "default" | "outline";
   label: string;
+  className?: string;
 }
 
-export function PricingCheckoutButton({ plan, variant = "default", label }: Props) {
+export function PackCheckoutButton({ pack, variant = "default", label, className }: Props) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   async function handleClick() {
     setLoading(true);
     try {
-      const res = await fetch("/api/pagos/crear-suscripcion", {
+      const res = await fetch("/api/pagos/crear-pack", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ pack }),
       });
 
       if (res.status === 401) {
@@ -39,7 +40,7 @@ export function PricingCheckoutButton({ plan, variant = "default", label }: Prop
 
   return (
     <Button
-      className="w-full rounded-md"
+      className={className ?? "w-full rounded-md"}
       variant={variant}
       onClick={handleClick}
       disabled={loading}

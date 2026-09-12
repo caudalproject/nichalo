@@ -7,13 +7,10 @@ import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
+import { PackCheckoutButton } from "@/components/PackCheckoutButton";
 import { HeroMock } from "@/components/HeroMock";
 import { PixelTracking } from "@/components/PixelTracking";
-import {
-  MonedaPais,
-  NotaPrecioStarter,
-  PrecioPlan,
-} from "@/components/PreciosPais";
+import { MonedaPais, PrecioPlan } from "@/components/PreciosPais";
 
 // Landing 100% estática (○ en el build): sin Supabase y sin headers().
 // El Navbar hidrata su propia sesión del lado cliente y los precios por país
@@ -60,28 +57,11 @@ const PLANS = [
     href: "/login",
   },
   {
-    name: "Starter",
-    price: <PrecioPlan plan="starter" /> as ReactNode,
-    period: "/mes",
-    priceNote: <NotaPrecioStarter /> as ReactNode,
-    popular: true,
-    badge: "Más popular" as null | string,
-    mpPlan: "starter" as const,
-    features: [
-      { label: "10 análisis por mes", included: true, subItems: null as string[] | null },
-      { label: "50 publicaciones analizadas", included: true, subItems: null as string[] | null },
-      { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
-      { label: "Análisis completo desbloqueado", included: true, subItems: null as string[] | null },
-    ],
-    cta: "Empezar ahora",
-    href: null,
-  },
-  {
     name: "Pro",
     price: <PrecioPlan plan="pro" /> as ReactNode,
     period: "/mes",
     priceNote: "El análisis más completo del mercado" as ReactNode,
-    popular: false,
+    popular: true,
     badge: "⭐ Más completo" as null | string,
     mpPlan: "pro" as const,
     features: [
@@ -98,6 +78,26 @@ const PLANS = [
     ],
     cta: "Empezar ahora",
     href: null,
+  },
+];
+
+// Packs de créditos: pago único, sin vencimiento. No cambian el plan del
+// usuario (siguen en Free), solo suman análisis. Pensados para el uso
+// episódico — quien valida 2 o 3 productos y no necesita suscribirse.
+const PACKS_DISPLAY = [
+  {
+    name: "Pack 3",
+    price: "$4.500",
+    analisis: 3,
+    pack: "pack_3" as const,
+    popular: false,
+  },
+  {
+    name: "Pack 10",
+    price: "$12.000",
+    analisis: 10,
+    pack: "pack_10" as const,
+    popular: true,
   },
 ];
 
@@ -411,7 +411,7 @@ export default function LandingPage() {
             <p className="mt-1 text-center text-sm text-[#6B7280]">
               Precios en <MonedaPais />
             </p>
-            <div className="mt-12 mx-auto grid max-w-5xl gap-6 md:grid-cols-3 items-start">
+            <div className="mt-12 mx-auto grid max-w-3xl gap-6 md:grid-cols-2 items-start">
               {PLANS.map((plan) => (
                 <div key={plan.name} className="relative">
                   {plan.badge && (
@@ -504,6 +504,56 @@ export default function LandingPage() {
               ))}
             </div>
 
+            {/* Packs de créditos — uso episódico, sin suscripción */}
+            <div className="mt-16 mx-auto max-w-3xl">
+              <h3 className="text-center text-xl font-semibold text-[#0A0A0A]">
+                ¿Validás pocos productos por mes?
+              </h3>
+              <p className="mt-2 text-center text-[#6B7280] text-sm">
+                Comprá un pack de créditos en vez de suscribirte. Sin vencimiento, se usan cuando quieras.
+              </p>
+              <div className="mt-8 grid gap-6 sm:grid-cols-2">
+                {PACKS_DISPLAY.map((p) => (
+                  <Card
+                    key={p.name}
+                    className={`rounded-lg ${
+                      p.popular ? "border-2 border-[#16A34A] shadow-md" : "border-[#E5E7EB]"
+                    }`}
+                  >
+                    <CardContent className="p-6">
+                      <h4 className="text-lg font-semibold text-[#0A0A0A]">{p.name}</h4>
+                      <div className="mt-2 flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-[#0A0A0A]">{p.price}</span>
+                        <span className="text-[#6B7280] text-sm">pago único</span>
+                      </div>
+                      <p className="mt-1 text-xs text-[#6B7280]">{p.analisis} análisis, sin vencimiento</p>
+                      <ul className="mt-6 space-y-3">
+                        <li className="flex items-start gap-2.5 text-sm">
+                          <Check className="h-4 w-4 text-[#16A34A] mt-0.5 shrink-0" />
+                          <span className="text-[#0A0A0A]">{p.analisis} análisis, no vencen</span>
+                        </li>
+                        <li className="flex items-start gap-2.5 text-sm">
+                          <Check className="h-4 w-4 text-[#16A34A] mt-0.5 shrink-0" />
+                          <span className="text-[#0A0A0A]">50 publicaciones analizadas</span>
+                        </li>
+                        <li className="flex items-start gap-2.5 text-sm">
+                          <Check className="h-4 w-4 text-[#16A34A] mt-0.5 shrink-0" />
+                          <span className="text-[#0A0A0A]">Subida de imagen del producto</span>
+                        </li>
+                      </ul>
+                      <div className="mt-8">
+                        <PackCheckoutButton
+                          pack={p.pack}
+                          variant="default"
+                          label={`Comprar ${p.name}`}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
             {/* Comparison table */}
             <div className="mt-16 max-w-3xl mx-auto overflow-x-auto rounded-xl border border-[#E5E7EB] bg-white">
               <table className="w-full text-sm">
@@ -511,7 +561,7 @@ export default function LandingPage() {
                   <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
                     <th className="text-left py-3 px-5 font-medium text-[#6B7280] w-[40%]"></th>
                     <th className="text-center py-3 px-4 font-medium text-[#6B7280]">Free</th>
-                    <th className="text-center py-3 px-4 font-medium text-[#6B7280]">Starter</th>
+                    <th className="text-center py-3 px-4 font-medium text-[#6B7280]">Packs</th>
                     <th className="text-center py-3 px-4 font-semibold text-[#0A0A0A] bg-[#F0FDF4] border-x border-[#16A34A]/25">Pro</th>
                   </tr>
                 </thead>
@@ -520,17 +570,17 @@ export default function LandingPage() {
                     const yes = <Check className="inline-block text-green-600" size={18} />;
                     const no = <X className="inline-block text-gray-400" size={18} />;
                     return [
-                      { label: "Análisis/mes", free: "1", starter: "10", pro: "30" },
-                      { label: "Publicaciones", free: "30", starter: "50", pro: "100" },
-                      { label: "Imagen del producto", free: yes, starter: yes, pro: yes },
-                      { label: "Análisis avanzado", free: no, starter: no, pro: yes },
-                      { label: "Precio sugerido", free: yes, starter: yes, pro: yes },
-                      { label: "Secciones completas", free: "1er análisis", starter: yes, pro: yes },
+                      { label: "Análisis", free: "1", packs: "3 o 10, sin vencimiento", pro: "30/mes" },
+                      { label: "Publicaciones", free: "30", packs: "50", pro: "100" },
+                      { label: "Imagen del producto", free: yes, packs: yes, pro: yes },
+                      { label: "Análisis avanzado", free: no, packs: no, pro: yes },
+                      { label: "Precio sugerido", free: yes, packs: yes, pro: yes },
+                      { label: "Secciones completas", free: "1er análisis", packs: yes, pro: yes },
                     ].map((row) => (
                       <tr key={row.label}>
                         <td className="py-3 px-5 text-[#0A0A0A]">{row.label}</td>
                         <td className="py-3 px-4 text-center text-[#6B7280]">{row.free}</td>
-                        <td className="py-3 px-4 text-center text-[#6B7280]">{row.starter}</td>
+                        <td className="py-3 px-4 text-center text-[#6B7280]">{row.packs}</td>
                         <td className="py-3 px-4 text-center font-medium text-[#0A0A0A] bg-[#F0FDF4] border-x border-[#16A34A]/25">{row.pro}</td>
                       </tr>
                     ));

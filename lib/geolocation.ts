@@ -9,22 +9,21 @@ export type PaisDetectado = "AR" | "MX" | "CO";
 export const PAIS_COOKIE = "pais";
 export const PAIS_DEFAULT: PaisDetectado = "AR";
 
-const PRECIOS: Record<PaisDetectado, { starter: string; pro: string; moneda: string }> = {
-  AR: { starter: "$17.000", pro: "$41.000", moneda: "ARS" },
-  MX: { starter: "$210", pro: "$510", moneda: "MXN" },
-  CO: { starter: "$50.000", pro: "$120.000", moneda: "COP" },
+// Starter (suscripción) se eliminó del modelo de negocio (ver Diario de
+// Decisiones 2026-09-12) — reemplazado por packs de créditos sin
+// vencimiento, vendidos solo en ARS por ahora. Pro bajó de $41.000 a
+// $16.000 ARS/mes con el nuevo modelo. Los precios MX/CO de Pro quedan sin
+// actualizar (pendiente definir conversión) hasta tener cifras confirmadas.
+const PRECIOS: Record<PaisDetectado, { pro: string; moneda: string }> = {
+  AR: { pro: "$16.000", moneda: "ARS" },
+  MX: { pro: "$510", moneda: "MXN" },
+  CO: { pro: "$120.000", moneda: "COP" },
 };
 
 const MONEDA_LARGA: Record<PaisDetectado, string> = {
   AR: "pesos argentinos (ARS)",
   MX: "pesos mexicanos (MXN)",
   CO: "pesos colombianos (COP)",
-};
-
-const NOTA_STARTER: Record<PaisDetectado, string> = {
-  AR: "~$1.700 ARS por análisis",
-  MX: "~$21 MXN por análisis",
-  CO: "~$5.000 COP por análisis",
 };
 
 /** Normaliza un ISO-3166 alpha-2 arbitrario a los tres paises soportados. */
@@ -41,8 +40,4 @@ export function getPreciosPorPais(pais: PaisDetectado) {
 
 export function getMonedaLarga(pais: PaisDetectado) {
   return MONEDA_LARGA[pais];
-}
-
-export function getNotaStarter(pais: PaisDetectado) {
-  return NOTA_STARTER[pais];
 }

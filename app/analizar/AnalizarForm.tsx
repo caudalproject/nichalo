@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { PacksOffer } from "@/components/PacksOffer";
 import {
   Select,
   SelectContent,
@@ -178,7 +179,7 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
     setError(null);
 
     if (noCredits) {
-      setError("No te quedan análisis en tu plan. Actualizá a Starter o Pro para continuar.");
+      setError("No te quedan análisis. Comprá un pack o pasate a Pro para continuar.");
       return;
     }
 
@@ -542,15 +543,17 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
           )}
 
           {noCredits && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center space-y-3">
-              <p className="text-sm font-semibold text-amber-800">
-                Usaste tu análisis gratis. Para seguir validando productos antes de invertir en stock, elegí un plan:
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-amber-800 text-center">
+                Usaste tu análisis gratis. Para seguir validando productos antes de invertir en stock:
               </p>
-              <div className="flex gap-2 justify-center flex-wrap">
-                <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
-                  Starter — 10 análisis por $17.000/mes →
+              <PacksOffer />
+              <p className="text-center text-xs text-[#6B7280]">
+                ¿Validás varios productos por mes?{" "}
+                <a href="/#planes" className="text-[#16A34A] hover:underline font-medium">
+                  Mirá el plan Pro →
                 </a>
-              </div>
+              </p>
             </div>
           )}
 
