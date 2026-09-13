@@ -1,17 +1,15 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Check, Search, Bot, CheckCircle } from "lucide-react";
+import { Search, Bot, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
-import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
-import { PacksZone } from "@/components/PacksZone";
-import { ComparisonTable } from "@/components/ComparisonTable";
 import { HeroMock } from "@/components/HeroMock";
 import { PixelTracking } from "@/components/PixelTracking";
-import { MonedaPais, PrecioPlan } from "@/components/PreciosPais";
+import { PrecioPlan } from "@/components/PreciosPais";
+import { PricingSection } from "@/components/PricingSection";
 
 // Landing 100% estática (○ en el build): sin Supabase y sin headers().
 // El Navbar hidrata su propia sesión del lado cliente y los precios por país
@@ -390,133 +388,7 @@ export default function LandingPage() {
         </section>
 
         {/* Pricing */}
-        <section id="planes" className="bg-[#F9FAFB] py-20 border-y border-[#E5E7EB]">
-          <div className="container">
-            <h2 className="text-center text-3xl font-bold text-[#0A0A0A]">
-              Planes
-            </h2>
-            <p className="mt-3 text-center text-[#6B7280]">
-              Un análisis cuesta menos del 1% del stock que estás por comprar.
-            </p>
-            <p className="mt-1 text-center text-sm text-[#6B7280]">
-              Precios en <MonedaPais />
-            </p>
-            <div className="mt-12 mx-auto grid max-w-5xl gap-6 grid-cols-1 md:grid-cols-3 items-start">
-              {/* Free */}
-              <div key={PRICING_CARDS[0].name} className="relative h-full">
-                <Card className="h-full rounded-lg border-[#E5E7EB]">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-[#0A0A0A]">
-                      {PRICING_CARDS[0].name}
-                    </h3>
-                    <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-[#0A0A0A]">
-                        {PRICING_CARDS[0].price}
-                      </span>
-                      <span className="text-[#6B7280] text-sm">
-                        {PRICING_CARDS[0].period}
-                      </span>
-                    </div>
-                    <ul className="mt-6 space-y-3">
-                      {PRICING_CARDS[0].features.map((feat) => (
-                        <li key={feat.label} className="flex items-start gap-2.5 text-sm">
-                          <Check className="h-4 w-4 text-[#16A34A] mt-0.5 shrink-0" />
-                          <span className="text-[#0A0A0A]">{feat.label}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="mt-8">
-                      <Link href={PRICING_CARDS[0].href!} className="block">
-                        <Button className="w-full rounded-md" variant="outline">
-                          {PRICING_CARDS[0].cta}
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Análisis (Pack 3 / Pack 10) — la única card destacada */}
-              <PacksZone />
-
-              {/* Pro — subordinada, sin border verde */}
-              <div key={PRICING_CARDS[1].name} className="relative h-full">
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap text-white bg-[#16A34A]">
-                    {PRICING_CARDS[1].badge}
-                  </span>
-                </div>
-                <Card className="h-full rounded-lg border-[#E5E7EB]">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-[#0A0A0A]">
-                      {PRICING_CARDS[1].name}
-                    </h3>
-                    <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-[#0A0A0A]">
-                        {PRICING_CARDS[1].price}
-                      </span>
-                      <span className="text-[#6B7280] text-sm">
-                        {PRICING_CARDS[1].period}
-                      </span>
-                    </div>
-                    {PRICING_CARDS[1].priceNote && (
-                      <p className="mt-1 text-xs text-[#6B7280]">{PRICING_CARDS[1].priceNote}</p>
-                    )}
-                    <ul className="mt-6 space-y-3">
-                      {PRICING_CARDS[1].features.map((feat) => (
-                        <li key={feat.label} className="flex items-start gap-2.5 text-sm">
-                          <Check className="h-4 w-4 text-[#16A34A] mt-0.5 shrink-0" />
-                          <div>
-                            <span className="text-[#0A0A0A]">{feat.label}</span>
-                            {feat.subItems && (
-                              <ul className="mt-1.5 space-y-1">
-                                {feat.subItems.map((sub) => (
-                                  <li key={sub} className="flex items-center gap-1.5 text-xs text-[#6B7280]">
-                                    <span className="text-[#16A34A] font-bold leading-none">·</span>
-                                    {sub}
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="mt-8">
-                      <PricingCheckoutButton
-                        plan={PRICING_CARDS[1].mpPlan!}
-                        variant="default"
-                        label={PRICING_CARDS[1].cta}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* Confianza + prueba social (punto 9 del brief) */}
-            <div className="mt-8 text-center space-y-2">
-              <p className="text-sm text-[#6B7280]">
-                Pagás con Mercado Pago · Sin suscripción · Sin renovación automática
-              </p>
-              <p className="text-sm">
-                <a
-                  href="/resultado/6d43a024-af07-495a-9926-a2167fa12644"
-                  className="text-[#16A34A] hover:underline font-medium"
-                >
-                  Mirá un análisis completo, sin registrarte →
-                </a>
-              </p>
-            </div>
-
-            {/* Comparison table */}
-            <ComparisonTable />
-
-            <p className="mt-8 text-center text-sm text-[#6B7280]">
-              Sin contratos. Cancelá cuando quieras.
-            </p>
-          </div>
-        </section>
+        <PricingSection cards={PRICING_CARDS} />
 
         {/* FAQ */}
         <FAQSection />
