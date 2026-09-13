@@ -85,6 +85,14 @@ create policy "analyses self select"
   on public.analyses for select
   using (auth.uid() = user_id);
 
+-- Resultado compartible sin login: el link usa un UUID no adivinable como
+-- token de acceso (no la sesion). Ver supabase/migrations/20260913130000_allow_anon_select_analyses_for_share.sql.
+drop policy if exists "analyses public select by id" on public.analyses;
+create policy "analyses public select by id"
+  on public.analyses for select
+  to anon
+  using (true);
+
 drop policy if exists "analyses self insert" on public.analyses;
 create policy "analyses self insert"
   on public.analyses for insert
