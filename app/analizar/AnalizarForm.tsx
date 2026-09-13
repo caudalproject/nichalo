@@ -20,6 +20,8 @@ import { getCurrencyForCountry, getExchangeRate } from "@/lib/currency";
 interface Props {
   creditsLeft: number;
   plan: string;
+  ultimoProducto?: string;
+  ultimoVeredicto?: "VIABLE" | "MARGINAL" | "SATURADO";
 }
 
 type PerfilVendedor = "principiante" | "intermedio" | "experto";
@@ -52,7 +54,7 @@ const MESSAGE_PROGRESS: Record<string, number> = {
   "¡Análisis completado!": 100,
 };
 
-export function AnalizarForm({ creditsLeft, plan }: Props) {
+export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredicto }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -544,10 +546,12 @@ export function AnalizarForm({ creditsLeft, plan }: Props) {
 
           {noCredits && (
             <div className="space-y-3">
-              <p className="text-sm font-semibold text-amber-800 text-center">
-                Usaste tu análisis gratis. Para seguir validando productos antes de invertir en stock:
-              </p>
-              <PacksOffer />
+              {!ultimoProducto && (
+                <p className="text-sm font-semibold text-amber-800 text-center">
+                  Usaste tu análisis gratis. Para seguir validando productos antes de invertir en stock:
+                </p>
+              )}
+              <PacksOffer producto={ultimoProducto} veredicto={ultimoVeredicto} />
               <p className="text-center text-xs text-[#6B7280]">
                 ¿Validás varios productos por mes?{" "}
                 <a href="/#planes" className="text-[#16A34A] hover:underline font-medium">

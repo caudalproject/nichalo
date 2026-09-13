@@ -24,6 +24,21 @@ export default async function AnalizarPage() {
 
   const analisisRestantes = (profile?.creditos_ciclo ?? 0) + (profile?.creditos_pack ?? 0);
 
+  // Solo se consulta si hace falta: sin créditos es cuando AnalizarForm
+  // muestra la PacksOffer y le sirve el producto/veredicto del último
+  // análisis para personalizarla.
+  let ultimoAnalisis: { producto: string; veredicto: "VIABLE" | "MARGINAL" | "SATURADO" } | null = null;
+  if (analisisRestantes <= 0) {
+    const { data } = await supabase
+      .from("analyses")
+      .select("producto, veredicto")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    ultimoAnalisis = data;
+  }
+
   return (
     <>
       <Navbar
@@ -41,6 +56,8 @@ export default async function AnalizarPage() {
             <AnalizarForm
               creditsLeft={analisisRestantes}
               plan={profile?.plan ?? "free"}
+              ultimoProducto={ultimoAnalisis?.producto}
+              ultimoVeredicto={ultimoAnalisis?.veredicto}
             />
           </div>
         </div>
