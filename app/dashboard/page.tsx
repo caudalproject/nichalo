@@ -145,7 +145,7 @@ export default async function DashboardPage({
 
         {analisisRestantes <= 0 && profile?.plan !== "pro" && (
           <div className="mt-6">
-            <UpgradeBanner />
+            <UpgradeBanner producto={list[0]?.producto} veredicto={list[0]?.veredicto} />
           </div>
         )}
 

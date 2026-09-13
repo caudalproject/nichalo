@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { PacksOffer } from "@/components/PacksOffer";
 
-export function UpgradeBanner() {
+interface Props {
+  /** Producto del último análisis del usuario, si hay alguno. */
+  producto?: string;
+  veredicto?: "VIABLE" | "MARGINAL" | "SATURADO";
+}
+
+export function UpgradeBanner({ producto, veredicto }: Props) {
   const [loadingPro, setLoadingPro] = useState(false);
   const router = useRouter();
 
@@ -41,7 +47,12 @@ export function UpgradeBanner() {
           Usaste tu análisis gratis. Para seguir validando productos antes de invertir en stock:
         </span>
       </div>
-      <PacksOffer title="Packs de créditos" className="border-amber-200" />
+      <PacksOffer
+        title={producto ? undefined : "Packs de créditos"}
+        className="border-amber-200"
+        producto={producto}
+        veredicto={veredicto}
+      />
       <div className="flex justify-end">
         <Button
           size="sm"
