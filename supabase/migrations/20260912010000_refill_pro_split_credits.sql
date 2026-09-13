@@ -170,18 +170,22 @@ revoke execute on function public.refrescar_ciclo_pro(uuid) from public, anon, a
 revoke execute on function public.cancelar_pro(uuid) from public, anon, authenticated;
 
 -- 13) Hallazgo aparte, mismo commit porque toca la misma tabla: `anon` y
---     `authenticated` tenían GRANT de UPDATE a nivel de columna sobre
---     analisis_restantes (y por ende iban a heredarlo en las columnas
---     nuevas), con una policy de RLS que solo filtra por fila
---     (auth.uid() = id) y no por columna. Eso permitía que cualquier
---     usuario logueado se autoadjudicara créditos con un UPDATE directo vía
---     REST, sin pasar por ninguna RPC. Nadie lo explotó, pero es la misma
---     clase de agujero que ya se cerró para las RPC. Todas las escrituras
---     legítimas de estas columnas pasan por service role o por las
---     funciones de arriba (SECURITY DEFINER) — ningún código de cliente
---     necesita este permiso.
-revoke update (plan, creditos_ciclo, creditos_pack, ultimo_refill_at)
-  on public.users from anon, authenticated;
+--     `authenticated` tenían GRANT de UPDATE sobre public.users (el GRANT
+--     ALL default que pone Supabase en cualquier proyecto nuevo), con una
+--     policy de RLS que solo filtra por fila (auth.uid() = id) y no por
+--     columna. Eso permitía que cualquier usuario logueado se
+--     autoadjudicara créditos con un UPDATE directo vía REST, sin pasar por
+--     ninguna RPC. Nadie lo explotó, pero es la misma clase de agujero que
+--     ya se cerró para las RPC.
+--
+--     OJO: un REVOKE UPDATE a nivel de columna acá NO alcanza — se probó
+--     contra la base real y no bloqueó nada, porque un GRANT de tabla
+--     completa (el que ya existía) gana sobre cualquier REVOKE de columna
+--     específica en Postgres. Hay que sacar el UPDATE a nivel de TABLA
+--     entero. Ningún código de cliente escribe esta tabla directo (todo pasa
+--     por service role o por las funciones SECURITY DEFINER de arriba), así
+--     que no hace falta un GRANT UPDATE más fino para ninguna columna.
+revoke update on public.users from anon, authenticated;
 
 -- 14) handle_new_user() es un trigger function (retorna trigger, solo lo
 --     puede invocar el motor de triggers), pero por el GRANT default de

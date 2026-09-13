@@ -169,5 +169,8 @@ revoke execute on function public.activar_pro(uuid) from public, anon, authentic
 revoke execute on function public.refrescar_ciclo_pro(uuid) from public, anon, authenticated;
 revoke execute on function public.cancelar_pro(uuid) from public, anon, authenticated;
 
-revoke update (plan, creditos_ciclo, creditos_pack, ultimo_refill_at)
-  on public.users from anon, authenticated;
+-- Ojo: tiene que ser REVOKE UPDATE a nivel de TABLA. Un revoke de columnas
+-- específicas no alcanza si el rol ya tiene GRANT ALL de tabla (el default
+-- de Supabase en cualquier proyecto nuevo) -- verificado contra la base real,
+-- ver detalle en supabase/migrations/20260913000000_fix_revoke_users_update_table_level.sql.
+revoke update on public.users from anon, authenticated;

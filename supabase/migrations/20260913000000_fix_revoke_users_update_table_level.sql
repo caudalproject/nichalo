@@ -1,0 +1,26 @@
+-- Corrección de 20260912010000_refill_pro_split_credits.sql.
+--
+-- Esa migración intentó cerrar el agujero de "cualquier usuario logueado
+-- puede pisar sus propios créditos vía REST" con:
+--   revoke update (plan, creditos_ciclo, creditos_pack, ultimo_refill_at)
+--     on public.users from anon, authenticated;
+--
+-- No sirvió de nada. Se probó contra la base real (usuario de prueba +
+-- `set role authenticated` + `auth.uid()` apuntando a su propia fila): el
+-- UPDATE directo a creditos_pack pasó igual. Motivo: Supabase le da a
+-- `anon`/`authenticated` un GRANT ALL a nivel de TABLA sobre cada tabla de
+-- `public` por default (así arranca cualquier proyecto nuevo). En Postgres,
+-- un GRANT de tabla completa habilita escribir cualquier columna sin
+-- importar qué se haya revocado a nivel de columna específica -- revocar
+-- columnas solo tiene efecto cuando esa es la ÚNICA fuente del privilegio,
+-- no cuando compite con un GRANT de tabla ya existente.
+--
+-- La corrección real: sacar el UPDATE a nivel de TABLA entero para esos dos
+-- roles. Ningún código de cliente actualiza public.users directo (todo pasa
+-- por service role o por las funciones SECURITY DEFINER de la migración
+-- anterior), así que no hace falta dejar ninguna columna escribible.
+-- Reverificado después de este fix: mismo UPDATE de prueba ahora falla con
+-- "permission denied for table users", y el SELECT que sí necesita el
+-- cliente (useSesionCliente, Navbar, dashboard/analizar/resultado) sigue
+-- funcionando sin cambios.
+revoke update on public.users from anon, authenticated;
