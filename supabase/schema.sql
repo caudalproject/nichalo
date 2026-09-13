@@ -86,11 +86,13 @@ create policy "analyses self select"
   using (auth.uid() = user_id);
 
 -- Resultado compartible sin login: el link usa un UUID no adivinable como
--- token de acceso (no la sesion). Ver supabase/migrations/20260913130000_allow_anon_select_analyses_for_share.sql.
+-- token de acceso (no la sesion). Sin restriccion de rol (cubre anon Y
+-- authenticated) — un usuario logueado que abre el link de otro tambien
+-- tiene que poder verlo. Ver supabase/migrations/20260913130000_* y
+-- 20260913140000_fix_public_select_role_scope.sql.
 drop policy if exists "analyses public select by id" on public.analyses;
 create policy "analyses public select by id"
   on public.analyses for select
-  to anon
   using (true);
 
 drop policy if exists "analyses self insert" on public.analyses;

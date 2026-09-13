@@ -172,7 +172,13 @@ export default async function ResultadoPage({ params }: Params) {
   const usdToLocal = (usd: number) => usd * tasaCambio;
   const formatLocal = (usd: number) => formatLocalPrice(usdToLocal(usd), moneda ?? 'ARS');
   const precioVentaLocal = result.margen.precio_sugerido_venta;
-  const precioVentaUsd = moneda ? (tasaCambio > 0 ? precioVentaLocal / tasaCambio : 0) : precioVentaLocal;
+  // Bug encontrado 2026-09-13: esta condición usaba `moneda` sin el fallback
+  // ?? 'ARS' que sí tiene `formatLocal` dos líneas arriba. Cualquier análisis
+  // sin `moneda` en resultado_json (anteriores a que ese campo existiera)
+  // se quedaba SIN dividir por la tasa de cambio, inflando margenBruto/roi
+  // (ej. "Termo Stanley" mostraba 100.0% de margen en vez de ~61%). Ahora
+  // siempre se divide, usando la mejor tasa disponible (ver línea 171).
+  const precioVentaUsd = tasaCambio > 0 ? precioVentaLocal / tasaCambio : precioVentaLocal;
   const margenBruto = precioVentaUsd > 0 ? ((precioVentaUsd - costo) / precioVentaUsd) * 100 : 0;
   const roi = costo > 0 ? ((precioVentaUsd - costo) / costo) * 100 : 0;
   const localeMap: Record<string, string> = { AR: "es-AR", MX: "es-MX", CO: "es-CO" };
