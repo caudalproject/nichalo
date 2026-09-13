@@ -18,7 +18,7 @@ import {
  * el efecto. Es aceptable porque la seccion de precios esta muy abajo en la
  * pagina: nadie la ve antes de que hidrate.
  */
-function usePais(): PaisDetectado {
+export function usePais(): PaisDetectado {
   const [pais, setPais] = useState<PaisDetectado>(PAIS_DEFAULT);
 
   useEffect(() => {
