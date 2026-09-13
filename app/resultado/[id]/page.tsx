@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatCurrency } from "@/lib/utils";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
+import { PacksOffer } from "@/components/PacksOffer";
 
 export const dynamic = "force-dynamic";
 
@@ -770,31 +771,22 @@ export default async function ResultadoPage({ params }: Params) {
           {/* CTA final */}
           <div className="rounded-2xl border border-gray-100 bg-white p-6 text-center space-y-3">
             {isPrimerAnalisis ? (
-              <>
-                <p className="text-sm font-semibold text-gray-900">
-                  ¿Te sirvió el análisis?
-                </p>
-                <p className="text-xs text-gray-500">
-                  Usaste tu análisis gratis. Para seguir validando productos antes de invertir en stock, elegí un plan:
-                </p>
-                <div className="flex gap-3 justify-center flex-wrap">
-                  <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
-                    Ver planes desde $4.500, pago único →
-                  </a>
-                </div>
-              </>
+              <div className="text-left max-w-sm mx-auto">
+                <PacksOffer producto={analysis.producto} veredicto={analysis.veredicto} />
+              </div>
             ) : isFree ? (
-              <>
-                <p className="text-sm font-semibold text-gray-900">
+              <div className="text-left max-w-sm mx-auto">
+                <p className="text-sm font-semibold text-gray-900 text-center mb-3">
                   ¿Querés ver el análisis completo?
                 </p>
-                <p className="text-xs text-gray-500">
-                  Desbloqueá competencia, márgenes, top vendedores y más.
+                <PacksOffer producto={analysis.producto} veredicto={analysis.veredicto} />
+                <p className="text-center text-xs text-[#6B7280] mt-3">
+                  ¿Validás varios productos por mes?{" "}
+                  <a href="/#planes" className="text-[#16A34A] hover:underline font-medium">
+                    Mirá el plan Pro →
+                  </a>
                 </p>
-                <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2 text-sm font-semibold text-white hover:bg-[#15803D] transition-colors">
-                  Ver planes →
-                </a>
-              </>
+              </div>
             ) : (
               <>
                 <p className="text-sm font-semibold text-gray-900">
