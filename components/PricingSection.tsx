@@ -30,6 +30,13 @@ interface Props {
   cards: PricingCard[];
 }
 
+// Resultado público de ejemplo mostrado sin login (ver "trust line" abajo).
+// Configurable por env var para poder rotarlo sin tocar código; fallback al
+// análisis real vigente ("Termo Stanley", score 90) si la var no está seteada.
+// El build falla si este ID no resuelve — ver scripts/check-featured-result.mjs.
+const FEATURED_RESULT_ID =
+  process.env.NEXT_PUBLIC_FEATURED_RESULT_ID || "6d43a024-af07-495a-9926-a2167fa12644";
+
 // Ring de énfasis para la card que el recomendador (arriba) señala. No
 // reemplaza el estilo propio de cada card (ej. el badge "Más completo" de
 // Pro, o el resaltado permanente de Análisis en PacksZone) — se suma.
@@ -159,7 +166,7 @@ export function PricingSection({ cards }: Props) {
           </p>
           <p className="text-sm">
             <a
-              href="/resultado/6d43a024-af07-495a-9926-a2167fa12644"
+              href={`/resultado/${FEATURED_RESULT_ID}`}
               className="text-[#16A34A] hover:underline font-medium"
             >
               Mirá un análisis completo, sin registrarte →
