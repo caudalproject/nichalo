@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Check, X, Search, Bot, CheckCircle } from "lucide-react";
+import { Check, Search, Bot, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
@@ -8,6 +8,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { PacksZone } from "@/components/PacksZone";
+import { ComparisonTable } from "@/components/ComparisonTable";
 import { HeroMock } from "@/components/HeroMock";
 import { PixelTracking } from "@/components/PixelTracking";
 import { MonedaPais, PrecioPlan } from "@/components/PreciosPais";
@@ -53,7 +54,7 @@ const PRICING_CARDS = [
     highlighted: false,
     badge: null as null | string,
     features: [
-      { label: "1 análisis gratis de cortesía", included: true, subItems: null as string[] | null },
+      { label: "Un producto, analizado completo. Sin tarjeta.", included: true, subItems: null as string[] | null },
       { label: "30 publicaciones analizadas — para no adivinar", included: true, subItems: null as string[] | null },
       { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
       { label: "Primer análisis completo — sin restricciones", included: true, subItems: null as string[] | null },
@@ -395,7 +396,7 @@ export default function LandingPage() {
               Planes
             </h2>
             <p className="mt-3 text-center text-[#6B7280]">
-              Elegí el plan que mejor se adapta a tu ritmo de trabajo.
+              Un análisis cuesta menos del 1% del stock que estás por comprar.
             </p>
             <p className="mt-1 text-center text-sm text-[#6B7280]">
               Precios en <MonedaPais />
@@ -509,39 +510,7 @@ export default function LandingPage() {
             </div>
 
             {/* Comparison table */}
-            <div className="mt-16 max-w-3xl mx-auto overflow-x-auto rounded-xl border border-[#E5E7EB] bg-white">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                    <th className="text-left py-3 px-5 font-medium text-[#6B7280] w-[40%]"></th>
-                    <th className="text-center py-3 px-4 font-medium text-[#6B7280]">Free</th>
-                    <th className="text-center py-3 px-4 font-medium text-[#6B7280]">Packs</th>
-                    <th className="text-center py-3 px-4 font-semibold text-[#0A0A0A] bg-[#F0FDF4] border-x border-[#16A34A]/25">Pro</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E5E7EB]">
-                  {(() => {
-                    const yes = <Check className="inline-block text-green-600" size={18} />;
-                    const no = <X className="inline-block text-gray-400" size={18} />;
-                    return [
-                      { label: "Análisis", free: "1", packs: "3 o 10, sin vencimiento", pro: "30/mes" },
-                      { label: "Publicaciones", free: "30", packs: "50", pro: "100" },
-                      { label: "Imagen del producto", free: yes, packs: yes, pro: yes },
-                      { label: "Análisis avanzado", free: no, packs: no, pro: yes },
-                      { label: "Precio sugerido", free: yes, packs: yes, pro: yes },
-                      { label: "Secciones completas", free: "1er análisis", packs: yes, pro: yes },
-                    ].map((row) => (
-                      <tr key={row.label}>
-                        <td className="py-3 px-5 text-[#0A0A0A]">{row.label}</td>
-                        <td className="py-3 px-4 text-center text-[#6B7280]">{row.free}</td>
-                        <td className="py-3 px-4 text-center text-[#6B7280]">{row.packs}</td>
-                        <td className="py-3 px-4 text-center font-medium text-[#0A0A0A] bg-[#F0FDF4] border-x border-[#16A34A]/25">{row.pro}</td>
-                      </tr>
-                    ));
-                  })()}
-                </tbody>
-              </table>
-            </div>
+            <ComparisonTable />
 
             <p className="mt-8 text-center text-sm text-[#6B7280]">
               Sin contratos. Cancelá cuando quieras.

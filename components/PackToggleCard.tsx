@@ -15,7 +15,7 @@ const PACKS = {
     pack: "pack_3" as const,
     precio: "$4.500",
     porAnalisis: "$1.500 por análisis",
-    analisis: "3 análisis, sin vencimiento",
+    analisis: "3 productos que no comprás a ciegas",
     cta: "Comprar Pack 3",
   },
   pack_10: {
@@ -23,10 +23,15 @@ const PACKS = {
     pack: "pack_10" as const,
     precio: "$12.000",
     porAnalisis: "$1.200 por análisis",
-    analisis: "10 análisis, sin vencimiento",
+    analisis: "10 productos que no comprás a ciegas",
     cta: "Comprar Pack 10",
   },
 } as const;
+
+const FEATURES_FIJAS = [
+  "Hasta 50 publicaciones reales de tu competencia por análisis — no una estimación",
+  "Veredicto: VIABLE, MARGINAL o SATURADO, con el razonamiento",
+];
 
 export function PackToggleCard() {
   const [selected, setSelected] = useState<keyof typeof PACKS>("pack_3");
@@ -71,7 +76,7 @@ export function PackToggleCard() {
           <p className="mt-1 text-xs text-[#6B7280]">{pack.porAnalisis}</p>
 
           <ul className="mt-6 space-y-3">
-            {[pack.analisis, "50 publicaciones analizadas — más data para decidir"].map(
+            {[pack.analisis, ...FEATURES_FIJAS].map(
               (label) => (
                 <li key={label} className="flex items-start gap-2.5 text-sm">
                   <Check className="h-4 w-4 text-[#16A34A] mt-0.5 shrink-0" />
