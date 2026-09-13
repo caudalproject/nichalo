@@ -32,19 +32,19 @@ export default async function DashboardPage({
   }
 
   let profile:
-    | (Pick<UserRow, "plan" | "analisis_restantes" | "email"> & {
+    | (Pick<UserRow, "plan" | "creditos_ciclo" | "creditos_pack" | "email"> & {
         credit_bootstrap_done?: boolean;
       })
     | null = null;
   const { data: profileData } = await supabase
     .from("users")
-    .select("plan, analisis_restantes, email, credit_bootstrap_done")
+    .select("plan, creditos_ciclo, creditos_pack, email, credit_bootstrap_done")
     .eq("id", user.id)
     .maybeSingle();
   profile = profileData;
 
   if (!profile) {
-    profile = { plan: "free", analisis_restantes: 1, email: user.email ?? "" };
+    profile = { plan: "free", creditos_ciclo: 0, creditos_pack: 1, email: user.email ?? "" };
   }
 
   // Red de seguridad: si el credito gratis nunca se otorgo (ej. el usuario
@@ -55,13 +55,15 @@ export default async function DashboardPage({
     await bootstrapNewUser(user, headers(), cookies());
     const { data: refreshed } = await supabase
       .from("users")
-      .select("plan, analisis_restantes, email, credit_bootstrap_done")
+      .select("plan, creditos_ciclo, creditos_pack, email, credit_bootstrap_done")
       .eq("id", user.id)
       .maybeSingle();
     if (refreshed) {
       profile = refreshed;
     }
   }
+
+  const analisisRestantes = (profile?.creditos_ciclo ?? 0) + (profile?.creditos_pack ?? 0);
 
   const { data: analyses, error: analysesError } = await supabase
     .from("analyses")
@@ -82,7 +84,7 @@ export default async function DashboardPage({
   const viables = list.filter(a => a.veredicto === "VIABLE").length;
   const mejorScore = list.length > 0 ? Math.max(...list.map(a => a.score ?? 0)) : 0;
   const totalPlan = PLAN_CONFIG[profile?.plan as Plan]?.analisisPorMes ?? 1;
-  const totalUsados = totalPlan - (profile?.analisis_restantes ?? 0);
+  const totalUsados = totalPlan - analisisRestantes;
 
   return (
     <>
@@ -91,7 +93,7 @@ export default async function DashboardPage({
       </Suspense>
       <Navbar
         email={profile?.email ?? user.email}
-        analisisRestantes={profile?.analisis_restantes}
+        analisisRestantes={analisisRestantes}
         plan={profile?.plan}
       />
       <main className="container py-10">
@@ -106,7 +108,7 @@ export default async function DashboardPage({
               </Badge>
               <span className="text-sm text-[#6B7280]">
                 <strong className="text-[#0A0A0A]">
-                  {profile?.analisis_restantes ?? 0}
+                  {analisisRestantes}
                 </strong>{" "}
                 análisis restantes
               </span>
@@ -120,7 +122,7 @@ export default async function DashboardPage({
         </div>
 
         {/* Banner reverse trial para Free con crédito disponible */}
-        {profile?.plan === "free" && (profile?.analisis_restantes ?? 0) > 0 && (
+        {profile?.plan === "free" && analisisRestantes > 0 && (
           <div className="rounded-xl bg-green-50 border border-green-200 p-4 flex items-center justify-between mb-4 mt-6">
             <div>
               <p className="text-sm font-semibold text-green-800">🎁 Tu primer análisis es completamente gratis</p>
@@ -141,7 +143,7 @@ export default async function DashboardPage({
           </div>
         )}
 
-        {(profile?.analisis_restantes ?? 0) <= 0 && profile?.plan !== "pro" && (
+        {analisisRestantes <= 0 && profile?.plan !== "pro" && (
           <div className="mt-6">
             <UpgradeBanner />
           </div>

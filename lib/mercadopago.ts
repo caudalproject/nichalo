@@ -22,7 +22,7 @@ export const PLANES = {
 } as const;
 
 // Packs de créditos: pago único, sin vencimiento. NO cambian el plan del
-// usuario — solo suman a analisis_restantes (ver purchases.creditos_otorgados).
+// usuario — solo suman a creditos_pack (ver purchases.creditos_otorgados).
 export const PACKS = {
   pack_3: {
     nombre: "Pack 3 análisis",

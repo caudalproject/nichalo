@@ -272,7 +272,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
 
       // Step 6b: Decrementar crédito del usuario
       await step.run("decrement-credits", async () => {
-        await supabase.rpc("decrement_analisis_restantes", { user_id_param: user_id });
+        await supabase.rpc("descontar_analisis", { user_id_param: user_id });
       });
 
       // Step 6c: Marcar job como done

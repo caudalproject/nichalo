@@ -48,9 +48,9 @@ type Listener = (s: SesionCliente) => void;
 
 // Singleton a nivel de modulo: si Navbar y HeroSection montan este hook en la
 // misma carga de la landing (ninguno recibe datos del servidor ahi), el SDK,
-// `auth.getUser()` y el query a `users(plan, analisis_restantes)` se disparan
-// UNA sola vez y ambos componentes se suscriben al mismo resultado. No hay
-// fetch duplicado por tener dos consumidores del hook.
+// `auth.getUser()` y el query a `users(plan, creditos_ciclo, creditos_pack)`
+// se disparan UNA sola vez y ambos componentes se suscriben al mismo
+// resultado. No hay fetch duplicado por tener dos consumidores del hook.
 let estado: SesionCliente = ESTADO_INICIAL;
 let fetchCompleto: Promise<void> | null = null;
 const listeners = new Set<Listener>();
@@ -71,7 +71,7 @@ function hidratarCompleto(): Promise<void> {
 
       const { data: perfil } = await supabase
         .from("users")
-        .select("plan, analisis_restantes")
+        .select("plan, creditos_ciclo, creditos_pack")
         .eq("id", u.id)
         .maybeSingle();
 
@@ -80,7 +80,7 @@ function hidratarCompleto(): Promise<void> {
         clientName:
           u.user_metadata?.full_name ?? u.user_metadata?.name ?? null,
         plan: perfil?.plan ?? "free",
-        analisisRestantes: perfil?.analisis_restantes ?? 0,
+        analisisRestantes: (perfil?.creditos_ciclo ?? 0) + (perfil?.creditos_pack ?? 0),
       };
       notificar();
     } catch (err) {

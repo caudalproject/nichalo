@@ -143,11 +143,14 @@ export default async function ResultadoPage({ params }: Params) {
     ? (
         await supabase
           .from("users")
-          .select("plan, analisis_restantes")
+          .select("plan, creditos_ciclo, creditos_pack")
           .eq("id", user.id)
           .maybeSingle()
       ).data
     : null;
+  const analisisRestantes = profile
+    ? (profile.creditos_ciclo ?? 0) + (profile.creditos_pack ?? 0)
+    : undefined;
 
   const totalAnalisis = user ? (
     await supabase
@@ -209,7 +212,7 @@ export default async function ResultadoPage({ params }: Params) {
     <>
       <Navbar
         email={user?.email}
-        analisisRestantes={profile?.analisis_restantes}
+        analisisRestantes={analisisRestantes}
         plan={profile?.plan}
       />
       <main className="container py-10">

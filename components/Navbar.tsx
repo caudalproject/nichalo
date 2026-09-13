@@ -24,25 +24,27 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // El SDK de Supabase, `auth.getUser()` y el query a
-  // `users(plan, analisis_restantes)` viven en un hook compartido con
-  // HeroSection: en la landing (sin props de servidor) ambos componentes se
-  // suscriben al mismo fetch en vez de dispararlo dos veces.
+  // `users(plan, creditos_ciclo, creditos_pack)` viven en un hook compartido
+  // con HeroSection: en la landing (sin props de servidor) ambos componentes
+  // se suscriben al mismo fetch en vez de dispararlo dos veces.
   const sesion = useSesionCliente({ email, plan, analisisRestantes });
   const clientEmail = sesion.clientEmail;
   const clientName = sesion.clientName;
 
   // Cancelar la suscripcion cambia el plan sin pasar por un nuevo login: se
-  // guarda como override local por encima de lo que devuelva el hook.
+  // guarda como override local por encima de lo que devuelva el hook. Solo
+  // se pisa `plan` — los creditos que queden (creditos_pack, que no se
+  // toca al cancelar) los sabe el servidor, no este componente, y llegan
+  // solos con el `router.refresh()` de abajo.
   const [overrideTrasCancelar, setOverrideTrasCancelar] = useState<{
     plan: string;
-    analisis_restantes: number;
   } | null>(null);
   const userData = overrideTrasCancelar
     ? {
         plan: overrideTrasCancelar.plan,
-        analisis_restantes: overrideTrasCancelar.analisis_restantes,
+        analisisRestantes: sesion.analisisRestantes,
       }
-    : { plan: sesion.plan, analisis_restantes: sesion.analisisRestantes };
+    : { plan: sesion.plan, analisisRestantes: sesion.analisisRestantes };
 
   useEffect(() => {
     if (!open) return;
@@ -59,7 +61,7 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   }, [open]);
 
   const planActual = userData.plan;
-  const analisis = userData.analisis_restantes;
+  const analisis = userData.analisisRestantes;
   const nombre = clientName ?? clientEmail ?? "";
   const nombreCorto = clientName
     ? clientName.split(" ")[0]
@@ -89,7 +91,7 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
         setCancelError(data.error ?? "Error al cancelar. Intentá de nuevo.");
         return;
       }
-      setOverrideTrasCancelar({ plan: "free", analisis_restantes: 1 });
+      setOverrideTrasCancelar({ plan: "free" });
       setShowCancelConfirm(false);
       router.refresh();
     } finally {

@@ -75,54 +75,49 @@ export async function POST(req: Request) {
 
     const suscripcion = await preApproval.get({ id: body.data.id });
 
-    if (suscripcion.status === "authorized") {
+    // Alta de suscripción: activar_pro es idempotente (solo hace algo si el
+    // usuario todavía no está en plan 'pro'), así que una notificación
+    // "authorized" duplicada no vuelve a pisar creditos_ciclo a 30.
+    if (suscripcion.status === "authorized" && body.type !== "subscription_authorized_payment") {
       const [user_id, plan] = (suscripcion.external_reference ?? "").split("|");
       const planConfig = PLANES[plan as keyof typeof PLANES];
 
       if (user_id && planConfig) {
-        // Solo actualizar si el plan cambió — evita resetear créditos en duplicados
-        const { data: currentUser } = await supabase
-          .from("users")
-          .select("plan")
-          .eq("id", user_id)
-          .single();
-
-        if (currentUser?.plan !== planConfig.plan) {
-          const { error } = await supabase
-            .from("users")
-            .update({
-              plan: planConfig.plan,
-              analisis_restantes: planConfig.analisis,
-            })
-            .eq("id", user_id);
-
-          if (error) {
-            console.error("[webhook] error actualizando usuario:", error.message);
-            return NextResponse.json({ error: "DB error" }, { status: 500 });
-          }
+        const { error } = await supabase.rpc("activar_pro", { user_id_param: user_id });
+        if (error) {
+          console.error("[webhook] error activando pro:", error.message);
+          return NextResponse.json({ error: "DB error" }, { status: 500 });
         }
       }
     }
 
-    // Manejar renovaciones mensuales
+    // Renovación mensual (Opción A, camino principal del refill): entra la
+    // plata -> se recarga el ciclo. refrescar_ciclo_pro es la misma función
+    // que llama la Opción B (red de seguridad en /api/analizar), así que si
+    // por lo que sea las dos se disparan cerca en el tiempo, la segunda no
+    // hace nada — no hay forma de duplicar el refill.
     if (body.type === "subscription_authorized_payment" && suscripcion.status === "authorized") {
       const [user_id, plan] = (suscripcion.external_reference ?? "").split("|");
       const planConfig = PLANES[plan as keyof typeof PLANES];
       if (user_id && planConfig) {
-        await supabase
-          .from("users")
-          .update({ analisis_restantes: planConfig.analisis })
-          .eq("id", user_id);
+        const { error } = await supabase.rpc("refrescar_ciclo_pro", { user_id_param: user_id });
+        if (error) {
+          console.error("[webhook] error refrescando ciclo pro:", error.message);
+          return NextResponse.json({ error: "DB error" }, { status: 500 });
+        }
       }
     }
 
+    // Cancelación o vencimiento: plan vuelve a free, creditos_ciclo a 0,
+    // creditos_pack queda intacto. cancelar_pro lo hace atómico en SQL.
     if (suscripcion.status === "cancelled" || suscripcion.status === "paused") {
       const [user_id] = (suscripcion.external_reference ?? "").split("|");
       if (user_id) {
-        await supabase
-          .from("users")
-          .update({ plan: "free" })
-          .eq("id", user_id);
+        const { error } = await supabase.rpc("cancelar_pro", { user_id_param: user_id });
+        if (error) {
+          console.error("[webhook] error cancelando pro:", error.message);
+          return NextResponse.json({ error: "DB error" }, { status: 500 });
+        }
       }
     }
 
@@ -134,7 +129,7 @@ export async function POST(req: Request) {
 }
 
 // Pago único de un pack de créditos (Checkout Pro). Los packs NO tocan el
-// plan del usuario, solo suman a analisis_restantes.
+// plan del usuario ni creditos_ciclo — solo suman a creditos_pack, que no vence.
 async function manejarPagoDePack(paymentId: string) {
   try {
     const mp = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! });
@@ -179,7 +174,7 @@ async function manejarPagoDePack(paymentId: string) {
     }
 
     // Incremento atómico — evita el race condition de leer y escribir desde JS.
-    const { error: rpcError } = await supabase.rpc("increment_analisis_restantes", {
+    const { error: rpcError } = await supabase.rpc("incrementar_creditos_pack", {
       user_id_param: user_id,
       amount_param: packConfig.creditos,
     });

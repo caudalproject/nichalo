@@ -93,9 +93,12 @@ export async function bootstrapNewUser(
         );
       if (upsertClaimErr) throw upsertClaimErr;
 
+      // Courtesy credit de Free: va a creditos_pack (no vence, mismo trato
+      // que un crédito comprado). El usuario recién creado siempre arranca
+      // en 0, así que esto es una asignación segura, no un incremento.
       const { error: creditErr } = await service
         .from("users")
-        .update({ analisis_restantes: 1 })
+        .update({ creditos_pack: 1 })
         .eq("id", user.id);
       if (creditErr) throw creditErr;
     }
@@ -104,7 +107,7 @@ export async function bootstrapNewUser(
     // el de un falso positivo es un usuario perdido.
     console.error("[new-user-bootstrap] fallback: se otorga credito por error en anti-fraude:", err);
     sinCredito = false;
-    await service.from("users").update({ analisis_restantes: 1 }).eq("id", user.id);
+    await service.from("users").update({ creditos_pack: 1 }).eq("id", user.id);
   }
 
   // Atribucion de campana: persistir los UTM de la cookie de la landing.

@@ -56,10 +56,9 @@ export async function POST() {
       body: { status: "cancelled" },
     });
 
-    await adminSupabase
-      .from("users")
-      .update({ plan: "free" })
-      .eq("id", user.id);
+    // plan vuelve a free, creditos_ciclo a 0, creditos_pack queda intacto —
+    // atómico en SQL (ver supabase/migrations/20260912010000_refill_pro_split_credits.sql).
+    await adminSupabase.rpc("cancelar_pro", { user_id_param: user.id });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

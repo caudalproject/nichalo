@@ -56,9 +56,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  // Opción B (red de seguridad) del refill mensual de Pro: si pasó más de un
+  // mes desde el último refill, se recarga acá antes de leer el perfil. No
+  // hace nada si el usuario no es Pro o si todavía no corresponde — la
+  // condición vive adentro de la función SQL, no acá, para que esto y el
+  // webhook (Opción A) nunca puedan duplicar un refill.
+  const { error: refillErr } = await supabase.rpc("refrescar_ciclo_pro", {
+    user_id_param: user.id,
+  });
+  if (refillErr) {
+    console.error("[analizar] error en refill lazy (no bloqueante):", refillErr.message);
+  }
+
   const { data: profile, error: profileErr } = await supabase
     .from("users")
-    .select("id, plan, analisis_restantes")
+    .select("id, plan, creditos_ciclo, creditos_pack")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -69,7 +81,7 @@ export async function POST(request: Request) {
     );
   }
 
-  let restantes = profile?.analisis_restantes ?? 0;
+  let restantes = (profile?.creditos_ciclo ?? 0) + (profile?.creditos_pack ?? 0);
   if (!profile) {
     // No otorgar credito aca: el credito gratis solo lo otorga
     // app/auth/callback/route.ts, despues de pasar el chequeo anti-fraude de
@@ -140,7 +152,7 @@ export async function POST(request: Request) {
           );
         }
 
-        await supabase.rpc("decrement_analisis_restantes", { user_id_param: user.id });
+        await supabase.rpc("descontar_analisis", { user_id_param: user.id });
 
         return NextResponse.json({ id: inserted.id });
       }

@@ -11,45 +11,35 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 
 -- 2) Public profile table mirroring auth.users
+--
+-- Los créditos viven en dos columnas separadas a propósito (ver
+-- supabase/migrations/20260912010000_refill_pro_split_credits.sql):
+--   creditos_pack  -> comprados (packs) o el cortesía de Free. No vencen.
+--   creditos_ciclo -> cupo mensual de Pro. Se resetea en cada renovación y
+--                     se pone en 0 al cancelar/vencer. NUNCA toca creditos_pack.
+-- El total que ve el usuario es la suma de los dos.
 create table if not exists public.users (
   id uuid primary key references auth.users(id) on delete cascade,
   email text not null,
   plan plan_tier not null default 'free',
-  analisis_restantes int not null default 1,
+  creditos_ciclo int not null default 0,
+  creditos_pack int not null default 0,
+  ultimo_refill_at timestamptz,
   created_at timestamptz not null default now()
 );
 
--- Ensure analisis_restantes auto-resets when the plan changes
-create or replace function public.set_analisis_restantes_on_plan_change()
-returns trigger
-language plpgsql
-as $$
-begin
-  if new.plan is distinct from old.plan then
-    new.analisis_restantes := case new.plan
-      when 'free' then 1
-      when 'starter' then 10
-      when 'pro' then 30
-    end;
-  end if;
-  return new;
-end;
-$$;
-
-drop trigger if exists trg_users_plan_change on public.users;
-create trigger trg_users_plan_change
-before update on public.users
-for each row execute function public.set_analisis_restantes_on_plan_change();
-
--- 3) Auto-create a profile row whenever a new auth user signs up
+-- 3) Auto-create a profile row whenever a new auth user signs up. El
+-- courtesy credit de Free lo otorga lib/new-user-bootstrap.ts (contra
+-- creditos_pack) después de pasar el chequeo anti-fraude de multicuentas —
+-- acá no se regala nada.
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.users (id, email, plan, analisis_restantes)
-  values (new.id, new.email, 'free', 1)
+  insert into public.users (id, email, plan)
+  values (new.id, new.email, 'free')
   on conflict (id) do nothing;
   return new;
 end;
@@ -99,3 +89,85 @@ drop policy if exists "analyses self insert" on public.analyses;
 create policy "analyses self insert"
   on public.analyses for insert
   with check (auth.uid() = user_id);
+
+-- 6) Créditos: descuento y otorgamiento, siempre atómico en SQL.
+-- Detalle completo de por qué en supabase/migrations/20260912010000_refill_pro_split_credits.sql.
+
+create or replace function public.descontar_analisis(user_id_param uuid)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.users
+  set
+    creditos_ciclo = case when creditos_ciclo > 0 then creditos_ciclo - 1 else creditos_ciclo end,
+    creditos_pack  = case when creditos_ciclo > 0 then creditos_pack else greatest(creditos_pack - 1, 0) end
+  where id = user_id_param
+    and (creditos_ciclo + creditos_pack) > 0;
+$$;
+
+create or replace function public.incrementar_creditos_pack(
+  user_id_param uuid,
+  amount_param int
+)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.users
+  set creditos_pack = creditos_pack + amount_param
+  where id = user_id_param;
+$$;
+
+create or replace function public.activar_pro(user_id_param uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  update public.users
+  set plan = 'pro',
+      creditos_ciclo = 30,
+      ultimo_refill_at = now()
+  where id = user_id_param
+    and plan is distinct from 'pro'
+  returning true;
+$$;
+
+create or replace function public.refrescar_ciclo_pro(user_id_param uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  update public.users
+  set creditos_ciclo = 30,
+      ultimo_refill_at = now()
+  where id = user_id_param
+    and plan = 'pro'
+    and (ultimo_refill_at is null or ultimo_refill_at < now() - interval '1 month')
+  returning true;
+$$;
+
+create or replace function public.cancelar_pro(user_id_param uuid)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.users
+  set plan = 'free',
+      creditos_ciclo = 0
+  where id = user_id_param;
+$$;
+
+revoke execute on function public.descontar_analisis(uuid) from public, anon, authenticated;
+revoke execute on function public.incrementar_creditos_pack(uuid, int) from public, anon, authenticated;
+revoke execute on function public.activar_pro(uuid) from public, anon, authenticated;
+revoke execute on function public.refrescar_ciclo_pro(uuid) from public, anon, authenticated;
+revoke execute on function public.cancelar_pro(uuid) from public, anon, authenticated;
+
+revoke update (plan, creditos_ciclo, creditos_pack, ultimo_refill_at)
+  on public.users from anon, authenticated;

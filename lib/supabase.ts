@@ -14,7 +14,9 @@ export interface UserRow {
   id: string;
   email: string;
   plan: Plan;
-  analisis_restantes: number;
+  creditos_ciclo: number;
+  creditos_pack: number;
+  ultimo_refill_at: string | null;
   created_at: string;
 }
 

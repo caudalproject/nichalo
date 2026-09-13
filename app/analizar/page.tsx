@@ -18,15 +18,17 @@ export default async function AnalizarPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("plan, analisis_restantes, email")
+    .select("plan, creditos_ciclo, creditos_pack, email")
     .eq("id", user.id)
     .maybeSingle();
+
+  const analisisRestantes = (profile?.creditos_ciclo ?? 0) + (profile?.creditos_pack ?? 0);
 
   return (
     <>
       <Navbar
         email={user.email}
-        analisisRestantes={profile?.analisis_restantes}
+        analisisRestantes={analisisRestantes}
         plan={profile?.plan}
       />
       <main className="container py-10">
@@ -37,7 +39,7 @@ export default async function AnalizarPage() {
           </p>
           <div className="mt-6">
             <AnalizarForm
-              creditsLeft={profile?.analisis_restantes ?? 0}
+              creditsLeft={analisisRestantes}
               plan={profile?.plan ?? "free"}
             />
           </div>
