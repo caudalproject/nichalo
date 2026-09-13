@@ -32,10 +32,14 @@ interface Props {
 
 // Resultado público de ejemplo mostrado sin login (ver "trust line" abajo).
 // Configurable por env var para poder rotarlo sin tocar código; fallback al
-// análisis real vigente ("Termo Stanley", score 90) si la var no está seteada.
-// El build falla si este ID no resuelve — ver scripts/check-featured-result.mjs.
+// análisis real vigente ("Camiseta deportiva talle único", score 80) si la
+// var no está seteada. El build falla si este ID no resuelve — ver
+// scripts/check-featured-result.mjs.
+// Nota: NO es "Termo Stanley" (6d43a024-...) — ese análisis tiene un bug real
+// de conversión de moneda (Gemini restó precio en ARS crudo contra costo en
+// USD sin dividir por la tasa, ver Diario de Decisiones 2026-09-13, corrección).
 const FEATURED_RESULT_ID =
-  process.env.NEXT_PUBLIC_FEATURED_RESULT_ID || "6d43a024-af07-495a-9926-a2167fa12644";
+  process.env.NEXT_PUBLIC_FEATURED_RESULT_ID || "3ac26d02-3530-4178-8680-a5245635c62b";
 
 // Ring de énfasis para la card que el recomendador (arriba) señala. No
 // reemplaza el estilo propio de cada card (ej. el badge "Más completo" de
