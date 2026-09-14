@@ -9,7 +9,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Nichalo — Validá tu producto en Mercado Libre",
   description:
-    "Descubrí en segundos si tu producto va a vender en Mercado Libre. Análisis de competencia, márgenes y veredicto con IA.",
+    "Descubrí en ~3 minutos si tu producto va a vender en Mercado Libre. Análisis de competencia, márgenes y veredicto con datos reales de ML.",
 };
 
 export default function RootLayout({

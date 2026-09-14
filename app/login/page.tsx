@@ -174,7 +174,7 @@ function LoginContent() {
         <CardHeader>
           <CardTitle className="text-center">Ingresá a Nichalo</CardTitle>
           <p className="text-center text-sm text-muted-foreground">
-            Validá tu próximo producto en segundos.
+            Validá tu próximo producto en ~3 minutos.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

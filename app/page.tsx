@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Search, Bot, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FAQSection } from "@/components/FAQSection";
-import { HeroMock } from "@/components/HeroMock";
+import { HeroResultadoReal } from "@/components/HeroResultadoReal";
+import { EjemploReal } from "@/components/EjemploReal";
+import { SoloAnonimo, SoloLogueado, SoloSinPro } from "@/components/SesionGate";
 import { PixelTracking } from "@/components/PixelTracking";
 import { PrecioPlan } from "@/components/PreciosPais";
 import { PricingSection } from "@/components/PricingSection";
@@ -15,26 +16,51 @@ import { PricingSection } from "@/components/PricingSection";
 // El Navbar hidrata su propia sesión del lado cliente y los precios por país
 // salen de la cookie que setea el middleware, así que ni la sesión ni la
 // geolocalización cuestan TTFB en el hero.
+//
+// Rediseño del 14/9 sobre la auditoría del 13/9
+// (Negocios/Nichalo/AI-Sessions/2026-09-13-auditoria-landing-y-briefs.md):
+// - El producto inventado ("cargador inalámbrico 15W, score 78") aparecía en
+//   cuatro secciones. Se fue entero: ahora hay un análisis REAL y público
+//   (lib/ejemplo-real.ts), que aparece una sola vez en el hero, y la sección
+//   #ejemplo muestra la continuación de ese mismo informe, no una repetición.
+// - Se cayeron los tres testimonios anónimos (confirmados inventados el 13/9)
+//   y el titular "Desarrollado junto a vendedores top" (plural y no
+//   verificable): queda una línea en singular y sin adjetivo propio.
+// - "en segundos" → "~3 min" en todas partes (hero, login, stats, lock).
+// - El CTA de cierre pasó a después de la FAQ; antes pedía la conversión una
+//   sección ANTES de mostrar el precio.
+// - Navbar con anclas + línea de ancla de precio en el hero, sin subir la
+//   sección de planes al top.
 
-const FEATURES = [
+// Reemplaza a las tres feature cards. Son los tres pasos del producto, no
+// tres adjetivos. "Revisamos cientos de publicaciones" se cayó: el techo real
+// es 100 (PLAN_CONFIG.pro.maxItems), así que "cientos" no era verificable.
+const PASOS = [
   {
-    Icon: Search,
-    title: "Scraping en vivo",
-    description:
-      "Revisamos cientos de publicaciones reales de ML al momento.",
+    n: "1",
+    title: "Decinos qué querés vender",
+    description: "El producto y cuánto te cuesta. Nada más.",
   },
   {
-    Icon: Bot,
-    title: "IA que entiende el mercado",
+    n: "2",
+    title: "Scrapeamos el mercado real",
     description:
-      "Gemini analiza competencia, márgenes y tendencias en español.",
+      "Hasta 100 publicaciones de Mercado Libre, en el momento en que apretás analizar.",
   },
   {
-    Icon: CheckCircle,
-    title: "Decisión clara",
+    n: "3",
+    title: "Te damos un veredicto en ~3 min",
     description:
-      "VIABLE, MARGINAL o SATURADO — con el razonamiento detrás.",
+      "VIABLE, MARGINAL o SATURADO, con el razonamiento y los números detrás.",
   },
+];
+
+// La stat del medio decía "AR / Argentina" — presentaba una limitación como
+// si fuera un logro (auditoría, problema 6). Reemplazada por una que suma.
+const STATS = [
+  { valor: "100%", label: "publicaciones reales de ML" },
+  { valor: "hasta 100", label: "publicaciones por análisis" },
+  { valor: "~3 min", label: "por análisis" },
 ];
 
 // Free y Pro son planes; "Análisis" (Pack 3 / Pack 10) es un producto con una
@@ -95,7 +121,8 @@ export default function LandingPage() {
       <Navbar />
       <main>
         <PixelTracking />
-        {/* Hero */}
+
+        {/* 1 — Hero */}
         <section className="py-10 md:py-32">
           <div className="max-w-6xl mx-auto px-6 text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#0A0A0A] leading-tight max-w-4xl mx-auto">
@@ -103,295 +130,176 @@ export default function LandingPage() {
               <span className="text-[#16A34A] whitespace-nowrap">Mercado Libre</span>?
             </h1>
             <p className="mt-6 text-lg text-[#6B7280] leading-relaxed max-w-xl mx-auto">
-              Antes de comprar stock, sabé exactamente si el mercado tiene
-              espacio para vos. Análisis real con datos de ML en segundos.
+              Antes de comprar stock, sabé si el mercado tiene espacio para vos.
+              Analizamos publicaciones reales de Mercado Libre y te damos un
+              veredicto en ~3 minutos.
             </p>
             <HeroSection />
-            <HeroMock />
+            <SoloAnonimo>
+              <HeroResultadoReal />
+            </SoloAnonimo>
           </div>
         </section>
 
-        {/* Antes y después */}
-        <section className="container py-20">
-          <div className="text-center" style={{ marginBottom: "2.5rem" }}>
-            <h2 className="text-3xl font-bold text-[#0A0A0A]">
-              Lo que cambia cuando usás Nichalo
-            </h2>
-            <p className="mt-3 text-sm text-[#6B7280]">
-              De intuición a certeza, antes de gastar un peso
-            </p>
-          </div>
-
-          <div className="mx-auto max-w-4xl">
-            <div className="flex flex-col md:flex-row md:gap-0 gap-4">
-              {/* Columna ANTES */}
-              <div className="flex-1 bg-gray-100 rounded-xl p-6 flex flex-col">
-                <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Antes</h3>
-                <ul className="space-y-3 flex-1">
-                  {[
-                    "\"Me parece que este producto va a vender\"",
-                    "Comprás stock sin saber si hay mercado real",
-                    "Publicás y esperás semanas para descubrir que el precio no cierra",
-                    "Perdés capital en productos que no rotan",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-[#0A0A0A]">
-                      <span className="text-gray-500 font-bold mt-0.5 shrink-0">✗</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-xs text-[#6B7280] italic" style={{ borderTop: "0.5px solid var(--border, #E5E7EB)", paddingTop: "16px", marginTop: "20px" }}>
-                  Lo que pasa hoy, sin datos.
-                </p>
-              </div>
-
-              {/* Flecha — solo desktop */}
-              <div className="hidden md:flex items-center justify-center px-3">
-                <div className="w-10 h-10 rounded-full bg-[#374151] flex items-center justify-center shrink-0">
-                  <span className="text-white text-base leading-none">→</span>
-                </div>
-              </div>
-
-              {/* Columna DESPUÉS */}
-              <div className="flex-1 bg-gray-100 rounded-xl p-6 flex flex-col">
-                <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Después</h3>
-                <p className="text-xs text-[#6B7280] mb-3">Ejemplo real: cargador inalámbrico</p>
-                <div className="mb-4">
-                  <span className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-green-50 text-[#16A34A]">
-                    Score 78 · VIABLE
-                  </span>
-                </div>
-                <ul className="space-y-3 flex-1">
-                  {[
-                    "Margen real: +18.4% con tu costo de proveedor",
-                    "Precio sugerido según tu perfil de vendedor",
-                    "Datos reales de Mercado Libre al momento del análisis",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-[#0A0A0A]">
-                      <span className="text-[#16A34A] font-bold mt-0.5 shrink-0">✓</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-xs text-[#6B7280] italic" style={{ borderTop: "0.5px solid var(--border, #E5E7EB)", paddingTop: "16px", marginTop: "20px" }}>
-                  Todo esto antes de comprar una sola unidad.
-                </p>
-              </div>
+        <SoloAnonimo>
+          {/* 2 — Cómo funciona */}
+          <section id="como-funciona" className="container py-20 scroll-mt-16">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold text-[#0A0A0A]">Cómo funciona</h2>
             </div>
-          </div>
-        </section>
 
-        {/* Social proof */}
-        <section className="bg-[#F9FAFB] py-16 border-y border-[#E5E7EB]">
-          <div className="container">
-            <p className="text-center text-xl font-semibold text-[#0A0A0A] md:text-2xl">
-              Desarrollado junto a vendedores top de Mercado Libre
-            </p>
-            <div className="mt-10 grid grid-cols-3 gap-6 max-w-xl mx-auto text-center">
-              <div>
-                <div className="text-3xl font-bold text-[#0A0A0A]">100%</div>
-                <div className="text-sm text-[#6B7280] mt-1">
-                  datos reales de ML
-                </div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[#0A0A0A]">AR</div>
-                <div className="text-sm text-[#6B7280] mt-1">Argentina</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[#0A0A0A]">
-                  ~3 min
-                </div>
-                <div className="text-sm text-[#6B7280] mt-1">
-                  por análisis
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features */}
-        <section className="container py-20">
-          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
-            {FEATURES.map((f) => (
-              <Card key={f.title} className="border-[#E5E7EB] rounded-lg">
-                <CardContent className="p-6">
-                  <f.Icon className="h-5 w-5 text-[#16A34A]" />
-                  <h3 className="mt-4 text-base font-semibold text-[#0A0A0A]">
-                    {f.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-[#6B7280] leading-relaxed">
-                    {f.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Preview del análisis — siempre visible para usuarios anónimos */}
-        <section className="container py-20">
-          <div className="mx-auto max-w-3xl text-center mb-10">
-            <h2 className="text-3xl font-bold text-[#0A0A0A]">
-              Esto es lo que vas a ver
-            </h2>
-            <p className="mt-3 text-[#6B7280]">
-              Así se ve un análisis real — antes de gastar un peso en stock
-            </p>
-          </div>
-
-          <div className="mx-auto max-w-3xl relative">
-            {/* Card de resultado mockeado */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="h-1.5 w-full bg-green-500" />
-              <div className="px-8 py-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-green-50 text-green-700">
-                    VIABLE
-                  </span>
-                  <span className="text-sm text-gray-400">Mercado con oportunidad real</span>
-                </div>
-                <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-6xl md:text-8xl font-black leading-none text-green-500">78</span>
-                  <span className="text-2xl text-gray-300 font-light">/100</span>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-1">Cargador inalámbrico 15W para auto</h3>
-                <p className="text-sm text-gray-400 mb-6">Argentina · Costo $ 8.500 · Análisis basado en 45 publicaciones de Mercado Libre</p>
-
-                {/* Métricas */}
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-4 mb-6">
-                  {[
-                    { label: "Ganancia por unidad", value: "+ $ 4.200", green: true },
-                    { label: "Margen bruto", value: "+18.4%", green: true },
-                    { label: "Publicaciones", value: "45", green: false },
-                    { label: "Precio sugerido", value: "$ 18.900", green: false },
-                  ].map((m) => (
-                    <div key={m.label} className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-center">
-                      <div className="text-xs text-gray-500">{m.label}</div>
-                      <div className={`mt-1 text-lg font-bold ${m.green ? "text-green-600" : "text-gray-900"}`}>{m.value}</div>
+            <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
+              {PASOS.map((p) => (
+                <Card key={p.n} className="border-[#E5E7EB] rounded-lg">
+                  <CardContent className="p-6">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#16A34A] text-sm font-bold text-white">
+                      {p.n}
                     </div>
-                  ))}
+                    <h3 className="mt-4 text-base font-semibold text-[#0A0A0A]">
+                      {p.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-[#6B7280] leading-relaxed">
+                      {p.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="mt-12 grid grid-cols-3 gap-6 max-w-xl mx-auto text-center">
+              {STATS.map((s) => (
+                <div key={s.label}>
+                  <div className="text-xl md:text-3xl font-bold text-[#0A0A0A]">
+                    {s.valor}
+                  </div>
+                  <div className="text-sm text-[#6B7280] mt-1">{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Antes era un titular de 2xl y en plural ("vendedores top de
+                Mercado Libre"). Es una sola persona, y "top" es un adjetivo
+                nuestro, no una credencial que dé ML — misma familia que el
+                badge "Más elegido" que se cayó por falso el 13/9. Si se
+                confirma la categoría real (MercadoLíder / Gold / Platinum),
+                esta línea la usa; hasta entonces, el fallback honesto. */}
+            <p className="mt-12 text-center text-sm text-[#6B7280]">
+              Desarrollado con el feedback de un vendedor de Mercado Libre en
+              actividad.
+            </p>
+          </section>
+
+          {/* 3 — Antes y después */}
+          <section className="container py-20">
+            <div className="text-center" style={{ marginBottom: "2.5rem" }}>
+              <h2 className="text-3xl font-bold text-[#0A0A0A]">
+                Lo que cambia cuando usás Nichalo
+              </h2>
+              <p className="mt-3 text-sm text-[#6B7280]">
+                De intuición a certeza, antes de gastar un peso
+              </p>
+            </div>
+
+            <div className="mx-auto max-w-4xl">
+              <div className="flex flex-col md:flex-row md:gap-0 gap-4">
+                {/* Columna ANTES */}
+                <div className="flex-1 bg-gray-100 rounded-xl p-6 flex flex-col">
+                  <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Antes</h3>
+                  <ul className="space-y-3 flex-1">
+                    {[
+                      "\"Me parece que este producto va a vender\"",
+                      "Comprás stock sin saber si hay mercado real",
+                      "Publicás y esperás semanas para descubrir que el precio no cierra",
+                      "Perdés capital en productos que no rotan",
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-[#0A0A0A]">
+                        <span className="text-gray-500 font-bold mt-0.5 shrink-0">✗</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-xs text-[#6B7280] italic" style={{ borderTop: "0.5px solid var(--border, #E5E7EB)", paddingTop: "16px", marginTop: "20px" }}>
+                    Lo que pasa hoy, sin datos.
+                  </p>
                 </div>
 
-                <p className="text-xs text-gray-500 mb-6">
-                  El precio sugerido no garantiza ganancia: comisión ML (~17%) + envío + impuestos consumen el margen.
-                </p>
+                {/* Flecha — solo desktop */}
+                <div className="hidden md:flex items-center justify-center px-3">
+                  <div className="w-10 h-10 rounded-full bg-[#374151] flex items-center justify-center shrink-0">
+                    <span className="text-white text-base leading-none">→</span>
+                  </div>
+                </div>
 
-                {/* Resumen visible */}
-                <div className="rounded-xl border border-gray-100 p-4 mb-4">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Resumen</p>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    Mercado con demanda sostenida y pocos vendedores consolidados. Tu costo te permite competir en precio con margen saludable.
+                {/* Columna DESPUÉS — se le sacaron la card y el "Score 78" del
+                    producto inventado. Ahora describe capacidades, no un
+                    resultado falso. */}
+                <div className="flex-1 bg-gray-100 rounded-xl p-6 flex flex-col">
+                  <h3 className="text-base font-bold text-[#0A0A0A] mb-4">Después</h3>
+                  <ul className="space-y-3 flex-1">
+                    {[
+                      "Sabés cuántos venden lo mismo y a qué precio, antes de comprar",
+                      "Un precio sugerido calculado con tu costo real, no el promedio del mercado",
+                      "Un veredicto — VIABLE, MARGINAL o SATURADO — con el razonamiento detrás",
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-[#0A0A0A]">
+                        <span className="text-[#16A34A] font-bold mt-0.5 shrink-0">✓</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-xs text-[#6B7280] italic" style={{ borderTop: "0.5px solid var(--border, #E5E7EB)", paddingTop: "16px", marginTop: "20px" }}>
+                    Todo esto antes de comprar una sola unidad.
                   </p>
                 </div>
               </div>
             </div>
+          </section>
 
-            {/* Contenido bloqueado */}
-            <div className="relative overflow-hidden">
-              <div className="blur-sm pointer-events-none select-none opacity-100 bg-white rounded-2xl border border-gray-100 p-8 space-y-4">
-                {/* Alternativas sugeridas falsas */}
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Productos con mejor oportunidad</p>
-                  <div className="space-y-1">
-                    <div className="flex gap-2 text-sm"><span className="text-green-600">1.</span><span className="text-gray-600">Auriculares TWS con cancelación de ruido ANC</span></div>
-                    <div className="flex gap-2 text-sm"><span className="text-green-600">2.</span><span className="text-gray-600">Auriculares óseos deportivos para running</span></div>
-                  </div>
-                </div>
-                {/* Competencia falsa */}
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Competencia</p>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex justify-between"><span className="text-gray-400">Precio mínimo</span><span className="font-medium">$ 9.800</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Precio promedio</span><span className="font-medium">$ 16.400</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Precio máximo</span><span className="font-medium">$ 28.000</span></div>
-                    <div className="flex justify-between"><span className="text-gray-400">Vendedores top</span><span className="font-medium">12 perfiles</span></div>
-                  </div>
-                </div>
-                {/* Riesgos falsos */}
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Riesgos</p>
-                  <div className="space-y-1">
-                    <div className="h-3 bg-gray-100 rounded w-full" />
-                    <div className="h-3 bg-gray-100 rounded w-4/5" />
-                  </div>
-                </div>
-              </div>
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 rounded-2xl border border-gray-100 py-8">
-                <span className="text-2xl mb-2">🔒</span>
-                <p className="text-sm font-semibold text-gray-900 mb-1">
-                  Competencia, márgenes y recomendaciones completas
-                </p>
-                <p className="text-xs text-gray-500 mb-4 text-center px-6">
-                  Creá una cuenta gratis y hacé tu primer análisis en ~3 min
-                </p>
+          {/* 4 — Ejemplo real */}
+          <EjemploReal />
+        </SoloAnonimo>
+
+        {/* 5 — Planes. El logueado free o con packs la sigue viendo: es su
+            único camino de upgrade (/planes redirige a /#planes). Solo se
+            oculta para quien ya está en Pro. */}
+        <SoloSinPro>
+          <PricingSection cards={PRICING_CARDS} />
+        </SoloSinPro>
+
+        {/* 6 — FAQ */}
+        <FAQSection />
+
+        {/* 7 — CTA de cierre. Va DESPUÉS de la FAQ: antes estaba una sección
+            antes de los planes, o sea que pedía la decisión antes de dar el
+            dato necesario para decidirla (auditoría, problema 3). */}
+        <section className="py-16 text-center bg-[#F9FAFB] border-t border-[#E5E7EB]">
+          <div className="container">
+            <p className="text-2xl font-bold text-[#0A0A0A]">
+              ¿Qué producto estás por comprar?
+            </p>
+            <SoloAnonimo>
+              <div className="mt-6">
                 <Link href="/login">
-                  <Button className="rounded-full bg-[#16A34A] hover:bg-[#15803D] text-white px-6">
+                  <Button size="lg" className="rounded-md">
                     Empezar gratis →
                   </Button>
                 </Link>
               </div>
-            </div>
+              <p className="mt-3 text-sm text-[#6B7280]">
+                1 análisis gratis · Sin tarjeta de crédito
+              </p>
+            </SoloAnonimo>
+            <SoloLogueado>
+              <div className="mt-6">
+                <Link href="/analizar">
+                  <Button size="lg" className="rounded-md">
+                    Nuevo análisis →
+                  </Button>
+                </Link>
+              </div>
+            </SoloLogueado>
           </div>
         </section>
-
-        {/* Testimonios */}
-        <section className="bg-[#F9FAFB] py-16 border-y border-[#E5E7EB]">
-          <div className="container">
-            <div className="mx-auto max-w-3xl grid gap-6 md:grid-cols-3">
-              {[
-                {
-                  texto: "Iba a comprar stock de auriculares. Nichalo me dio 38/100 — SATURADO. Me ahorré la inversión.",
-                  autor: "Vendedor de electrónica",
-                  pais: "Argentina",
-                },
-                {
-                  texto: "Validé 3 productos en una tarde. El único VIABLE fue el que terminé vendiendo. Los datos son reales.",
-                  autor: "Vendedor de hogar",
-                  pais: "Argentina",
-                },
-                {
-                  texto: "Lo que más me sirvió fue el precio sugerido según mi perfil. No el promedio del mercado, el que yo podía poner.",
-                  autor: "Vendedor principiante",
-                  pais: "Argentina",
-                },
-              ].map((t, i) => (
-                <div key={i} className="bg-white rounded-xl border border-[#E5E7EB] p-5 space-y-3">
-                  <p className="text-sm text-[#0A0A0A] leading-relaxed">&ldquo;{t.texto}&rdquo;</p>
-                  <div>
-                    <p className="text-xs font-semibold text-[#0A0A0A]">{t.autor}</p>
-                    <p className="text-xs text-[#6B7280]">{t.pais}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA intermedio — siempre visible para usuarios anónimos */}
-        <section className="py-12 text-center">
-          <div className="container">
-            <p className="text-2xl font-bold text-[#0A0A0A]">
-              ¿Listo para validar tu próximo producto?
-            </p>
-            <div className="mt-6">
-              <Link href="/login">
-                <Button size="lg" className="rounded-md">
-                  Empezar gratis →
-                </Button>
-              </Link>
-            </div>
-            <p className="mt-3 text-sm text-[#6B7280]">
-              1 análisis gratis · Sin tarjeta de crédito
-            </p>
-          </div>
-        </section>
-
-        {/* Pricing */}
-        <PricingSection cards={PRICING_CARDS} />
-
-        {/* FAQ */}
-        <FAQSection />
       </main>
 
       {/* Footer */}

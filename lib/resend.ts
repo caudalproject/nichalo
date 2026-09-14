@@ -39,7 +39,7 @@ export async function sendWelcomeEmail(email: string, nombre: string) {
       subject: 'Bienvenido a Nichalo 👋',
       html: wrap(`
         <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 16px">¡Hola ${nombreSeguro}! Ya podés validar tu primer producto</h1>
-        <p style="font-size:15px;color:#374151;line-height:1.6;margin:0">Nichalo analiza el mercado de Mercado Libre en segundos y te dice si tu producto tiene oportunidad real de venta.</p>
+        <p style="font-size:15px;color:#374151;line-height:1.6;margin:0">Nichalo analiza el mercado de Mercado Libre en ~3 minutos y te dice si tu producto tiene oportunidad real de venta.</p>
         ${btnHtml(`${BASE_URL}/analizar`, 'Hacer mi primer análisis')}
       `),
     })

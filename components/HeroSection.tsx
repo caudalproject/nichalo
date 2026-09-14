@@ -3,8 +3,41 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useSesionCliente } from "@/lib/useSesionCliente";
+import { usePais } from "@/components/PreciosPais";
 
 declare function fbq(...args: unknown[]): void;
+
+/**
+ * Ancla de precio del hero (auditoria 13/9, problema 2): los planes estaban a
+ * ~7 scrolls y no habia forma de llegar al precio sin recorrer toda la
+ * narrativa. En vez de subir la seccion de planes, se da la puerta de atras:
+ * esta linea + las anclas del navbar.
+ *
+ * El "desde $1.200 por analisis" sale del Pack 10, que solo se vende en
+ * Argentina (ver PacksZone) — para MX/CO la linea no puede prometer ese
+ * precio, asi que manda al ancla sin cifra.
+ */
+function AnclaPrecio() {
+  const pais = usePais();
+
+  return (
+    <p className="mt-4 text-sm text-[#6B7280]">
+      1 análisis gratis · Sin tarjeta ·{" "}
+      {pais === "AR" ? (
+        <>
+          Después, desde $1.200 por análisis —{" "}
+          <Link href="#planes" className="text-[#16A34A] hover:underline">
+            ver planes ↓
+          </Link>
+        </>
+      ) : (
+        <Link href="#planes" className="text-[#16A34A] hover:underline">
+          ver planes y precios ↓
+        </Link>
+      )}
+    </p>
+  );
+}
 
 function handleCtaClick() {
   if (typeof fbq !== "undefined") {
@@ -21,7 +54,7 @@ function handleCtaClick() {
  * Los tres estados se renderizan siempre los tres, apilados en la misma
  * celda de grid (`col-start-1 row-start-1`) y solo uno visible por vez: asi
  * el contenedor mide lo que mide el mas alto de los tres y el swap post-
- * hidratacion no mueve el HeroMock de abajo.
+ * hidratacion no mueve la card de abajo.
  */
 export function HeroSection() {
   const { clientEmail, analisisRestantes } = useSesionCliente();
@@ -42,12 +75,10 @@ export function HeroSection() {
             Analizar mi producto gratis →
           </Button>
         </Link>
-        <p className="mt-4 text-sm text-[#6B7280]">
-          1 análisis gratis · Sin tarjeta de crédito
-        </p>
+        <AnclaPrecio />
       </div>
 
-      {/* Logueado, con analisis disponibles este mes */}
+      {/* Logueado, con creditos disponibles */}
       <div
         className="col-start-1 row-start-1 flex flex-col items-center"
         style={{ visibility: conAnalisis ? "visible" : "hidden" }}
@@ -69,12 +100,15 @@ export function HeroSection() {
             </Button>
           </Link>
         </div>
+        {/* Sin "este mes": el credito free se otorga una sola vez
+            (creditos_pack = 1 en auth/callback), no se recarga todos los
+            meses. Solo el ciclo de Pro es mensual. */}
         <p className="mt-4 text-sm text-[#6B7280]">
-          Te quedan {analisisRestantes} análisis este mes
+          Te quedan {analisisRestantes} análisis
         </p>
       </div>
 
-      {/* Logueado, sin analisis restantes este mes */}
+      {/* Logueado, sin creditos restantes */}
       <div
         className="col-start-1 row-start-1 flex flex-col items-center"
         style={{ visibility: sinAnalisis ? "visible" : "hidden" }}
@@ -97,7 +131,7 @@ export function HeroSection() {
           </Link>
         </div>
         <p className="mt-4 text-sm text-[#6B7280]">
-          Usaste tu análisis de este mes
+          Te quedaste sin análisis disponibles
         </p>
       </div>
     </div>

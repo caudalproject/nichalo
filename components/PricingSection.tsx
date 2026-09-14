@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { PacksZone } from "@/components/PacksZone";
 import { ComparisonTable } from "@/components/ComparisonTable";
+import { FEATURED_RESULT_ID } from "@/lib/ejemplo-real";
 import { MonedaPais } from "@/components/PreciosPais";
 import { PlanRecommender, type PlanRecommendation } from "@/components/PlanRecommender";
 
@@ -30,16 +31,9 @@ interface Props {
   cards: PricingCard[];
 }
 
-// Resultado público de ejemplo mostrado sin login (ver "trust line" abajo).
-// Configurable por env var para poder rotarlo sin tocar código; fallback al
-// análisis real vigente ("Camiseta deportiva talle único", score 80) si la
-// var no está seteada. El build falla si este ID no resuelve — ver
-// scripts/check-featured-result.mjs.
-// Nota: NO es "Termo Stanley" (6d43a024-...) — ese análisis tiene un bug real
-// de conversión de moneda (Gemini restó precio en ARS crudo contra costo en
-// USD sin dividir por la tasa, ver Diario de Decisiones 2026-09-13, corrección).
-const FEATURED_RESULT_ID =
-  process.env.NEXT_PUBLIC_FEATURED_RESULT_ID || "3ac26d02-3530-4178-8680-a5245635c62b";
+// El ID del resultado destacado vive en lib/ejemplo-real.ts, junto con los
+// valores que la landing muestra de ese mismo analisis (hero y seccion
+// #ejemplo), para que no puedan desincronizarse entre si.
 
 // Ring de énfasis para la card que el recomendador (arriba) señala. No
 // reemplaza el estilo propio de cada card (ej. el badge "Más completo" de
@@ -54,7 +48,7 @@ export function PricingSection({ cards }: Props) {
   const pro = cards[1];
 
   return (
-    <section id="planes" className="bg-[#F9FAFB] py-20 border-y border-[#E5E7EB]">
+    <section id="planes" className="bg-[#F9FAFB] py-20 border-y border-[#E5E7EB] scroll-mt-16">
       <div className="container">
         <h2 className="text-center text-3xl font-bold text-[#0A0A0A]">
           Planes
@@ -173,7 +167,7 @@ export function PricingSection({ cards }: Props) {
               href={`/resultado/${FEATURED_RESULT_ID}`}
               className="text-[#16A34A] hover:underline font-medium"
             >
-              Mirá un análisis completo, sin registrarte →
+              Mirá un análisis real, sin registrarte →
             </a>
           </p>
         </div>
@@ -181,8 +175,12 @@ export function PricingSection({ cards }: Props) {
         {/* Comparison table */}
         <ComparisonTable />
 
+        {/* Antes decia "Sin contratos. Cancela cuando quieras.", que
+            contradecia el argumento central de los packs igual que la
+            pregunta de FAQ que se saco en este mismo rediseno. */}
         <p className="mt-8 text-center text-sm text-[#6B7280]">
-          Sin contratos. Cancelá cuando quieras.
+          Los packs no se renuevan solos: pagás una vez y los créditos te
+          esperan. El Pro se cancela desde tu cuenta cuando quieras.
         </p>
       </div>
     </section>

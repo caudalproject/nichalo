@@ -224,13 +224,37 @@ export default async function ResultadoPage({ params }: Params) {
       />
       <main className="container py-10">
         <div className="mx-auto max-w-3xl space-y-6">
+          {/* Contexto para el visitante sin cuenta. La landing lo manda aca
+              con "Mira un analisis real, sin registrarte", y lo que ve es la
+              version publica: sin competencia en detalle, sin riesgos y sin
+              recomendacion (`isFree` mas arriba tapa esas secciones para
+              cualquiera sin sesion). Sin este cartel la pagina se lee como si
+              estuviera rota; con el, el hueco es la oferta. */}
+          {!user && (
+            <div className="rounded-xl border border-[#16A34A]/25 bg-[#F0FDF4] px-4 py-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
+              <p className="text-sm text-[#0A0A0A]">
+                Estás viendo la <strong>versión pública</strong> de un análisis
+                real. Creá una cuenta gratis y tu primer análisis lo ves entero.
+              </p>
+              <Link href="/login" className="mt-3 block sm:mt-0 sm:shrink-0">
+                <Button size="sm" className="w-full sm:w-auto">
+                  Empezar gratis →
+                </Button>
+              </Link>
+            </div>
+          )}
+
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Link
-              href="/dashboard"
-              className="text-sm text-muted-foreground hover:underline"
-            >
-              <span className="whitespace-nowrap">← Volver al dashboard</span>
-            </Link>
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="text-sm text-muted-foreground hover:underline"
+              >
+                <span className="whitespace-nowrap">← Volver al dashboard</span>
+              </Link>
+            ) : (
+              <span />
+            )}
             <div className="flex items-center gap-2">
               <ShareButton />
               {user && (

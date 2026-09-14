@@ -234,9 +234,36 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
                 </div>
               </>
             ) : (
-              <Link href="/login">
-                <Button size="sm">Ingresar</Button>
-              </Link>
+              <>
+                {/* Anclas de la landing (auditoria 13/9, problema 2: la
+                    navbar era solo logo + Ingresar, y para llegar al precio
+                    habia que recorrer ~7 scrolls). Solo para el visitante
+                    anonimo: el logueado ya tiene Dashboard / Nuevo analisis.
+                    En mobile queda solo "Planes" — es la que importa para
+                    que el precio sea alcanzable, y las tres no entran a
+                    375px al lado del boton. */}
+                <a
+                  href="/#como-funciona"
+                  className="hidden sm:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
+                >
+                  Cómo funciona
+                </a>
+                <a
+                  href="/#ejemplo"
+                  className="hidden sm:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
+                >
+                  Ejemplo
+                </a>
+                <a
+                  href="/#planes"
+                  className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
+                >
+                  Planes
+                </a>
+                <Link href="/login">
+                  <Button size="sm">Ingresar</Button>
+                </Link>
+              </>
             )}
           </nav>
         </div>
