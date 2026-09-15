@@ -166,31 +166,43 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <div className="mt-12 grid grid-cols-3 gap-6 max-w-xl mx-auto text-center">
-              {STATS.map((s) => (
-                <div key={s.label}>
-                  {/* whitespace-nowrap + text-lg: "hasta 100" no entra en una
-                      columna de ~107px a 393px de ancho y se partia en dos
-                      lineas, desalineando los labels de las tres stats. */}
-                  <div className="text-lg md:text-3xl font-bold text-[#0A0A0A] whitespace-nowrap">
-                    {s.valor}
-                  </div>
-                  <div className="text-sm text-[#6B7280] mt-1">{s.label}</div>
-                </div>
-              ))}
-            </div>
+          </section>
 
-            {/* Antes era un titular de 2xl y en plural ("vendedores top de
-                Mercado Libre"). Es una sola persona, y "top" es un adjetivo
-                nuestro, no una credencial que dé ML — misma familia que el
-                badge "Más elegido" que se cayó por falso el 13/9.
-                Esta línea es la versión final, no un placeholder: JP decidió
-                el 13/9 no pedirle nada al vendedor (ni nombre, ni cita, ni
-                credencial). No reabrir. */}
-            <p className="mt-12 text-center text-sm text-[#6B7280]">
-              Desarrollado con el feedback de un vendedor de Mercado Libre en
-              actividad.
-            </p>
+          {/* 2b — Banda de datos + prueba social.
+              Vive en su propia sección con fondo gris, no suelta al pie de
+              "Cómo funciona". En la primera versión de este rediseño se
+              fundieron las stats adentro de esa sección y, sin contenedor
+              visual, quedaban flotando sobre blanco entre dos bloques —
+              se leía como contenido huérfano (verificado en iPhone el 15/9).
+              La banda también le da ritmo a la página: blanco / gris / blanco. */}
+          <section className="bg-[#F9FAFB] py-14 border-y border-[#E5E7EB]">
+            <div className="container">
+              <div className="grid grid-cols-3 gap-6 max-w-xl mx-auto text-center">
+                {STATS.map((s) => (
+                  <div key={s.label}>
+                    {/* whitespace-nowrap + text-lg: "hasta 100" no entra en una
+                        columna de ~107px a 393px de ancho y se partia en dos
+                        lineas, desalineando los labels de las tres stats. */}
+                    <div className="text-lg md:text-3xl font-bold text-[#0A0A0A] whitespace-nowrap">
+                      {s.valor}
+                    </div>
+                    <div className="text-sm text-[#6B7280] mt-1">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Antes era un titular de 2xl y en plural ("vendedores top de
+                  Mercado Libre"). Es una sola persona, y "top" es un adjetivo
+                  nuestro, no una credencial que dé ML — misma familia que el
+                  badge "Más elegido" que se cayó por falso el 13/9.
+                  Esta línea es la versión final, no un placeholder: JP decidió
+                  el 13/9 no pedirle nada al vendedor (ni nombre, ni cita, ni
+                  credencial). No reabrir. */}
+              <p className="mt-10 text-center text-sm text-[#6B7280]">
+                Desarrollado con el feedback de un vendedor de Mercado Libre en
+                actividad.
+              </p>
+            </div>
           </section>
 
           {/* 3 — Antes y después */}
