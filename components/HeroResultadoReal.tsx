@@ -67,10 +67,11 @@ export function HeroResultadoReal() {
           <p className="text-sm font-semibold text-gray-900 mb-0.5">
             {EJEMPLO_REAL.producto}
           </p>
-          <p className="text-xs text-gray-400 mb-3">
-            {EJEMPLO_REAL.pais} · {EJEMPLO_REAL.publicacionesAnalizadas} publicaciones
-            analizadas
-          </p>
+          {/* Sin repetir las publicaciones: el numero ya esta en la metrica
+              de abajo. Tenerlo dos veces a un centimetro de distancia es la
+              misma metrica duplicada que la auditoria marco en el dashboard
+              ("27 analisis restantes" junto a "3/30 usados"). */}
+          <p className="text-xs text-gray-400 mb-3">{EJEMPLO_REAL.pais}</p>
 
           {/* Metricas — las dos verificables (ver comentario arriba) */}
           <div className="grid grid-cols-2 gap-2 mb-3">

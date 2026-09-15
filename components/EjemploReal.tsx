@@ -126,7 +126,7 @@ export function EjemploReal() {
             dejaba el texto medio legible y parecia un error de render. */}
         <div className="relative overflow-hidden mt-3">
           <div
-            className="blur-[6px] pointer-events-none select-none bg-white rounded-2xl border border-gray-100 p-8 space-y-5"
+            className="blur-[5px] pointer-events-none select-none bg-white rounded-2xl border border-gray-100 p-8 space-y-5"
             aria-hidden
           >
             <div>
@@ -134,9 +134,10 @@ export function EjemploReal() {
                 Recomendación
               </p>
               <div className="space-y-2">
-                <div className="h-3 bg-gray-100 rounded w-full" />
-                <div className="h-3 bg-gray-100 rounded w-11/12" />
-                <div className="h-3 bg-gray-100 rounded w-3/4" />
+                <div className="h-3 bg-gray-300 rounded w-full" />
+                <div className="h-3 bg-gray-300 rounded w-11/12" />
+                <div className="h-3 bg-gray-300 rounded w-3/4" />
+                <div className="h-3 bg-gray-300 rounded w-5/6" />
               </div>
             </div>
             <div>
@@ -144,13 +145,14 @@ export function EjemploReal() {
                 Productos con mejor oportunidad
               </p>
               <div className="space-y-2">
-                <div className="h-3 bg-gray-100 rounded w-5/6" />
-                <div className="h-3 bg-gray-100 rounded w-2/3" />
+                <div className="h-3 bg-gray-300 rounded w-5/6" />
+                <div className="h-3 bg-gray-300 rounded w-2/3" />
+                <div className="h-3 bg-gray-300 rounded w-3/4" />
               </div>
             </div>
           </div>
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 rounded-2xl border border-gray-100 py-8">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/85 rounded-2xl border border-gray-100 py-8">
             <p className="text-sm font-semibold text-gray-900 mb-1">
               Tu primer análisis lo ves completo
             </p>

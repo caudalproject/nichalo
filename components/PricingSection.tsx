@@ -160,7 +160,7 @@ export function PricingSection({ cards }: Props) {
         {/* Confianza + prueba social (punto 9 del brief) */}
         <div className="mt-8 text-center space-y-2">
           <p className="text-sm text-[#6B7280]">
-            Pagás con Mercado Pago · Sin suscripción · Sin renovación automática
+            Pagás con Mercado Pago
           </p>
           <p className="text-sm">
             <a

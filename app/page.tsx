@@ -169,7 +169,10 @@ export default function LandingPage() {
             <div className="mt-12 grid grid-cols-3 gap-6 max-w-xl mx-auto text-center">
               {STATS.map((s) => (
                 <div key={s.label}>
-                  <div className="text-xl md:text-3xl font-bold text-[#0A0A0A]">
+                  {/* whitespace-nowrap + text-lg: "hasta 100" no entra en una
+                      columna de ~107px a 393px de ancho y se partia en dos
+                      lineas, desalineando los labels de las tres stats. */}
+                  <div className="text-lg md:text-3xl font-bold text-[#0A0A0A] whitespace-nowrap">
                     {s.valor}
                   </div>
                   <div className="text-sm text-[#6B7280] mt-1">{s.label}</div>
