@@ -180,9 +180,10 @@ export default function LandingPage() {
             {/* Antes era un titular de 2xl y en plural ("vendedores top de
                 Mercado Libre"). Es una sola persona, y "top" es un adjetivo
                 nuestro, no una credencial que dé ML — misma familia que el
-                badge "Más elegido" que se cayó por falso el 13/9. Si se
-                confirma la categoría real (MercadoLíder / Gold / Platinum),
-                esta línea la usa; hasta entonces, el fallback honesto. */}
+                badge "Más elegido" que se cayó por falso el 13/9.
+                Esta línea es la versión final, no un placeholder: JP decidió
+                el 13/9 no pedirle nada al vendedor (ni nombre, ni cita, ni
+                credencial). No reabrir. */}
             <p className="mt-12 text-center text-sm text-[#6B7280]">
               Desarrollado con el feedback de un vendedor de Mercado Libre en
               actividad.
