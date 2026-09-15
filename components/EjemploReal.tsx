@@ -126,7 +126,7 @@ export function EjemploReal() {
             dejaba el texto medio legible y parecia un error de render. */}
         <div className="relative overflow-hidden mt-3">
           <div
-            className="blur-[5px] pointer-events-none select-none bg-white rounded-2xl border border-gray-100 p-8 space-y-5"
+            className="blur-[5px] pointer-events-none select-none bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-5"
             aria-hidden
           >
             <div>
@@ -150,21 +150,40 @@ export function EjemploReal() {
                 <div className="h-3 bg-gray-300 rounded w-3/4" />
               </div>
             </div>
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                Diferenciadores y oportunidad
+              </p>
+              <div className="space-y-2">
+                <div className="h-3 bg-gray-300 rounded w-full" />
+                <div className="h-3 bg-gray-300 rounded w-4/5" />
+                <div className="h-3 bg-gray-300 rounded w-11/12" />
+                <div className="h-3 bg-gray-300 rounded w-3/5" />
+              </div>
+            </div>
           </div>
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/85 rounded-2xl border border-gray-100 py-8">
-            <p className="text-sm font-semibold text-gray-900 mb-1">
-              Tu primer análisis lo ves completo
-            </p>
-            <p className="text-xs text-gray-500 mb-4 text-center px-6 max-w-md">
-              La recomendación y los productos alternativos entran en el análisis
-              gratis. Se bloquean del segundo en adelante, no en el primero.
-            </p>
-            <Link href="/login">
-              <Button className="rounded-full bg-[#16A34A] hover:bg-[#15803D] text-white px-6">
-                Empezar gratis →
-              </Button>
-            </Link>
+          {/* Overlay liviano + tarjeta solida para el copy. Un velo parejo y
+              opaco sobre todo el bloque (se probo con white/70 y white/85)
+              borra los skeletons y deja una caja blanca vacia — justo lo
+              contrario de lo que este bloque tiene que transmitir. Asi el
+              contenido tapado se ve alrededor y el mensaje igual se lee. */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/30 rounded-2xl px-4">
+            <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white px-5 py-5 text-center shadow-lg">
+              <p className="text-sm font-semibold text-gray-900 mb-1">
+                Tu primer análisis lo ves completo
+              </p>
+              <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+                La recomendación y los productos alternativos entran en el
+                análisis gratis. Se bloquean del segundo en adelante, no en el
+                primero.
+              </p>
+              <Link href="/login">
+                <Button className="rounded-full bg-[#16A34A] hover:bg-[#15803D] text-white px-6">
+                  Empezar gratis →
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 
