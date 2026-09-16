@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { ScrapeResult } from "./apify";
 import type { AnalysisResult } from "./supabase";
+import type { Confianza, PrecioStats } from "./confianza";
 
 const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-1.5-flash-latest"] as const;
 
@@ -28,17 +29,8 @@ interface AnalyzeArgs {
     trends?: { trending: boolean; interest: number; related: string[] };
   };
   datosPro?: DatosPro;
-  precioStats?: {
-    precio_minimo: number;
-    precio_maximo: number;
-    precio_promedio: number;
-    p10: number;
-    p25: number;
-    p50: number;
-    p65: number;
-    total_con_precio: number;
-    total_con_ventas: number;
-  } | null;
+  precioStats?: PrecioStats | null;
+  confianza?: Confianza | null;
 }
 
 export async function extractKeywordsFromImage(
@@ -133,7 +125,7 @@ export async function analizarConGemini(
   throw new Error("No se pudo completar el análisis con ningún modelo");
 }
 
-function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlTrends, mlData, datosPro, precioStats }: AnalyzeArgs) {
+function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlTrends, mlData, datosPro, precioStats, confianza }: AnalyzeArgs) {
   const sample = scrape.listings.slice(0, 50);
   const currencyCode = currency?.code ?? "ARS";
   const currencyName = currency?.name ?? "Peso argentino";
@@ -145,18 +137,34 @@ function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, c
 ESTADÍSTICAS DE PRECIOS (calculadas del scrape — usá estos valores exactos, NO los recalcules):
 - Precio mínimo: ${precioStats.precio_minimo} ${currencyCode}
 - Precio máximo: ${precioStats.precio_maximo} ${currencyCode}
-- Precio promedio: ${precioStats.precio_promedio} ${currencyCode}
+- Precio promedio (recortado, sin outliers): ${precioStats.precio_promedio} ${currencyCode}
+- Precio mediano: ${precioStats.precio_mediano} ${currencyCode}
 - Percentil 10 (p10): ${precioStats.p10} ${currencyCode}
 - Percentil 25 (p25): ${precioStats.p25} ${currencyCode}
 - Percentil 50 (p50): ${precioStats.p50} ${currencyCode}
 - Percentil 65 (p65): ${precioStats.p65} ${currencyCode}
+- Percentil 90 (p90): ${precioStats.p90} ${currencyCode}
 - Listings con precio válido: ${precioStats.total_con_precio}
+- Listings descartados por estar fuera de rango: ${precioStats.total_descartados}
 - Listings con ventas registradas (soldQuantity > 0): ${precioStats.total_con_ventas}
 
 REGLA DE PRECIO SUGERIDO (usar los percentiles de arriba):
 - principiante → usá p10 como precio_sugerido_venta
 - intermedio → usá p25
 - experto → usá p65
+` : '';
+  const bloqueConfianza = confianza && confianza.nivel !== "alta" ? `
+CONFIANZA DE LOS DATOS: ${confianza.nivel.toUpperCase()}
+Motivos detectados: ${confianza.motivos.join(", ")}
+Dispersión p90/p10 (sobre el set ya recortado): ${confianza.ratio_p90_p10}×
+
+REGLAS OBLIGATORIAS CON CONFIANZA ${confianza.nivel.toUpperCase()}:
+- Usá el precio MEDIANO como referencia de mercado, nunca el promedio.
+${confianza.nivel === "baja" ? `- El score NO puede superar 60. Datos dispersos no sostienen un veredicto VIABLE.
+- El veredicto NO puede ser "VIABLE".` : `- El score NO puede superar 75.`}
+- El campo "resumen" TIENE QUE arrancar diciendo que los datos son poco confiables y por qué, ANTES de cualquier conclusión sobre el producto.
+${confianza.motivos.includes("dispersion_precios") ? `- La búsqueda "${producto}" probablemente mezcló categorías (accesorios, repuestos o lotes junto al producto). Sugerí en la recomendación un término de búsqueda más específico, entre comillas, como PRIMER bullet.` : ''}
+- No afirmes márgenes ni ROI como si fueran precisos. Usá rangos y lenguaje condicional.
 ` : '';
   const comisionesPorPais = {
     AR: {
@@ -288,7 +296,7 @@ REGLA DE PRECIOS CRÍTICA:
 - Para calcular margen: convertí el precio_sugerido de ${currencyCode} a USD usando la tasa (dividir por ${rate}), luego restá el costo en USD
 - Ejemplo: si precio_sugerido = ${Math.round(rate * 25)} ${currencyCode} y costo = 10 USD → precio en USD = 25 → ganancia = 25 - 10 - comision = X USD
 
-${preciosCalculados}
+${preciosCalculados}${bloqueConfianza}
 PERFIL DEL VENDEDOR: ${perfil}
 Reglas según perfil:
 - Si es "principiante": Aplicar escala de penalización según REGLAS DE SCORE definidas abajo — 11-20 vendedores: -10 puntos, 21-30: -20 puntos, +30: máximo score 50. El precio de entrada recomendado debe ser el percentil 10 del mercado (los más baratos con ventas), no el promedio. La recomendación debe incluir consejos específicos para construir reputación desde cero (primeras ventas, precios de lanzamiento, envío gratis inicial).
@@ -397,7 +405,15 @@ function extractJson(text: string): unknown | null {
 
 function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
   const r = (raw ?? {}) as Partial<AnalysisResult> & Record<string, unknown>;
-  const score = clampInt(r.score, 0, 100, 50);
+  const scoreCrudo = clampInt(r.score, 0, 100, 50);
+
+  // El cap por confianza se aplica ACA, no solo en el prompt. Pedirselo al
+  // modelo es una sugerencia; esto es una garantia. Todo el bug original
+  // (ROI 1283% en verde) nacio de confiar en que el output se autorregulara.
+  const techo =
+    args.confianza?.nivel === "baja" ? 60 : args.confianza?.nivel === "media" ? 75 : 100;
+  const score = Math.min(scoreCrudo, techo);
+
   const veredicto: AnalysisResult["veredicto"] =
     score >= 75 ? "VIABLE" : score >= 50 ? "MARGINAL" : "SATURADO";
 
@@ -441,9 +457,13 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
     resumen: typeof r.resumen === "string" ? r.resumen : "Análisis no disponible.",
     competencia: {
       cantidad_vendedores: clampInt(competencia.cantidad_vendedores, 0, 99999, args.scrape.totalListings),
-      precio_minimo: toNumber(competencia.precio_minimo, 0),
-      precio_maximo: toNumber(competencia.precio_maximo, 0),
-      precio_promedio: toNumber(competencia.precio_promedio, 0),
+      // Si tenemos las estadisticas calculadas, mandan ellas. El prompt ya dice
+      // "usá estos valores exactos, NO los recalcules", pero cuando el modelo
+      // igual los recalcula la UI terminaba mostrando un promedio distinto del
+      // que uso el razonamiento. Aca dejan de poder divergir.
+      precio_minimo: args.precioStats?.precio_minimo ?? toNumber(competencia.precio_minimo, 0),
+      precio_maximo: args.precioStats?.precio_maximo ?? toNumber(competencia.precio_maximo, 0),
+      precio_promedio: args.precioStats?.precio_promedio ?? toNumber(competencia.precio_promedio, 0),
       top_vendedores: topVendedores,
       palabras_clave_titulos: Array.isArray(competencia.palabras_clave_titulos)
         ? (competencia.palabras_clave_titulos as unknown[]).map(String).slice(0, 10)

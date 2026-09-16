@@ -78,6 +78,13 @@ export interface AnalysisResult {
     monto_usd: number;
     cargo_fijo_ars: number;
   };
+  /**
+   * Confianza estadistica del scrape. Ausente en los analisis anteriores al
+   * 16/9 — la UI tiene que tratar `undefined` como "no medido", NO como
+   * "alta". Ver `lib/confianza.ts`.
+   */
+  confianza?: import("./confianza").Confianza | null;
+  precio_stats?: import("./confianza").PrecioStats | null;
   productos_alternativos?: {
     nombre: string;
     razon: string;

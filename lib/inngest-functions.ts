@@ -187,22 +187,22 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           const currency = getCurrencyForCountry(pais);
           const exchangeRate = await getExchangeRate(currency.code);
 
+          // El promedio aca era una media aritmetica cruda: una publicacion de
+          // $2.695.000 arrastraba el promedio de "Silla gamer" a $278.213. Ahora
+          // el recorte, los percentiles y el nivel de confianza salen de
+          // `lib/confianza.ts`, y la confianza viaja hasta la UI.
+          const { calcularPrecioStats } = await import("./confianza");
           const precios = finalScrape.listings
             .map(l => l.price)
-            .filter((p): p is number => p !== null && p > 0)
-            .sort((a, b) => a - b);
+            .filter((p): p is number => p !== null && p > 0);
+          const totalConVentas = finalScrape.listings.filter(l => (l.soldQuantity ?? 0) > 0).length;
 
-          const precioStats = precios.length > 0 ? {
-            precio_minimo: precios[0],
-            precio_maximo: precios[precios.length - 1],
-            precio_promedio: Math.round(precios.reduce((a, b) => a + b, 0) / precios.length),
-            p10: precios[Math.floor(precios.length * 0.10)] ?? precios[0],
-            p25: precios[Math.floor(precios.length * 0.25)] ?? precios[0],
-            p50: precios[Math.floor(precios.length * 0.50)] ?? precios[0],
-            p65: precios[Math.floor(precios.length * 0.65)] ?? precios[precios.length - 1],
-            total_con_precio: precios.length,
-            total_con_ventas: finalScrape.listings.filter(l => (l.soldQuantity ?? 0) > 0).length,
-          } : null;
+          // El costo se ingresa en USD; los precios del scrape estan en moneda
+          // local. Hay que compararlos en la misma moneda o la senal de
+          // "costo fuera de rango" se dispara siempre.
+          const costoLocal = costo_estimado * (exchangeRate ?? 1);
+          const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal);
+          const precioStats = calculado?.stats ?? null;
 
           if (finalScrape.totalListings === 0) {
             throw new NonRetriableError(
@@ -210,7 +210,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             );
           }
 
-          return await analizarConGemini({
+          const resultado = await analizarConGemini({
             producto,
             pais,
             costoEstimadoUsd: costo_estimado,
@@ -222,7 +222,18 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             mlData,
             datosPro: datos_pro ?? undefined,
             precioStats: precioStats ?? undefined,
+            confianza: calculado?.confianza,
           });
+
+          // La confianza y los percentiles viajan por el RETORNO del step, no
+          // por una variable de afuera: en un replay de Inngest este step no se
+          // vuelve a ejecutar (se lee del cache) y una variable externa quedaria
+          // en null, con la UI mostrando "alta confianza" sobre datos sucios.
+          return {
+            ...resultado,
+            confianza: calculado?.confianza ?? null,
+            precio_stats: calculado?.stats ?? null,
+          };
         },
       );
 
