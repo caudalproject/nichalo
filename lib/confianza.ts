@@ -227,6 +227,62 @@ export function calcularPrecioStats(
   return { stats, confianza };
 }
 
+/**
+ * Confianza reconstruida para analisis anteriores al 16/9.
+ *
+ * Esos registros no tienen el campo `confianza` ni los listings crudos (no se
+ * guardan en ningun lado), asi que no se puede recalcular bien. Pero dejarlos
+ * como "sin medir" los mostraria en verde — y son precisamente los analisis
+ * con los numeros sospechosos, incluido el "Silla gamer Yeyian" que origino
+ * todo esto.
+ *
+ * Se reconstruye con lo unico disponible en `resultado_json`: min, max, y el
+ * costo contra el precio sugerido. La dispersion vuelve a medirse con max/min
+ * porque no hay percentiles guardados, pero con un umbral bastante mas alto
+ * (20x en vez de 10x) justamente porque sabemos que ese ratio sobre-dispara.
+ *
+ * Es deliberadamente conservadora: ante la duda degrada. Un analisis viejo
+ * mostrado con mas cautela de la necesaria cuesta mucho menos que uno sucio
+ * mostrado en verde.
+ */
+export function confianzaHeredada(args: {
+  precioMinimo?: number;
+  precioMaximo?: number;
+  precioSugerido?: number;
+  costoLocal?: number;
+}): Confianza | null {
+  const { precioMinimo = 0, precioMaximo = 0, precioSugerido = 0, costoLocal = 0 } = args;
+  if (precioMinimo <= 0 || precioMaximo <= 0) return null;
+
+  const motivos: MotivoConfianza[] = [];
+  let nivel: NivelConfianza = "alta";
+
+  const ratioCrudo = precioMaximo / precioMinimo;
+  if (ratioCrudo > 20) {
+    motivos.push("dispersion_precios");
+    nivel = peor(nivel, "baja");
+  } else if (ratioCrudo > 10) {
+    motivos.push("dispersion_precios");
+    nivel = peor(nivel, "media");
+  }
+
+  if (costoLocal > 0 && precioSugerido > 0 && precioSugerido / costoLocal > MARKUP_IMPLAUSIBLE) {
+    motivos.push("costo_fuera_de_rango");
+    nivel = peor(nivel, "baja");
+  }
+
+  if (motivos.length === 0) return null;
+
+  return {
+    nivel,
+    ratio_p90_p10: Math.round(ratioCrudo * 10) / 10,
+    n_con_precio: 0,
+    n_descartados: 0,
+    motivos,
+    tendencia_central: "mediana",
+  };
+}
+
 /** Texto para el usuario. Concreto y accionable, no un disclaimer generico. */
 export function explicarConfianza(
   confianza: Confianza,

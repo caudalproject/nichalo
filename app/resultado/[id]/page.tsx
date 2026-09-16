@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatCurrency } from "@/lib/utils";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
+import { AvisoConfianza } from "@/components/AvisoConfianza";
+import { confianzaHeredada } from "@/lib/confianza";
 import { PacksOffer } from "@/components/PacksOffer";
 
 export const dynamic = "force-dynamic";
@@ -179,8 +181,35 @@ export default async function ResultadoPage({ params }: Params) {
   // (ej. "Termo Stanley" mostraba 100.0% de margen en vez de ~61%). Ahora
   // siempre se divide, usando la mejor tasa disponible (ver línea 171).
   const precioVentaUsd = tasaCambio > 0 ? precioVentaLocal / tasaCambio : precioVentaLocal;
-  const margenBruto = precioVentaUsd > 0 ? ((precioVentaUsd - costo) / precioVentaUsd) * 100 : 0;
-  const roi = costo > 0 ? ((precioVentaUsd - costo) / costo) * 100 : 0;
+
+  // Bug encontrado 2026-09-16: margen y ROI se calculaban sin restar la
+  // comision de ML, que Gemini ya devuelve y que esta pagina muestra una fila
+  // mas arriba. En "Silla gamer" eso daba 92,8% contra el 78,86% que habia
+  // calculado el modelo: dos margenes en el sistema, y la pantalla mostraba
+  // el mas favorable. A diferencia del resto de este archivo, esto estaba mal
+  // tambien con datos perfectamente limpios.
+  const comisionUsd =
+    result.comision_detalle?.monto_usd ?? result.margen.comision_ml_estimada ?? 0;
+  const gananciaUsd = precioVentaUsd - costo - comisionUsd;
+  const margenBruto = precioVentaUsd > 0 ? (gananciaUsd / precioVentaUsd) * 100 : 0;
+  const roi = costo > 0 ? (gananciaUsd / costo) * 100 : 0;
+
+  // Confianza. `undefined` = analisis anterior al 16/9, cuando no se medía.
+  // Para esos se reconstruye con lo que haya en resultado_json en vez de
+  // asumir "alta": los analisis viejos son justamente los que tienen los
+  // numeros sospechosos.
+  const confianza =
+    result.confianza ??
+    confianzaHeredada({
+      precioMinimo: result.competencia?.precio_minimo,
+      precioMaximo: result.competencia?.precio_maximo,
+      precioSugerido: precioVentaLocal,
+      costoLocal: costo * tasaCambio,
+    });
+  const confiable = confianza?.nivel === "alta";
+  const bajaConfianza = confianza?.nivel === "baja";
+  const degradado = confianza != null && !confiable;
+  const mostrarMediana = degradado && result.precio_stats?.precio_mediano != null;
   const localeMap: Record<string, string> = { AR: "es-AR", MX: "es-MX", CO: "es-CO" };
   const locale = localeMap[analysis.pais] ?? "es-AR";
   const fecha = new Date(analysis.created_at).toLocaleString(locale, {
@@ -188,7 +217,28 @@ export default async function ResultadoPage({ params }: Params) {
     timeStyle: "short",
   });
 
-  const isFree = (!user || !profile || profile.plan === "free") && !isPrimerAnalisis;
+  // Bug encontrado 2026-09-16: los packs NO cambian el plan del usuario, solo
+  // suman `creditos_pack` (ver el comentario en lib/mercadopago.ts). Como esta
+  // condicion miraba unicamente `plan === "free"`, alguien que pagaba $4.500
+  // por el Pack 3 veia las secciones blureadas desde su segundo analisis.
+  // Cobrar y entregar el producto capado es peor que cualquier badge en verde.
+  //
+  // NO alcanza con mirar `creditos_pack > 0`: el credito gratis de bienvenida
+  // tambien se otorga ahi (bootstrapNewUser), asi que esa condicion abriria
+  // todo para cualquier usuario free. Y `creditos_pack` baja a 0 cuando los
+  // gasta, con lo que perderia el acceso a sus propios analisis pasados.
+  // El unico hecho persistente de "pago alguna vez" es la tabla `purchases`.
+  const compro = user
+    ? ((
+        await supabase
+          .from("purchases")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+      ).count ?? 0) > 0
+    : false;
+
+  const isFree =
+    (!user || !profile || (profile.plan === "free" && !compro)) && !isPrimerAnalisis;
 
   const resultadoParaMostrar = isFree ? {
     ...result,
@@ -317,17 +367,46 @@ export default async function ResultadoPage({ params }: Params) {
             </div>
           </div>
 
+          {/* Confianza de los datos — va ANTES de cualquier numero derivado. */}
+          <AvisoConfianza
+            confianza={confianza}
+            stats={result.precio_stats ?? result.competencia}
+            formatear={(n: number) => formatLocalPrice(n, moneda ?? "ARS")}
+          />
+
           {/* CAPA 2: Resumen ejecutivo */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Ganancia por unidad</div>
-              <div className="mt-1 font-mono text-xl font-bold text-[#0A0A0A]">
-                {result.margen?.ganancia_estimada != null ? formatLocal(result.margen.ganancia_estimada) : "—"}
+              <div
+                className={`mt-1 font-mono text-xl font-bold ${
+                  bajaConfianza ? "text-[#9CA3AF]" : "text-[#0A0A0A]"
+                }`}
+              >
+                {bajaConfianza
+                  ? "—"
+                  : result.margen?.ganancia_estimada != null
+                    ? formatLocal(result.margen.ganancia_estimada)
+                    : "—"}
               </div>
             </div>
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Margen bruto</div>
-              <div className="mt-1 font-mono text-xl font-bold text-[#0A0A0A]">{margenBruto.toFixed(1)}%</div>
+              <div
+                className={`mt-1 font-mono text-xl font-bold ${
+                  bajaConfianza ? "text-[#9CA3AF]" : "text-[#0A0A0A]"
+                }`}
+              >
+                {/* Sin decimal cuando la confianza es baja: "92.8%" afirma una
+                    precision que los datos no sostienen. El decimal hace mas
+                    dano que el numero. */}
+                {bajaConfianza ? `~${Math.round(margenBruto)}%` : `${margenBruto.toFixed(1)}%`}
+              </div>
+              {bajaConfianza && (
+                <div className="mt-1 text-[10px] font-medium uppercase tracking-wide text-amber-700">
+                  baja confianza
+                </div>
+              )}
             </div>
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
               <div className="text-xs text-[#6B7280]">Publicaciones scrapeadas</div>
@@ -387,21 +466,6 @@ export default async function ResultadoPage({ params }: Params) {
             </Card>
           )}
 
-          {/* Alerta de dispersión de precios */}
-          {result.competencia?.precio_minimo > 0 &&
-            result.competencia?.precio_maximo > 0 &&
-            result.competencia.precio_maximo / result.competencia.precio_minimo > 10 && (
-            <div className="flex items-start gap-3 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
-              <span className="mt-0.5 shrink-0">⚠️</span>
-              <p>
-                Los resultados de este análisis incluyen productos con precios muy
-                distintos entre sí — esto puede indicar que el término de búsqueda
-                mezcló categorías diferentes. El análisis puede ser menos preciso.
-                Te recomendamos buscar con un término más específico.
-              </p>
-            </div>
-          )}
-
           {/* CAPA 6: Competencia + Margen */}
           <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
           <div className="grid gap-4 md:grid-cols-2">
@@ -417,9 +481,29 @@ export default async function ResultadoPage({ params }: Params) {
                 <Row label="Precio mínimo">
                   {formatLocalPrice(result.competencia?.precio_minimo ?? 0, moneda)}
                 </Row>
-                <Row label="Precio promedio">
-                  {formatLocalPrice(result.competencia?.precio_promedio ?? 0, moneda)}
-                </Row>
+                {/* Con confianza degradada manda la mediana: el promedio es lo
+                    que un solo outlier de $2.695.000 podia mover solo. El
+                    promedio sigue visible abajo, etiquetado, para que nadie
+                    sienta que le escondimos un numero. */}
+                {mostrarMediana ? (
+                  <>
+                    <Row label="Precio mediano">
+                      <span className="font-medium">
+                        {formatLocalPrice(result.precio_stats!.precio_mediano, moneda)}
+                      </span>
+                    </Row>
+                    <div className="flex items-center justify-between text-xs text-[#9CA3AF]">
+                      <span>Precio promedio (sensible a outliers)</span>
+                      <span>
+                        {formatLocalPrice(result.competencia?.precio_promedio ?? 0, moneda)}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <Row label="Precio promedio">
+                    {formatLocalPrice(result.competencia?.precio_promedio ?? 0, moneda)}
+                  </Row>
+                )}
                 <Row label="Precio máximo">
                   {formatLocalPrice(result.competencia?.precio_maximo ?? 0, moneda)}
                 </Row>
@@ -481,39 +565,60 @@ export default async function ResultadoPage({ params }: Params) {
                 <Row label="Ganancia estimada">
                   <strong>{formatLocal(result.margen.ganancia_estimada)}</strong>
                 </Row>
+                {/* Con confianza baja el verde es inalcanzable. Tampoco rojo:
+                    pintar de rojo tambien seria afirmar algo sobre datos que no
+                    sostienen ninguna afirmacion. Neutro y dicho con palabras. */}
                 <Row label="Margen bruto">
-                  <Badge
-                    variant={
-                      margenBruto >= 25
-                        ? "success"
-                        : margenBruto >= 10
-                          ? "warning"
-                          : "destructive"
-                    }
-                  >
-                    {margenBruto.toFixed(1)}%
-                  </Badge>
+                  {bajaConfianza ? (
+                    <Badge variant="outline" className="border-[#E5E7EB] text-[#6B7280]">
+                      ~{Math.round(margenBruto)}% · baja confianza
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant={
+                        margenBruto >= 25
+                          ? "success"
+                          : margenBruto >= 10
+                            ? "warning"
+                            : "destructive"
+                      }
+                    >
+                      {margenBruto.toFixed(1)}%
+                    </Badge>
+                  )}
                 </Row>
                 <Row label="ROI">
-                  <Badge
-                    variant={
-                      roi >= 30
-                        ? "success"
-                        : roi >= 15
-                          ? "warning"
-                          : "destructive"
-                    }
-                  >
-                    {roi.toFixed(1)}%
-                  </Badge>
+                  {bajaConfianza ? (
+                    <span className="text-xs text-[#6B7280]">
+                      No calculable con estos datos
+                    </span>
+                  ) : (
+                    <Badge
+                      variant={
+                        roi >= 30 ? "success" : roi >= 15 ? "warning" : "destructive"
+                      }
+                    >
+                      {roi.toFixed(1)}%
+                    </Badge>
+                  )}
                 </Row>
                 {result.margen.costo_evaluacion && (
                   <Row label="Costo ingresado">
                     <div className="flex items-center gap-2">
                       <span className="text-sm">{formatLocal(costo)}</span>
-                      <Badge className={costoBadgeClasses(result.margen.costo_evaluacion)}>
-                        {costoLabel(result.margen.costo_evaluacion)}
-                      </Badge>
+                      {/* "Competitivo" solo con confianza alta. Ese badge al lado
+                          del aviso de datos sucios era la contradiccion mas
+                          visible de la pantalla: el sistema declaraba bueno un
+                          costo que el mismo habia marcado como sospechoso. */}
+                      {confiable ? (
+                        <Badge className={costoBadgeClasses(result.margen.costo_evaluacion)}>
+                          {costoLabel(result.margen.costo_evaluacion)}
+                        </Badge>
+                      ) : confianza?.motivos.includes("costo_fuera_de_rango") ? (
+                        <Badge variant="outline" className="border-amber-300 text-amber-800">
+                          Revisalo
+                        </Badge>
+                      ) : null}
                     </div>
                   </Row>
                 )}
