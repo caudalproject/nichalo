@@ -10,7 +10,10 @@ type Valor = string | { v: string; sub: string };
 
 const ROWS: { label: string; free: Valor; packs: Valor; pro: Valor }[] = [
   { label: "Análisis", free: "1", packs: { v: "3 o 10", sub: "sin vencimiento" }, pro: "30/mes" },
-  { label: "Publicaciones", free: "30", packs: "50", pro: "100" },
+  // 50 para los tres desde el 16/9 (ver lib/plans.ts). Deja de ser una fila
+  // que diferencia, y esta bien que se vea igual: el mensaje es que la
+  // profundidad del analisis no depende de cuanto pagues.
+  { label: "Publicaciones", free: "50", packs: "50", pro: "50" },
   { label: "Imagen del producto", free: "yes", packs: "yes", pro: "yes" },
   { label: "Análisis avanzado", free: "no", packs: "no", pro: "yes" },
   { label: "Precio sugerido", free: "yes", packs: "yes", pro: "yes" },

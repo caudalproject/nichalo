@@ -45,7 +45,7 @@ const PASOS = [
     n: "2",
     title: "Scrapeamos el mercado real",
     description:
-      "Hasta 100 publicaciones de Mercado Libre, en el momento en que apretás analizar.",
+      "Hasta 50 publicaciones de Mercado Libre, en el momento en que apretás analizar.",
   },
   {
     n: "3",
@@ -59,7 +59,7 @@ const PASOS = [
 // si fuera un logro (auditoría, problema 6). Reemplazada por una que suma.
 const STATS = [
   { valor: "100%", label: "publicaciones reales de ML" },
-  { valor: "hasta 100", label: "publicaciones por análisis" },
+  { valor: "50", label: "publicaciones por análisis" },
   { valor: "~3 min", label: "por análisis" },
 ];
 
@@ -79,7 +79,7 @@ const PRICING_CARDS = [
     badge: null as null | string,
     features: [
       { label: "Un producto, analizado completo. Sin tarjeta.", included: true, subItems: null as string[] | null },
-      { label: "30 publicaciones analizadas — para no adivinar", included: true, subItems: null as string[] | null },
+      { label: "50 publicaciones analizadas — la misma profundidad que el plan pago", included: true, subItems: null as string[] | null },
       { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
       { label: "Primer análisis completo — sin restricciones", included: true, subItems: null as string[] | null },
     ],
@@ -107,7 +107,7 @@ const PRICING_CARDS = [
         subItems: ["De dónde conviene importarlo", "Cuánto necesitás para arrancar", "Qué variante vender primero", "Por dónde conviene vender"] as string[] | null,
       },
       { label: "30 análisis por mes — sin frenar por crédito", included: true, subItems: null as string[] | null },
-      { label: "100 publicaciones analizadas — el mayor detalle del mercado", included: true, subItems: null as string[] | null },
+      { label: "50 publicaciones por análisis — no capamos la profundidad por plan", included: true, subItems: null as string[] | null },
     ],
     cta: "Empezar ahora",
     href: null,
@@ -180,9 +180,11 @@ export default function LandingPage() {
               <div className="grid grid-cols-3 gap-6 max-w-xl mx-auto text-center">
                 {STATS.map((s) => (
                   <div key={s.label}>
-                    {/* whitespace-nowrap + text-lg: "hasta 100" no entra en una
-                        columna de ~107px a 393px de ancho y se partia en dos
-                        lineas, desalineando los labels de las tres stats. */}
+                    {/* whitespace-nowrap + text-lg: el valor mas largo ("~3 min")
+                        no entra en una columna de ~107px a 393px de ancho y se
+                        partia en dos lineas, desalineando los labels de las tres
+                        stats. El de esta columna paso de "hasta 100" a "50" el
+                        16/9, pero el nowrap sigue haciendo falta por "~3 min". */}
                     <div className="text-lg md:text-3xl font-bold text-[#0A0A0A] whitespace-nowrap">
                       {s.valor}
                     </div>
