@@ -38,7 +38,61 @@ const BodySchema = z.object({
   imagenMimeType: z.string().optional(),
   perfilVendedor: z.enum(["principiante", "intermedio", "experto"]).default("principiante"),
   datos_pro: DatosProSchema,
+  // Id del analisis de confianza baja que origina este reintento. Ver
+  // `resolverReintentoGratis` mas abajo.
+  reintento_de: z.string().uuid().optional(),
 });
+
+/**
+ * Decide si este analisis es un reintento gratis.
+ *
+ * Regla (Capa 4 de la propuesta de confianza del 16/9): si el sistema le dijo
+ * al usuario que sus datos eran poco confiables, no le cobramos el reintento.
+ * Cobrarlo es el verdadero golpe a la credibilidad: le avisamos que el
+ * resultado no servia y le descontamos un credito igual.
+ *
+ * Se valida TODO del lado del servidor y ninguna condicion sale del cliente:
+ * el cliente solo manda un id.
+ *
+ * El "una sola vez por analisis" NO se hace cumplir aca sino con el indice
+ * unico parcial `analyses_reintento_de_unico`. Este chequeo es solo para poder
+ * dar un mensaje decente; la garantia real es la constraint, porque dos
+ * requests simultaneos pasarian los dos por este if.
+ */
+async function esReintentoGratis(
+  supabase: ReturnType<typeof createSupabaseServerClient>,
+  userId: string,
+  reintentoDe: string | undefined
+): Promise<boolean> {
+  if (!reintentoDe) return false;
+
+  const { data: origen } = await supabase
+    .from("analyses")
+    .select("id, user_id, resultado_json, created_at")
+    .eq("id", reintentoDe)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!origen) return false;
+
+  // Solo los de confianza baja dan derecho. "media" no: ahi el analisis sigue
+  // siendo utilizable y regalar un credito por cada uno saldria carisimo — el
+  // 62% de los analisis historicos tenia alguna senal.
+  const resultado = origen.resultado_json as AnalysisResult | null;
+  if (resultado?.confianza?.nivel !== "baja") return false;
+
+  // Ventana de 7 dias. Sin limite temporal, un analisis malo de hace seis
+  // meses seguiria dando un credito gratis para siempre.
+  const edadMs = Date.now() - new Date(origen.created_at as string).getTime();
+  if (edadMs > 7 * 24 * 60 * 60 * 1000) return false;
+
+  const { count } = await supabase
+    .from("analyses")
+    .select("id", { count: "exact", head: true })
+    .eq("reintento_de", reintentoDe);
+
+  return (count ?? 0) === 0;
+}
 
 export async function POST(request: Request) {
   let json: unknown;
@@ -55,7 +109,7 @@ export async function POST(request: Request) {
       { status: 422 }
     );
   }
-  const { producto, pais, costoEstimado, imagenBase64, imagenMimeType, perfilVendedor, datos_pro } = parsed.data;
+  const { producto, pais, costoEstimado, imagenBase64, imagenMimeType, perfilVendedor, datos_pro, reintento_de } = parsed.data;
 
   const supabase = createSupabaseServerClient();
 
@@ -113,7 +167,11 @@ export async function POST(request: Request) {
     restantes = 0;
   }
 
-  if (restantes <= 0) {
+  const reintentoGratis = await esReintentoGratis(supabase, user.id, reintento_de);
+
+  // Un reintento por confianza baja no necesita credito: el analisis que lo
+  // origina ya se cobro y no sirvio.
+  if (restantes <= 0 && !reintentoGratis) {
     if (user.email) {
       await sendUpsellEmail(user.email);
     }
@@ -134,6 +192,10 @@ export async function POST(request: Request) {
         .eq("producto", productoNorm)
         .eq("pais", pais)
         .eq("perfil_vendedor", perfilVendedor ?? "principiante")
+        // El costo entra en la busqueda porque entra en el resultado: margen,
+        // ganancia, costo_evaluacion y la senal de confianza costo_fuera_de_rango
+        // se calcularon con el costo de quien corrio el analisis original.
+        .eq("costo_estimado", costoEstimado)
         .gte("created_at", cutoff)
         .maybeSingle();
 
@@ -152,18 +214,26 @@ export async function POST(request: Request) {
             resultado_json: resultadoJson,
             score: resultadoJson.score,
             veredicto: resultadoJson.veredicto,
+            reintento_de: reintentoGratis ? reintento_de : null,
           })
           .select("id")
           .single();
 
         if (insertErr || !inserted) {
+          // Si choca con analyses_reintento_de_unico, alguien ya uso el
+          // reintento de ese analisis. Se responde sin cobrar ni crear nada.
+          if (insertErr?.code === "23505") {
+            return NextResponse.json({ error: "reintento_ya_usado" }, { status: 409 });
+          }
           return NextResponse.json(
             { error: insertErr?.message ?? "Error guardando el análisis." },
             { status: 500 }
           );
         }
 
-        await supabase.rpc("descontar_analisis", { user_id_param: user.id });
+        if (!reintentoGratis) {
+          await supabase.rpc("descontar_analisis", { user_id_param: user.id });
+        }
 
         return NextResponse.json({ id: inserted.id });
       }
@@ -212,6 +282,9 @@ export async function POST(request: Request) {
       plan,
       perfil_vendedor: perfilVendedor,
       datos_pro: datos_pro ?? null,
+      // Ya validado arriba contra la base. El worker NO lo revalida: confia en
+      // que la route decidio, porque el evento solo lo puede emitir la route.
+      reintento_de: reintentoGratis ? reintento_de : null,
     };
     if (searchKeyword !== producto) {
       eventData.search_keyword = searchKeyword;

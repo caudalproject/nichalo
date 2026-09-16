@@ -209,6 +209,22 @@ export default async function ResultadoPage({ params }: Params) {
     });
   const confiable = confianza?.nivel === "alta";
   const bajaConfianza = confianza?.nivel === "baja";
+
+  // Oferta de reintento gratis (Capa 4). Solo si es el analisis del propio
+  // usuario, salio con confianza baja MEDIDA (no heredada — de los viejos no
+  // tenemos los datos para justificar el regalo), y todavia no genero uno.
+  // La route revalida todo esto; aca solo decidimos si mostrar el boton.
+  const reintentoDisponible =
+    user &&
+    analysis.user_id === user.id &&
+    result.confianza?.nivel === "baja" &&
+    Date.now() - new Date(analysis.created_at).getTime() < 7 * 24 * 60 * 60 * 1000 &&
+    ((
+      await supabase
+        .from("analyses")
+        .select("id", { count: "exact", head: true })
+        .eq("reintento_de", analysis.id)
+    ).count ?? 0) === 0;
   const degradado = confianza != null && !confiable;
   const mostrarMediana = degradado && result.precio_stats?.precio_mediano != null;
   const localeMap: Record<string, string> = { AR: "es-AR", MX: "es-MX", CO: "es-CO" };
@@ -373,6 +389,18 @@ export default async function ResultadoPage({ params }: Params) {
             confianza={confianza}
             stats={result.precio_stats ?? result.competencia}
             formatear={(n: number) => formatLocalPrice(n, moneda ?? "ARS")}
+            reintento={
+              reintentoDisponible
+                ? {
+                    // A proposito NO se prefillea el costo: si el motivo fue
+                    // costo_fuera_de_rango, que lo vuelva a tipear es
+                    // exactamente lo que queremos que revise.
+                    href: `/analizar?reintento_de=${analysis.id}&producto=${encodeURIComponent(
+                      analysis.producto
+                    )}&pais=${analysis.pais}`,
+                  }
+                : null
+            }
           />
 
           {/* CAPA 2: Resumen ejecutivo */}

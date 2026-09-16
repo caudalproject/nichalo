@@ -22,6 +22,10 @@ interface Props {
   plan: string;
   ultimoProducto?: string;
   ultimoVeredicto?: "VIABLE" | "MARGINAL" | "SATURADO";
+  /** Análisis de confianza baja que origina este reintento gratis. */
+  reintentoDe?: string;
+  productoPrefill?: string;
+  paisPrefill?: "AR" | "MX" | "CO";
 }
 
 type PerfilVendedor = "principiante" | "intermedio" | "experto";
@@ -54,13 +58,13 @@ const MESSAGE_PROGRESS: Record<string, number> = {
   "¡Análisis completado!": 100,
 };
 
-export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredicto }: Props) {
+export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredicto, reintentoDe, productoPrefill, paisPrefill }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const [producto, setProducto] = useState("");
-  const [pais, setPais] = useState<"AR" | "MX" | "CO">("AR");
+  const [producto, setProducto] = useState(productoPrefill ?? "");
+  const [pais, setPais] = useState<"AR" | "MX" | "CO">(paisPrefill ?? "AR");
   const [perfilVendedor, setPerfilVendedor] = useState<PerfilVendedor>("principiante");
   const [costo, setCosto] = useState("");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
@@ -78,7 +82,12 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  const noCredits = creditsLeft <= 0;
+  // Un reintento gratis tiene que poder correr con 0 créditos: el caso más
+  // común es justamente el usuario free, que tiene UN análisis, lo gasta, y le
+  // sale con confianza baja. Si `noCredits` lo frenara, la Capa 4 no existiría
+  // para el 96% de los usuarios. `reintentoDe` sólo llega si el server ya lo
+  // validó, y la route lo revalida antes de no cobrar.
+  const noCredits = creditsLeft <= 0 && !reintentoDe;
 
   // Pre-fill from query params (e.g. coming from "Analizar este producto →")
   useEffect(() => {
@@ -206,6 +215,7 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
         pais,
         costoEstimado: costoUSDSubmit,
         perfilVendedor,
+        ...(reintentoDe ? { reintento_de: reintentoDe } : {}),
         datos_pro: plan === 'pro' ? {
           origen_producto: origenProducto || null,
           presupuesto_inicial: presupuesto ? parseFloat(presupuesto.replace(',', '.')) / (exchangeRate ?? 1) : null,
@@ -563,7 +573,9 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
 
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
-              Plan {plan} · {creditsLeft} análisis restante{creditsLeft !== 1 ? 's' : ''}
+              {reintentoDe
+                ? "Reintento sin cargo — no descuenta de tu cuenta"
+                : `Plan ${plan} · ${creditsLeft} análisis restante${creditsLeft !== 1 ? 's' : ''}`}
               {plan === 'free' && creditsLeft === 1 && (
                 <span className="ml-1 text-amber-600 font-medium">— es tu único análisis gratis</span>
               )}

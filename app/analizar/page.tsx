@@ -5,7 +5,16 @@ import { AnalizarForm } from "./AnalizarForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function AnalizarPage() {
+export default async function AnalizarPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const asStr = (v: string | string[] | undefined) =>
+    typeof v === "string" ? v : undefined;
+  const reintentoDe = asStr(searchParams?.reintento_de);
+  const productoPrefill = asStr(searchParams?.producto);
+  const paisPrefill = asStr(searchParams?.pais);
   const supabase = createSupabaseServerClient();
 
   const {
@@ -39,6 +48,30 @@ export default async function AnalizarPage() {
     ultimoAnalisis = data;
   }
 
+  // Se revalida aca para no prometer "sin gastar credito" si ya se uso. La
+  // route es la autoridad final; esto solo evita mostrar una promesa falsa.
+  let reintentoValido = false;
+  if (reintentoDe) {
+    const { data: origen } = await supabase
+      .from("analyses")
+      .select("id, resultado_json, created_at")
+      .eq("id", reintentoDe)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const nivel = (origen?.resultado_json as { confianza?: { nivel?: string } } | null)
+      ?.confianza?.nivel;
+    if (origen && nivel === "baja") {
+      const fresco =
+        Date.now() - new Date(origen.created_at as string).getTime() <
+        7 * 24 * 60 * 60 * 1000;
+      const { count } = await supabase
+        .from("analyses")
+        .select("id", { count: "exact", head: true })
+        .eq("reintento_de", reintentoDe);
+      reintentoValido = fresco && (count ?? 0) === 0;
+    }
+  }
+
   return (
     <>
       <Navbar
@@ -58,6 +91,13 @@ export default async function AnalizarPage() {
               plan={profile?.plan ?? "free"}
               ultimoProducto={ultimoAnalisis?.producto}
               ultimoVeredicto={ultimoAnalisis?.veredicto}
+              reintentoDe={reintentoValido ? reintentoDe : undefined}
+              productoPrefill={productoPrefill}
+              paisPrefill={
+                paisPrefill === "MX" || paisPrefill === "CO" || paisPrefill === "AR"
+                  ? paisPrefill
+                  : undefined
+              }
             />
           </div>
         </div>

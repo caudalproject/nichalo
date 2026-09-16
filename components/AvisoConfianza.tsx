@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Confianza, PrecioStats } from "@/lib/confianza";
 import { explicarConfianza } from "@/lib/confianza";
 
@@ -19,12 +20,18 @@ export function AvisoConfianza({
   stats,
   formatear,
   sugerencia,
+  reintento,
 }: {
   confianza: Confianza | null | undefined;
   stats: Pick<PrecioStats, "precio_minimo" | "precio_maximo"> | null | undefined;
   formatear: (n: number) => string;
   /** Termino de busqueda mas especifico, si aplica. */
   sugerencia?: string | null;
+  /**
+   * Oferta de reintento sin costo. Solo se pasa cuando el analisis es del
+   * usuario logueado, tiene confianza baja y todavia no genero un reintento.
+   */
+  reintento?: { href: string } | null;
 }) {
   if (!confianza || confianza.nivel === "alta" || !stats) return null;
 
@@ -83,6 +90,24 @@ export function AvisoConfianza({
               {confianza.n_descartados === 1 ? "publicación" : "publicaciones"}{" "}
               fuera de rango antes de calcular los promedios.
             </p>
+          )}
+          {/* Si le dijimos que sus datos no servian, el reintento va por
+              nuestra cuenta. Cobrarselo seria el verdadero golpe a la
+              credibilidad: le avisamos que el resultado no servia y le
+              descontamos un credito igual. Cuesta ~$102 ARS. */}
+          {reintento && (
+            <div className="pt-1">
+              <Link
+                href={reintento.href}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#0A0A0A] px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0A0A0A]/85"
+              >
+                Reintentar sin gastar tu crédito
+              </Link>
+              <p className="mt-1.5 text-xs text-amber-700">
+                Este análisis no te sirvió, así que el reintento va por nuestra
+                cuenta. Una vez por análisis.
+              </p>
+            </div>
           )}
         </div>
       </div>
