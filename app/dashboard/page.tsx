@@ -11,7 +11,6 @@ import { DashboardList } from "@/components/DashboardList";
 import { UpgradeBanner } from "@/components/UpgradeBanner";
 import { PixelRegistration } from "@/components/PixelRegistration";
 import type { AnalysisRow, UserRow, Plan } from "@/lib/supabase";
-import { PLAN_CONFIG } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -81,10 +80,39 @@ export default async function DashboardPage({
     "id" | "producto" | "pais" | "score" | "veredicto" | "created_at"
   >[];
 
-  const viables = list.filter(a => a.veredicto === "VIABLE").length;
-  const mejorScore = list.length > 0 ? Math.max(...list.map(a => a.score ?? 0)) : 0;
-  const totalPlan = PLAN_CONFIG[profile?.plan as Plan]?.analisisPorMes ?? 1;
-  const totalUsados = totalPlan - analisisRestantes;
+  // Las stats se calculan sobre TODOS los analisis, no sobre `list`. `list`
+  // esta limitada a 20 y DashboardList pagina mas alla de eso, asi que a
+  // partir del analisis 21 "mejor score" y "productos viables" pasaban a
+  // significar en silencio "de los 20 mas recientes".
+  //
+  // `mejor` ademas trae producto e id: antes era un numero pelado, y cuando el
+  // mejor analisis quedaba varios scrolls abajo en el listado (el 80 de la
+  // cuenta de prueba esta en la posicion 11 de 14) la stat se leia como si
+  // contradijera lo que se ve en pantalla. El numero era correcto; lo que
+  // faltaba era decir a que analisis pertenece y poder ir a el.
+  const { data: mejorData } = await supabase
+    .from("analyses")
+    .select("id, producto, score")
+    .eq("user_id", user.id)
+    .order("score", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { count: viables } = await supabase
+    .from("analyses")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("veredicto", "VIABLE");
+
+  const { count: totalAnalisisCount } = await supabase
+    .from("analyses")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+
+  const mejor = mejorData ?? null;
+  const mejorScore = mejor?.score ?? 0;
+  const totalViables = viables ?? 0;
+  const totalAnalisis = totalAnalisisCount ?? 0;
 
   return (
     <>
@@ -102,16 +130,13 @@ export default async function DashboardPage({
             <h1 className="text-2xl font-bold text-[#0A0A0A]">
               Tus análisis
             </h1>
+            {/* Los creditos restantes viven solo en el Navbar. Estaban aca, en
+                el Navbar y en el tercer tile a la vez: el mismo numero tres
+                veces en la misma pantalla. */}
             <div className="mt-1 flex items-center gap-2">
               <Badge variant="secondary" className="text-xs capitalize">
                 Plan {profile?.plan ?? "free"}
               </Badge>
-              <span className="text-sm text-[#6B7280]">
-                <strong className="text-[#0A0A0A]">
-                  {analisisRestantes}
-                </strong>{" "}
-                análisis restantes
-              </span>
             </div>
           </div>
           <Link href="/analizar">
@@ -152,16 +177,37 @@ export default async function DashboardPage({
         {list.length > 0 && (
           <div className="grid grid-cols-3 gap-3 mb-6 mt-8">
             <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center">
-              <div className={`text-2xl font-bold ${viables > 0 ? 'text-[#16A34A]' : 'text-[#6B7280]'}`}>{viables}</div>
-              <div className="text-xs text-[#6B7280] mt-1">productos viables</div>
+              <div className={`text-2xl font-bold ${totalViables > 0 ? 'text-[#16A34A]' : 'text-[#6B7280]'}`}>{totalViables}</div>
+              <div className="text-xs text-[#6B7280] mt-1">
+                {totalViables === 1 ? "producto viable" : "productos viables"}
+              </div>
             </div>
+            {/* El mejor score linkea a su analisis y dice cual es. */}
+            {mejor && mejorScore > 0 ? (
+              <Link
+                href={`/resultado/${mejor.id}`}
+                className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center transition-colors hover:border-[#0A0A0A]/20 hover:bg-[#F9FAFB]"
+              >
+                <div className="text-2xl font-bold text-[#0A0A0A]">{mejorScore}</div>
+                <div className="text-xs text-[#6B7280] mt-1 truncate" title={mejor.producto}>
+                  mejor score · {mejor.producto}
+                </div>
+              </Link>
+            ) : (
+              <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center">
+                <div className="text-2xl font-bold text-[#0A0A0A]">—</div>
+                <div className="text-xs text-[#6B7280] mt-1">mejor score</div>
+              </div>
+            )}
+            {/* Tercer tile: antes repetia los creditos restantes, que ya estan
+                en el Navbar Y en la linea de arriba del titulo — el mismo dato
+                tres veces en una pantalla. Ahora muestra el total historico,
+                que no esta en ningun otro lado. */}
             <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center">
-              <div className="text-2xl font-bold text-[#0A0A0A]">{mejorScore > 0 ? mejorScore : "—"}</div>
-              <div className="text-xs text-[#6B7280] mt-1">mejor score</div>
-            </div>
-            <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 text-center">
-              <div className="text-2xl font-bold text-[#0A0A0A]">{Math.max(0, totalUsados)}/{totalPlan}</div>
-              <div className="text-xs text-[#6B7280] mt-1">análisis usados</div>
+              <div className="text-2xl font-bold text-[#0A0A0A]">{totalAnalisis}</div>
+              <div className="text-xs text-[#6B7280] mt-1">
+                {totalAnalisis === 1 ? "análisis hecho" : "análisis hechos"}
+              </div>
             </div>
           </div>
         )}
