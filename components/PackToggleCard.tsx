@@ -29,7 +29,7 @@ const PACKS = {
 } as const;
 
 const FEATURES_FIJAS = [
-  "Hasta 50 publicaciones reales de tu competencia por análisis — no una estimación",
+  "30 publicaciones reales de tu competencia por análisis — no una estimación",
   "Veredicto: VIABLE, MARGINAL o SATURADO, con el razonamiento",
 ];
 

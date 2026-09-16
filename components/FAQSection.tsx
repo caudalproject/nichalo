@@ -36,7 +36,7 @@ const FAQS = [
   },
   {
     q: "¿Qué incluye el plan Free?",
-    a: "1 análisis gratis, por única vez (no se recarga todos los meses), con 50 publicaciones analizadas y el informe completo, sin restricciones y sin tarjeta. Es exactamente el mismo análisis que recibe alguien que paga — lo que comprás después es cantidad, no profundidad. Cuando lo uses, podés seguir validando con un pack de créditos o suscribiéndote a Pro.",
+    a: "1 análisis gratis, por única vez (no se recarga todos los meses), con 30 publicaciones analizadas y el informe completo, sin restricciones y sin tarjeta. Es exactamente el mismo análisis que recibe alguien que paga — lo que comprás después es cantidad, no profundidad. Cuando lo uses, podés seguir validando con un pack de créditos o suscribiéndote a Pro.",
   },
 ];
 

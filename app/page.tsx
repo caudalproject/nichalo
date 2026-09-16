@@ -34,7 +34,8 @@ import { PricingSection } from "@/components/PricingSection";
 
 // Reemplaza a las tres feature cards. Son los tres pasos del producto, no
 // tres adjetivos. "Revisamos cientos de publicaciones" se cayó: el techo real
-// es 100 (PLAN_CONFIG.pro.maxItems), así que "cientos" no era verificable.
+// es 30 (PLAN_CONFIG, igual para todos los tiers desde el 16/9), así que
+// "cientos" no era verificable.
 const PASOS = [
   {
     n: "1",
@@ -45,7 +46,7 @@ const PASOS = [
     n: "2",
     title: "Scrapeamos el mercado real",
     description:
-      "Hasta 50 publicaciones de Mercado Libre, en el momento en que apretás analizar.",
+      "30 publicaciones de Mercado Libre, en el momento en que apretás analizar.",
   },
   {
     n: "3",
@@ -59,7 +60,7 @@ const PASOS = [
 // si fuera un logro (auditoría, problema 6). Reemplazada por una que suma.
 const STATS = [
   { valor: "100%", label: "publicaciones reales de ML" },
-  { valor: "50", label: "publicaciones por análisis" },
+  { valor: "30", label: "publicaciones por análisis" },
   { valor: "~3 min", label: "por análisis" },
 ];
 
@@ -79,7 +80,7 @@ const PRICING_CARDS = [
     badge: null as null | string,
     features: [
       { label: "Un producto, analizado completo. Sin tarjeta.", included: true, subItems: null as string[] | null },
-      { label: "50 publicaciones analizadas — la misma profundidad que el plan pago", included: true, subItems: null as string[] | null },
+      { label: "30 publicaciones analizadas — la misma profundidad que el plan pago", included: true, subItems: null as string[] | null },
       { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
       { label: "Primer análisis completo — sin restricciones", included: true, subItems: null as string[] | null },
     ],
@@ -116,7 +117,7 @@ const PRICING_CARDS = [
         ] as string[] | null,
       },
       { label: "30 análisis por mes — sin frenar por crédito", included: true, subItems: null as string[] | null },
-      { label: "50 publicaciones por análisis — no capamos la profundidad por plan", included: true, subItems: null as string[] | null },
+      { label: "30 publicaciones por análisis — no capamos la profundidad por plan", included: true, subItems: null as string[] | null },
     ],
     cta: "Empezar ahora",
     href: null,
@@ -192,7 +193,7 @@ export default function LandingPage() {
                     {/* whitespace-nowrap + text-lg: el valor mas largo ("~3 min")
                         no entra en una columna de ~107px a 393px de ancho y se
                         partia en dos lineas, desalineando los labels de las tres
-                        stats. El de esta columna paso de "hasta 100" a "50" el
+                        stats. El de esta columna paso de "hasta 100" a "30" el
                         16/9, pero el nowrap sigue haciendo falta por "~3 min". */}
                     <div className="text-lg md:text-3xl font-bold text-[#0A0A0A] whitespace-nowrap">
                       {s.valor}
