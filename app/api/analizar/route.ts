@@ -9,7 +9,18 @@ import type { Plan, AnalysisResult } from "@/lib/supabase";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+// Bajado de 30 a 7 dias el 15/9/2026. Medido sobre la base antes de tocarlo:
+// el cache pego 2 veces en 34 analisis historicos (6%), y las dos veces fue el
+// mismo usuario repitiendo el mismo producto en menos de 24 h — cero hits entre
+// usuarios distintos. O sea que la ventana de 30 dias no estaba ahorrando
+// practicamente nada, y a cambio permitia servir datos de precios de hasta un
+// mes de antiguedad en un mercado con inflacion mensual. 7 dias cubre el caso
+// real que si ocurre (el usuario que reanaliza lo mismo en pocos dias) sin
+// sostener precios viejos.
+//
+// El cache sigue siendo silencioso (regla dura del proyecto): esto no agrega
+// ningun aviso al usuario, solo acorta la ventana.
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 const DatosProSchema = z.object({
   origen_producto: z.string().nullable().optional(),
