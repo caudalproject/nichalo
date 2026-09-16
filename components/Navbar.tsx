@@ -6,6 +6,7 @@ import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useSesionCliente } from "@/lib/useSesionCliente";
+import { LandingAnchors } from "@/components/LandingAnchors";
 
 interface NavbarProps {
   email?: string | null;
@@ -102,14 +103,20 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
   return (
     <>
       <header className="border-b border-[#E5E7EB] bg-white sticky top-0 z-30">
-        <div className="container flex h-14 items-center justify-between">
-          <Link
-            href="/"
-            className="font-semibold text-xl tracking-tight select-none"
-          >
-            <span className="text-[#16A34A]">N</span>
-            <span className="text-[#0A0A0A]">ichalo</span>
-          </Link>
+        <div className="container flex h-14 items-center justify-between gap-4">
+          {/* Grupo izquierdo: marca + navegacion. Ver el comentario de
+              LandingAnchors sobre por que las anclas van aca y no pegadas al
+              boton de la derecha. */}
+          <div className="flex items-center gap-5 md:gap-8">
+            <Link
+              href="/"
+              className="font-semibold text-xl tracking-tight select-none shrink-0"
+            >
+              <span className="text-[#16A34A]">N</span>
+              <span className="text-[#0A0A0A]">ichalo</span>
+            </Link>
+            {!clientEmail && <LandingAnchors />}
+          </div>
 
           <nav className="flex items-center gap-3 text-sm">
             {clientEmail ? (
@@ -235,31 +242,8 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
               </>
             ) : (
               <>
-                {/* Anclas de la landing (auditoria 13/9, problema 2: la
-                    navbar era solo logo + Ingresar, y para llegar al precio
-                    habia que recorrer ~7 scrolls). Solo para el visitante
-                    anonimo: el logueado ya tiene Dashboard / Nuevo analisis.
-                    En mobile queda solo "Planes" — es la que importa para
-                    que el precio sea alcanzable, y las tres no entran a
-                    375px al lado del boton. */}
-                <a
-                  href="/#como-funciona"
-                  className="hidden sm:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
-                >
-                  Cómo funciona
-                </a>
-                <a
-                  href="/#ejemplo"
-                  className="hidden sm:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
-                >
-                  Ejemplo
-                </a>
-                <a
-                  href="/#planes"
-                  className="text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
-                >
-                  Planes
-                </a>
+                {/* Las anclas de la landing viven en el grupo izquierdo,
+                    junto al logo. Aca queda solo la accion. */}
                 <Link href="/login">
                   <Button size="sm">Ingresar</Button>
                 </Link>
