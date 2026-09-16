@@ -85,6 +85,30 @@ export interface AnalysisResult {
    */
   confianza?: import("./confianza").Confianza | null;
   precio_stats?: import("./confianza").PrecioStats | null;
+  /**
+   * Lo que produce el "Analisis avanzado Pro". Existe como bloque propio desde
+   * el 16/9: antes los cuatro inputs del Pro solo alteraban la prosa de campos
+   * que el free tambien recibe, asi que el usuario no tenia forma de saber que
+   * le habia servido contestarlos. Medido con
+   * `scripts/experimento-datos-pro.mjs`: el contenido existia (calculaba
+   * unidades por presupuesto), pero vivia dentro de
+   * `analisis_costo_proveedor.evaluacion`, sin nombre y sin envase.
+   */
+  analisis_avanzado?: {
+    primera_compra?: {
+      unidades: number;
+      inversion_usd: number;
+      costo_unitario_usd: number;
+      detalle: string;
+    } | null;
+    importacion?: {
+      costos_extra: string;
+      tiempo_estimado: string;
+      detalle: string;
+    } | null;
+    mix_variantes?: { variante: string; proporcion: string; razon: string }[] | null;
+    plan_canal?: { titulo: string; detalle: string } | null;
+  } | null;
   productos_alternativos?: {
     nombre: string;
     razon: string;

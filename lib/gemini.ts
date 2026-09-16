@@ -381,11 +381,15 @@ DATOS ADICIONALES DEL VENDEDOR (usar para personalizar el análisis):
 - Producto con variantes: ${datosPro.tiene_variantes || 'no especificado'}${datosPro.detalle_variantes ? ` (${datosPro.detalle_variantes})` : ''}
 - Canal de distribución: ${datosPro.canal_distribucion || 'no especificado'}
 
-Con estos datos, personalizar:
-- El análisis de costo vs proveedores (¿alcanza el presupuesto para el mínimo de compra mayorista?)
-- La estrategia de lanzamiento (según canal de distribución)
-- Las oportunidades de diferenciación (según si tiene variantes)
-- El análisis de márgenes (según origen del producto y costos de importación)` : ''}`;
+Con estos datos, ADEMÁS de personalizar el resto del análisis, agregá al JSON un campo "analisis_avanzado" con esta forma exacta:
+
+"analisis_avanzado":{"primera_compra":{"unidades":int,"inversion_usd":número,"costo_unitario_usd":número,"detalle":"1-2 frases: qué alcanza a comprar con su presupuesto y si es una cantidad sensata para arrancar"},"importacion":{"costos_extra":"flete + aduana + impuestos estimados como % sobre el FOB, para el origen que indicó","tiempo_estimado":"ej: 30-45 días puerta a puerta","detalle":"1-2 frases sobre riesgos o requisitos de ese origen"},"mix_variantes":[{"variante":"","proporcion":"ej: 50%","razon":"por qué esa proporción según lo scrapeado"}],"plan_canal":{"titulo":"","detalle":"2-3 frases de plan de lanzamiento concreto para el canal que indicó"}}
+
+Reglas de "analisis_avanzado":
+- unidades = presupuesto_inicial dividido el costo unitario estimado. Hacé la cuenta, no la dejes implícita.
+- Si NO indicó presupuesto, omití "primera_compra". Si NO indicó origen, omití "importacion". Si dijo que no tiene variantes o no lo indicó, omití "mix_variantes". Si no indicó canal, omití "plan_canal". No inventes datos que el usuario no dio.
+- "mix_variantes": máximo 4 entradas, y las proporciones tienen que sumar 100%.
+- Este bloque es lo que el usuario está pagando: tiene que ser específico y accionable, no genérico. Nada de "dependerá de tu estrategia".` : ''}`;
 }
 
 function extractJson(text: string): unknown | null {
@@ -444,6 +448,63 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
         };
       })
     : [];
+
+  // "analisis_avanzado" solo existe si el usuario mando datos_pro. Cada sub
+  // bloque se valida por separado porque el prompt le pide al modelo que omita
+  // los que el usuario no contesto — un Pro puede llenar dos campos y no los
+  // otros dos, y la UI tiene que poder mostrar solo lo que se pidio.
+  const avanzadoRaw = (r.analisis_avanzado ?? null) as Record<string, unknown> | null;
+  let avanzado: AnalysisResult["analisis_avanzado"] = null;
+  if (args.datosPro && avanzadoRaw && typeof avanzadoRaw === "object") {
+    const pc = (avanzadoRaw.primera_compra ?? null) as Record<string, unknown> | null;
+    const imp = (avanzadoRaw.importacion ?? null) as Record<string, unknown> | null;
+    const canal = (avanzadoRaw.plan_canal ?? null) as Record<string, unknown> | null;
+    const mix = Array.isArray(avanzadoRaw.mix_variantes)
+      ? (avanzadoRaw.mix_variantes as unknown[]).slice(0, 4).map((v) => {
+          const vv = (v ?? {}) as Record<string, unknown>;
+          return {
+            variante: typeof vv.variante === "string" ? vv.variante : "",
+            proporcion: typeof vv.proporcion === "string" ? vv.proporcion : "",
+            razon: typeof vv.razon === "string" ? vv.razon : "",
+          };
+        }).filter((v) => v.variante)
+      : [];
+
+    const bloque = {
+      primera_compra:
+        pc && toNumber(pc.unidades, 0) > 0
+          ? {
+              unidades: clampInt(pc.unidades, 0, 9999999, 0),
+              inversion_usd: toNumber(pc.inversion_usd, 0),
+              costo_unitario_usd: toNumber(pc.costo_unitario_usd, 0),
+              detalle: typeof pc.detalle === "string" ? pc.detalle : "",
+            }
+          : null,
+      importacion:
+        imp && typeof imp.costos_extra === "string"
+          ? {
+              costos_extra: imp.costos_extra,
+              tiempo_estimado: typeof imp.tiempo_estimado === "string" ? imp.tiempo_estimado : "",
+              detalle: typeof imp.detalle === "string" ? imp.detalle : "",
+            }
+          : null,
+      mix_variantes: mix.length > 0 ? mix : null,
+      plan_canal:
+        canal && typeof canal.detalle === "string" && canal.detalle
+          ? {
+              titulo: typeof canal.titulo === "string" ? canal.titulo : "Plan de lanzamiento",
+              detalle: canal.detalle,
+            }
+          : null,
+    };
+
+    // Si el modelo devolvio el objeto pero todo vacio, no lo guardamos: la UI
+    // mostraria una seccion "Analisis avanzado Pro" en blanco, que es peor que
+    // no mostrarla.
+    const tieneAlgo =
+      bloque.primera_compra || bloque.importacion || bloque.mix_variantes || bloque.plan_canal;
+    avanzado = tieneAlgo ? bloque : null;
+  }
 
   const costoEvalRaw = String(margen.costo_evaluacion ?? "COMPETITIVO").toUpperCase();
   const costoEval =
@@ -523,6 +584,7 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
         cargo_fijo_ars: toNumber(comisionDetalle.cargo_fijo_ars, 0),
       },
     } : {}),
+    ...(avanzado ? { analisis_avanzado: avanzado } : {}),
   };
 }
 

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn, formatCurrency } from "@/lib/utils";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { AvisoConfianza } from "@/components/AvisoConfianza";
+import { AnalisisAvanzado } from "@/components/AnalisisAvanzado";
 import { confianzaHeredada } from "@/lib/confianza";
 import { PacksOffer } from "@/components/PacksOffer";
 
@@ -626,6 +627,14 @@ export default async function ResultadoPage({ params }: Params) {
             </Card>
           </div>
           </LockedSection>
+
+          {/* CAPA 6b: Análisis avanzado Pro — solo si el usuario cargó los
+              datos del formulario avanzado. */}
+          {result.analisis_avanzado && (
+            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+              <AnalisisAvanzado datos={result.analisis_avanzado} formatUsd={formatLocal} />
+            </LockedSection>
+          )}
 
           {/* CAPA 7: Top vendedores */}
           {hasTopVendedores && (

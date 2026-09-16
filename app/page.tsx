@@ -101,10 +101,19 @@ const PRICING_CARDS = [
     features: [
       // Primero, porque es lo único que justifica pagar una suscripción en
       // vez de un pack (punto 8 del brief).
+      // Estos cuatro eran las PREGUNTAS del formulario ("de donde conviene
+      // importarlo", "cuanto necesitas para arrancar"): campos que el usuario
+      // llena, no resultados que recibe. Nadie paga por un formulario mas
+      // largo. Ahora nombran las cuatro secciones que devuelve el informe.
       {
         label: "Análisis avanzado Pro",
         included: true,
-        subItems: ["De dónde conviene importarlo", "Cuánto necesitás para arrancar", "Qué variante vender primero", "Por dónde conviene vender"] as string[] | null,
+        subItems: [
+          "Tu primera compra: cuántas unidades entran en tu presupuesto",
+          "Costos reales de importación: flete, aduana y tiempos",
+          "Mix de variantes: en qué proporción conviene comprarlas",
+          "Plan de lanzamiento para tu canal de venta",
+        ] as string[] | null,
       },
       { label: "30 análisis por mes — sin frenar por crédito", included: true, subItems: null as string[] | null },
       { label: "50 publicaciones por análisis — no capamos la profundidad por plan", included: true, subItems: null as string[] | null },
