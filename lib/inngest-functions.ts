@@ -39,6 +39,7 @@ export const analizarProducto = inngest.createFunction(
       perfil_vendedor,
       search_keyword,
       datos_pro,
+      reintento_de,
     } = event.data as {
       job_id: string;
       user_id: string;
@@ -55,6 +56,8 @@ export const analizarProducto = inngest.createFunction(
         detalle_variantes?: string | null;
         canal_distribucion?: string | null;
       } | null;
+      /** Ya validado por la route; aca solo se aplica. */
+      reintento_de?: string | null;
     };
 
     try {
@@ -257,6 +260,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             resultado_json: resultadoJson,
             score: analysis.score,
             veredicto: analysis.veredicto,
+            reintento_de: reintento_de ?? null,
           })
           .select("id")
           .single();
@@ -266,23 +270,39 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         }
 
         const productoNorm = producto.trim().toLowerCase();
-        await supabase.from("analysis_cache").upsert(
+        // costo_estimado entra en la clave: el resultado_json cacheado incluye
+        // margen, ganancia, costo_evaluacion y (desde el 16/9) la senal de
+        // confianza costo_fuera_de_rango, todos calculados CON ese costo.
+        // Servirlo a alguien que ingreso otro costo le daba los numeros de un
+        // desconocido. El onConflict tiene que coincidir exactamente con la
+        // constraint analysis_cache_unique_key.
+        const { error: cacheErr } = await supabase.from("analysis_cache").upsert(
           {
             producto: productoNorm,
             pais,
             perfil_vendedor: perfil_vendedor ?? "principiante",
+            costo_estimado,
             resultado_json: resultadoJson,
             publicaciones_analizadas: finalScrape.totalListings,
             created_at: new Date().toISOString(),
           },
-          { onConflict: "producto,pais,perfil_vendedor" }
+          { onConflict: "producto,pais,perfil_vendedor,costo_estimado" }
         );
+        // El cache es una optimizacion: si falla, el analisis ya esta guardado
+        // y el usuario no se entera. Pero se loguea, porque antes este upsert
+        // no chequeaba error y no habia forma de saber si estaba escribiendo.
+        if (cacheErr) {
+          console.error("[cache] no se pudo escribir:", cacheErr.message);
+        }
 
         return { analysisId: insertData.id, resultadoJson };
       });
 
-      // Step 6b: Decrementar crédito del usuario
+      // Step 6b: Decrementar crédito del usuario.
+      // Un reintento por confianza baja no descuenta: el análisis que lo
+      // originó ya se cobró y no sirvió (Capa 4, 16/9).
       await step.run("decrement-credits", async () => {
+        if (reintento_de) return;
         await supabase.rpc("descontar_analisis", { user_id_param: user_id });
       });
 
