@@ -23,9 +23,11 @@ interface AnalyzeArgs {
   currency?: { code: string; symbol: string; name: string };
   exchangeRate?: number;
   perfilVendedor?: string;
-  mlTrends?: string[];
+  // "total" (tamaño total del mercado en ML) se saco el 20/9 (TAB 1): la API
+  // publica que lo daba devuelve 403 desde que ML cerro el acceso sin token,
+  // y fallaba en silencio via catch => 0. Google Trends sigue siendo la unica
+  // fuente viva de esta familia de datos.
   mlData?: {
-    total: number;
     trends?: { trending: boolean; interest: number; related: string[] };
   };
   datosPro?: DatosPro;
@@ -125,7 +127,7 @@ export async function analizarConGemini(
   throw new Error("No se pudo completar el análisis con ningún modelo");
 }
 
-function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlTrends, mlData, datosPro, precioStats, confianza }: AnalyzeArgs) {
+function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlData, datosPro, precioStats, confianza }: AnalyzeArgs) {
   const sample = scrape.listings.slice(0, 50);
   const currencyCode = currency?.code ?? "ARS";
   const currencyName = currency?.name ?? "Peso argentino";
@@ -259,23 +261,7 @@ ${confianza.motivos.includes("dispersion_precios") ? `- La búsqueda "${producto
 
 Producto: "${producto}" | País: ${pais} (${scrape.domain}) | Costo/unidad USD: ${costoEstimadoUsd} | Publicaciones: ${scrape.totalListings}
 
-${mlTrends && mlTrends.length > 0 ? `TENDENCIAS REALES DE MERCADO LIBRE HOY (${new Date().toLocaleDateString('es-AR')}):
-${mlTrends.join(', ')}
-Si el producto analizado ("${producto}") coincide o está relacionado con alguna de estas tendencias, mencionarlo explícitamente en la sección "tendencia" del análisis.
-Si no aparece en tendencias, indicarlo como dato relevante.
-
-` : ''}${mlData?.total ? `
-DATOS REALES DE MERCADO LIBRE:
-
-Total de publicaciones para "${producto}": ${mlData.total.toLocaleString('es-AR')} publicaciones
-Nota: el análisis se basó en una muestra de ${scrape.totalListings} publicaciones
-
-Saturación según total real:
-- Menos de 500: mercado poco competido → score puede ser más alto
-- 500 a 2.000: competencia moderada
-- Más de 2.000: mercado saturado → penalizar score especialmente para principiantes
-
-` : ''}${mlData?.trends?.interest ? `TENDENCIA EN GOOGLE (último año en ${pais}):
+${mlData?.trends?.interest ? `TENDENCIA EN GOOGLE (último año en ${pais}):
 Interés promedio: ${mlData.trends.interest}/100
 En tendencia creciente: ${mlData.trends.trending ? "SÍ" : "NO"}
 ${mlData.trends.related?.length ? `- Búsquedas relacionadas: ${mlData.trends.related.join(', ')}` : ''}

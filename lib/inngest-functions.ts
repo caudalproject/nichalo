@@ -144,38 +144,25 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         return fallbackScrape;
       });
 
-      // Step 3: Obtener tendencias de ML
-      const mlTrends = await step.run("fetch-ml-trends", async () => {
-        await updateJob(job_id, { step_message: "Analizando tendencias del mercado..." });
-        const siteMap: Record<string, string> = {
-          AR: "MLA",
-          MX: "MLM",
-          CO: "MCO",
-        };
-        const siteId = siteMap[pais] ?? "MLA";
-
-        try {
-          const res = await fetch(
-            `https://api.mercadolibre.com/trends/${siteId}`,
-            { headers: { "Content-Type": "application/json" } }
-          );
-          if (!res.ok) return [];
-          const data = await res.json();
-          return data.slice(0, 20).map((t: { keyword: string }) => t.keyword);
-        } catch {
-          return [];
-        }
-      });
-
-      // Step 4: Obtener total de ML y tendencias de Google en paralelo
+      // Step 4: Tendencias de Google Trends.
+      // Antes tambien pedia "total de publicaciones" y "tendencias" a la API
+      // publica de Mercado Libre (api.mercadolibre.com/sites/*/search y
+      // /trends/*). Las dos devuelven 403 (PA_UNAUTHORIZED_RESULT_FROM_POLICIES)
+      // desde que ML cerro el acceso sin token, y fallaban en silencio via
+      // catch => 0 / catch => []. Sacado del prompt el 20/9 (TAB 1) en vez de
+      // seguir mandando datos falsos. Google Trends es la unica fuente de esta
+      // familia que sigue viva.
       const mlData = await step.run("fetch-ml-data", async () => {
-        await updateJob(job_id, { step_message: "Calculando tamaño del mercado..." });
-        const { getMLSearchTotal, getGoogleTrends } = await import("./mercadolibre");
-        const [total, trends] = await Promise.all([
-          getMLSearchTotal(producto, pais).catch(() => 0),
-          getGoogleTrends(producto, pais).catch(() => undefined),
-        ]);
-        return { total, trends };
+        await updateJob(job_id, { step_message: "Analizando tendencias del mercado..." });
+        const { getGoogleTrends } = await import("./mercadolibre");
+        const trends = await getGoogleTrends(producto, pais).catch((err) => {
+          console.error("[ml-data] getGoogleTrends fallo, sigue sin datos de tendencia:", err);
+          return undefined;
+        });
+        if (trends && trends.interest === 0 && !trends.trending && trends.related.length === 0) {
+          console.warn("[ml-data] getGoogleTrends devolvio el default vacio (posible fallo interno silencioso) para:", producto, pais);
+        }
+        return { trends };
       });
 
       // Step 5: Análisis con Gemini
@@ -221,7 +208,6 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             currency,
             exchangeRate,
             perfilVendedor: perfil_vendedor,
-            mlTrends,
             mlData,
             datosPro: datos_pro ?? undefined,
             precioStats: precioStats ?? undefined,
@@ -245,7 +231,10 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         const resultadoJson = {
           ...analysis,
           publicaciones_analizadas: finalScrape.totalListings,
-          total_publicaciones_ml: mlData?.total ?? 0,
+          // Columna deprecada el 20/9 (TAB 1): salia de la API de ML que hoy
+          // devuelve 403. Se deja en 0 en vez de borrar la columna (fuera de
+          // alcance de este tab). No se usa en ningun lado de la UI.
+          total_publicaciones_ml: 0,
           google_trends_interest: mlData?.trends?.interest ?? 0,
           google_trends_trending: mlData?.trends?.trending ?? false,
         };

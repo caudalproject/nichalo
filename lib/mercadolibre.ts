@@ -1,47 +1,13 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
 const googleTrends = require("google-trends-api") as any;
 
-export async function getMLSearchTotal(
-  producto: string,
-  pais: string
-): Promise<number> {
-  const siteMap: Record<string, string> = {
-    AR: "MLA",
-    MX: "MLM",
-    CO: "MCO",
-    CL: "MLC",
-    UY: "MLU",
-  };
-  const siteId = siteMap[pais] ?? "MLA";
-
-  try {
-    const res = await fetch(
-      `https://api.mercadolibre.com/sites/${siteId}/search?q=${encodeURIComponent(producto)}&limit=1`,
-      {
-        signal: AbortSignal.timeout(8000),
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; Nichalo/1.0)" },
-      }
-    );
-    console.log("[ML API] status:", res.status, "query:", producto, "site:", siteId);
-    if (!res.ok) {
-      console.log("[ML API] error response:", await res.text());
-      return 0;
-    }
-    const data = await res.json();
-    console.log("[ML API] paging.total:", data?.paging?.total);
-    return data?.paging?.total ?? 0;
-  } catch (err) {
-    console.log("[ML API] fetch error:", err);
-    return 0;
-  }
-}
-
-export async function getMLCategoryData(
-  _producto: string,
-  _pais: string
-): Promise<{ categoryName: string; totalInCategory: number } | null> {
-  return null;
-}
+// getMLSearchTotal() y getMLCategoryData() se borraron el 20/9 (TAB 1):
+// pegaban contra api.mercadolibre.com/sites/*/search, que devuelve 403
+// (PA_UNAUTHORIZED_RESULT_FROM_POLICIES) desde que ML cerro el acceso sin
+// token. getMLSearchTotal fallaba en silencio (catch => 0) y ya no se llama
+// desde inngest-functions.ts; getMLCategoryData era un stub que siempre
+// devolvia null y no se llamaba desde ningun lado. Ver
+// Negocios/Nichalo/Plan-Tabs/tab-1-datos-externos.md.
 
 export async function getGoogleTrends(
   producto: string,
