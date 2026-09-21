@@ -111,6 +111,12 @@ export interface ScoreCalculado {
   motivo_techo: string | null;
   precio_sugerido: number;
   margen_neto_pct: number;
+  /** Precio al que el margen cruza cero. Solo se calcula cuando el margen al
+   *  precio de entrada es negativo — es la salida accionable de ese caso. */
+  precio_equilibrio: number | null;
+  /** Margen a la mediana del mercado. Es el que decide si el techo de 20 se
+   *  aplica: perder en el percentil de entrada no es perder en el mercado. */
+  margen_mediana_pct: number | null;
   comision: ComisionCalculada;
   metricas: MetricasScrape;
   /** Version de la formula. Sube cuando cambian pesos o cortes: sin esto, el
@@ -118,12 +124,29 @@ export interface ScoreCalculado {
   formula: string;
 }
 
-export const FORMULA_VERSION = "score-v1-2026-09-20";
+export const FORMULA_VERSION = "score-v1.1-2026-09-21";
 
-/** Percentil de entrada segun perfil. Ya era la regla del prompt, sin cambios. */
-const PERCENTIL_POR_PERFIL: Record<string, keyof Pick<PrecioStats, "p10" | "p25" | "p65">> = {
-  principiante: "p10",
-  intermedio: "p25",
+/**
+ * Percentil de entrada segun perfil.
+ *
+ * Hasta la v1 el principiante entraba en **p10** y eso estaba mal: p10 es el
+ * decil mas barato del scrape, y en cualquier mercado disperso ese decil no es
+ * el mismo producto — es el accesorio, el usado o la unidad suelta cuando se
+ * busco un pack. Evaluar el margen ahi da negativo casi siempre, y el techo de
+ * 20 convertia eso en SATURADO.
+ *
+ * Caso que lo probo (21/9, usuario real): "Cama Clasica Antidesgarro 70x100",
+ * costo 25.000, p10 = 17.391 -> margen -70,5% -> score 20 SATURADO. A la
+ * mediana (63.250) ese mismo producto deja **+36%**. Era VIABLE y le dijimos
+ * que no.
+ *
+ * Ahora p25 / p50 / p65: tres valores distintos, uno por perfil. Que el
+ * principiante e intermedio compartieran percentil hubiera dejado la perilla
+ * muerta para dos de los tres perfiles.
+ */
+const PERCENTIL_POR_PERFIL: Record<string, keyof Pick<PrecioStats, "p25" | "p50" | "p65">> = {
+  principiante: "p25",
+  intermedio: "p50",
   experto: "p65",
 };
 
@@ -142,6 +165,40 @@ const PESO_COMPETENCIA: Record<string, number> = {
   intermedio: 1.0,
   experto: 1.2,
 };
+
+/**
+ * Precio al que el margen neto cruza cero, dado el costo y la comision del pais
+ * y perfil. La comision tiene tramos y cargo fijo por precio, asi que no se
+ * despeja: se busca por biseccion. 60 iteraciones dejan el error por debajo del
+ * peso de un centavo en cualquier rango realista.
+ *
+ * Existe para que un margen negativo al precio de entrada deje de ser un
+ * callejon sin salida ("SATURADO") y pase a ser una instruccion accionable:
+ * "a partir de $X este producto te deja ganancia".
+ */
+export function precioDeEquilibrio(args: {
+  pais: PaisML;
+  perfil: string;
+  producto: string;
+  costoLocal: number;
+}): number | null {
+  const { pais, perfil, producto, costoLocal } = args;
+  if (!(costoLocal > 0)) return null;
+
+  const ganancia = (precio: number) =>
+    precio - calcularComision({ pais, perfil, producto, precio }).monto_total - costoLocal;
+
+  let lo = costoLocal;
+  let hi = costoLocal * 10;
+  if (ganancia(hi) <= 0) return null; // comision >= 90%: no hay precio que cierre
+
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (ganancia(mid) > 0) hi = mid;
+    else lo = mid;
+  }
+  return Math.round(hi);
+}
 
 const MAX_MARGEN = 40;
 const MAX_FRAGMENTACION = 15;
@@ -268,11 +325,29 @@ export function calcularScore(args: {
   const perfil = PERCENTIL_POR_PERFIL[args.perfil] ? args.perfil : "principiante";
   const metricas = calcularMetricas(listings, stats);
 
-  const precioSugerido = stats[PERCENTIL_POR_PERFIL[perfil]] ?? stats.p10;
+  const precioSugerido = stats[PERCENTIL_POR_PERFIL[perfil]] ?? stats.p25 ?? stats.p50;
   const comision = calcularComision({ pais, perfil, producto, precio: precioSugerido });
   const margenNeto =
     precioSugerido > 0 ? (precioSugerido - comision.monto_total - costoLocal) / precioSugerido : -1;
   const margenPct = Math.round(margenNeto * 1000) / 10;
+
+  // Margen a la mediana del mercado. No entra al score: decide si el techo de
+  // 20 corresponde. Perder plata en el percentil de entrada no es lo mismo que
+  // perderla en el mercado — ver el bloque de techos.
+  const precioMediana = stats.p50 ?? null;
+  const margenMedianaPct =
+    precioMediana != null && precioMediana > 0
+      ? Math.round(
+          ((precioMediana -
+            calcularComision({ pais, perfil, producto, precio: precioMediana }).monto_total -
+            costoLocal) /
+            precioMediana) *
+            1000
+        ) / 10
+      : null;
+
+  const precioEquilibrio =
+    margenPct <= 0 ? precioDeEquilibrio({ pais, perfil, producto, costoLocal }) : null;
 
   const componentes: ComponenteScore[] = [];
   const omitidos: ComponenteOmitido[] = [];
@@ -299,7 +374,19 @@ export function calcularScore(args: {
       )}`,
       lectura:
         margenPct <= 0
-          ? "A ese precio se vende a perdida una vez descontada la comision."
+          ? precioEquilibrio != null
+            ? `A ese precio se vende a perdida una vez descontada la comision. Empeza a ganar a partir de ${formatearNumero(
+                precioEquilibrio,
+                pais
+              )}${
+                margenMedianaPct != null && margenMedianaPct > 0
+                  ? `, y la mediana del mercado ya esta arriba: a ${formatearNumero(
+                      precioMediana as number,
+                      pais
+                    )} el margen es ${margenMedianaPct}%.`
+                  : "."
+              }`
+            : "A ese precio se vende a perdida una vez descontada la comision."
           : `Despues de la comision de Mercado Libre (${comision.porcentaje}% + ${comision.cargo_fijo} fijo) y del costo.`,
     });
   } else {
@@ -461,9 +548,19 @@ export function calcularScore(args: {
   // Piso duro: no hay estructura de mercado que compense vender a perdida.
   // En los 36 historicos hay 13 analisis con margen <= 0, y uno de ellos
   // ("mini lavadora portatil", margen -51,3%) recibio score 65 = MARGINAL.
-  if (margenPct <= 0) {
+  //
+  // Corregido el 21/9 (v1.1): antes alcanzaba con que el margen fuera negativo
+  // al **precio de entrada** para clavar el score en 20. Eso convirtio dos
+  // analisis de usuarios reales en SATURADO el mismo dia, uno de ellos mal: la
+  // cama 70x100 perdia a p10 y dejaba +36% a la mediana. El techo ahora exige
+  // que el producto pierda tambien **en la mediana del mercado** — ahi si no
+  // hay precio al que cierre y no hay estructura que lo compense.
+  if (margenPct <= 0 && (margenMedianaPct == null || margenMedianaPct <= 0)) {
     techo = 20;
-    motivoTecho = "el margen neto es negativo o cero al precio de entrada";
+    motivoTecho =
+      margenMedianaPct == null
+        ? "el margen neto es negativo o cero al precio de entrada y no hay mediana utilizable"
+        : "el margen neto es negativo o cero incluso a la mediana del mercado";
     score = Math.min(score, 20);
   }
 
@@ -494,6 +591,8 @@ export function calcularScore(args: {
     motivo_techo: motivoTecho,
     precio_sugerido: precioSugerido,
     margen_neto_pct: margenPct,
+    precio_equilibrio: precioEquilibrio,
+    margen_mediana_pct: margenMedianaPct,
     comision,
     metricas,
     formula: FORMULA_VERSION,

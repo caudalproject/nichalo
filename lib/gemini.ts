@@ -178,7 +178,17 @@ VEREDICTO YA CALCULADO — NO LO RECALCULES, NO LO DISCUTAS, NO LO CONTRADIGAS
 Score: ${score.score}/100 → ${score.veredicto}
 Precio de entrada para un vendedor ${perfil}: ${score.precio_sugerido} ${currencyCode}
 Comisión de Mercado Libre (${score.comision.tipo_publicacion}, ${score.comision.categoria}): ${score.comision.porcentaje}% + ${score.comision.cargo_fijo} fijo = ${score.comision.monto_total} ${currencyCode}
-Margen neto a ese precio: ${score.margen_neto_pct}%
+Margen neto a ese precio: ${score.margen_neto_pct}%${
+    score.precio_equilibrio != null
+      ? `
+Precio de equilibrio (donde el margen cruza cero): ${score.precio_equilibrio} ${currencyCode}. Si el margen de arriba es negativo, decilo Y deci a partir de que precio deja ganancia. Nunca cierres en "no da" sin dar el numero.`
+      : ""
+  }${
+    score.margen_mediana_pct != null
+      ? `
+Margen a la mediana del mercado: ${score.margen_mediana_pct}%. Si a la mediana da positivo pero al precio de entrada no, el problema es el precio al que entra, NO el producto: decilo asi.`
+      : ""
+  }
 
 Cómo se compone el score (${score.puntos_obtenidos} de ${score.puntos_posibles} puntos posibles):
 ${explicarScore(score)}
