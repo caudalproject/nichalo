@@ -953,6 +953,23 @@ export default async function ResultadoPage({ params }: Params) {
                   </a>
                 </p>
               </div>
+            ) : !user ? (
+              // Sin este caso el anonimo caia en el CTA de abajo, que le dice
+              // "¿Querés validar OTRO producto?" y lo manda a /analizar, que el
+              // middleware le rebota a /login. Es el peor lugar para perderlo:
+              // acaba de leer el analisis entero y es el unico momento en que
+              // ya sabe lo que hace el producto.
+              <>
+                <p className="text-sm font-semibold text-gray-900">
+                  Este análisis es de otra persona. ¿Y el de tu producto?
+                </p>
+                <p className="text-xs text-[#6B7280]">
+                  Creá una cuenta y tu primer análisis es gratis.
+                </p>
+                <Link href="/login">
+                  <Button className="rounded-full">Analizar mi producto →</Button>
+                </Link>
+              </>
             ) : (
               <>
                 <p className="text-sm font-semibold text-gray-900">
