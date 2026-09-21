@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { ScrapeResult } from "./apify";
 import type { AnalysisResult } from "./supabase";
 import type { Confianza, PrecioStats } from "./confianza";
+import { explicarScore, type ScoreCalculado } from "./score";
 
 const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-1.5-flash-latest"] as const;
 
@@ -33,6 +34,9 @@ interface AnalyzeArgs {
   datosPro?: DatosPro;
   precioStats?: PrecioStats | null;
   confianza?: Confianza | null;
+  /** Calculado en lib/score.ts ANTES de esta llamada. El modelo no lo produce:
+   *  lo recibe ya hecho y su trabajo es explicarlo. Ver TAB 3 (20/9). */
+  score: ScoreCalculado;
 }
 
 export async function extractKeywordsFromImage(
@@ -127,34 +131,30 @@ export async function analizarConGemini(
   throw new Error("No se pudo completar el análisis con ningún modelo");
 }
 
-function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlData, datosPro, precioStats, confianza }: AnalyzeArgs) {
+function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlData, datosPro, precioStats, confianza, score }: AnalyzeArgs) {
   const sample = scrape.listings.slice(0, 50);
   const currencyCode = currency?.code ?? "ARS";
-  const currencyName = currency?.name ?? "Peso argentino";
-  const FALLBACK_RATES: Record<string, number> = { ARS: 1400, MXN: 17, COP: 4200 };
-  const rate = exchangeRate ?? FALLBACK_RATES[currencyCode] ?? 1400;
   const perfil = perfilVendedor ?? "principiante";
-  const costoEnMonedaLocal = Math.round(costoEstimadoUsd * rate);
+  // La tasa resuelve a 1 desde la migracion a ARS-only del 13/9 (ver
+  // lib/currency.ts). Hasta el 20/9 el prompt arrastraba ~20 lineas pidiendole
+  // al modelo que "convirtiera dividiendo por 1", con un ejemplo que decia
+  // "si precio_sugerido = 25 ARS y costo = 10 USD". Eran instrucciones
+  // contradictorias que el modelo tenia que reconciliar en cada corrida —
+  // candidato real a ruido. El costo entra una sola vez, ya en moneda local.
+  const costoLocal = Math.round(costoEstimadoUsd * (exchangeRate ?? 1));
+
   const preciosCalculados = precioStats ? `
 ESTADÍSTICAS DE PRECIOS (calculadas del scrape — usá estos valores exactos, NO los recalcules):
 - Precio mínimo: ${precioStats.precio_minimo} ${currencyCode}
 - Precio máximo: ${precioStats.precio_maximo} ${currencyCode}
 - Precio promedio (recortado, sin outliers): ${precioStats.precio_promedio} ${currencyCode}
 - Precio mediano: ${precioStats.precio_mediano} ${currencyCode}
-- Percentil 10 (p10): ${precioStats.p10} ${currencyCode}
-- Percentil 25 (p25): ${precioStats.p25} ${currencyCode}
-- Percentil 50 (p50): ${precioStats.p50} ${currencyCode}
-- Percentil 65 (p65): ${precioStats.p65} ${currencyCode}
-- Percentil 90 (p90): ${precioStats.p90} ${currencyCode}
+- Percentiles: p10 ${precioStats.p10} · p25 ${precioStats.p25} · p50 ${precioStats.p50} · p65 ${precioStats.p65} · p90 ${precioStats.p90} ${currencyCode}
 - Listings con precio válido: ${precioStats.total_con_precio}
 - Listings descartados por estar fuera de rango: ${precioStats.total_descartados}
 - Listings con ventas registradas (soldQuantity > 0): ${precioStats.total_con_ventas}
-
-REGLA DE PRECIO SUGERIDO (usar los percentiles de arriba):
-- principiante → usá p10 como precio_sugerido_venta
-- intermedio → usá p25
-- experto → usá p65
 ` : '';
+
   const bloqueConfianza = confianza && confianza.nivel !== "alta" ? `
 CONFIANZA DE LOS DATOS: ${confianza.nivel.toUpperCase()}
 Motivos detectados: ${confianza.motivos.join(", ")}
@@ -162,208 +162,81 @@ Dispersión p90/p10 (sobre el set ya recortado): ${confianza.ratio_p90_p10}×
 
 REGLAS OBLIGATORIAS CON CONFIANZA ${confianza.nivel.toUpperCase()}:
 - Usá el precio MEDIANO como referencia de mercado, nunca el promedio.
-${confianza.nivel === "baja" ? `- El score NO puede superar 60. Datos dispersos no sostienen un veredicto VIABLE.
-- El veredicto NO puede ser "VIABLE".` : `- El score NO puede superar 75.`}
 - El campo "resumen" TIENE QUE arrancar diciendo que los datos son poco confiables y por qué, ANTES de cualquier conclusión sobre el producto.
 ${confianza.motivos.includes("dispersion_precios") ? `- La búsqueda "${producto}" probablemente mezcló categorías (accesorios, repuestos o lotes junto al producto). Sugerí en la recomendación un término de búsqueda más específico, entre comillas, como PRIMER bullet.` : ''}
 - No afirmes márgenes ni ROI como si fueran precisos. Usá rangos y lenguaje condicional.
 ` : '';
-  const comisionesPorPais = {
-    AR: {
-      nombre: "Argentina",
-      clasica: {
-        categorias: {
-          "Electrónica/tecnología": 12.40,
-          "Electrodomésticos": 12.40,
-          "Ropa y accesorios": 12.40,
-          "Deportes y fitness": 12.40,
-          "Hogar y jardín": 12.40,
-          "Juguetes": 12.40,
-          "Resto": 12.40,
-        },
-        cargo_fijo: (precio: number) => precio < 33000 ? 2500 : precio < 60000 ? 4000 : 0,
-      },
-      premium: {
-        categorias: {
-          "Electrónica/tecnología": 13.90,
-          "Electrodomésticos": 12.40,
-          "Ropa y accesorios": 16.57,
-          "Deportes y fitness": 15.40,
-          "Hogar y jardín": 15.40,
-          "Juguetes": 15.40,
-          "Resto": 15.40,
-        },
-        cargo_fijo: (precio: number) => precio < 33000 ? 2500 : precio < 60000 ? 4000 : 0,
-      },
-    },
-    MX: {
-      nombre: "México",
-      clasica: {
-        categorias: {
-          "Electrónica/tecnología": 10.00,
-          "Electrodomésticos": 10.00,
-          "Ropa y accesorios": 16.00,
-          "Deportes y fitness": 14.00,
-          "Hogar y jardín": 15.00,
-          "Juguetes": 14.00,
-          "Resto": 13.00,
-        },
-        cargo_fijo: (precio: number) => precio < 99 ? 25 : precio < 199 ? 30 : precio < 299 ? 37 : 0,
-      },
-      premium: {
-        categorias: {
-          "Electrónica/tecnología": 13.50,
-          "Electrodomésticos": 13.50,
-          "Ropa y accesorios": 20.50,
-          "Deportes y fitness": 17.00,
-          "Hogar y jardín": 18.00,
-          "Juguetes": 17.00,
-          "Resto": 16.50,
-        },
-        cargo_fijo: (_precio: number) => 0,
-      },
-    },
-    CO: {
-      nombre: "Colombia",
-      clasica: {
-        categorias: {
-          "Electrónica/tecnología": 10.00,
-          "Electrodomésticos": 10.00,
-          "Ropa y accesorios": 15.00,
-          "Deportes y fitness": 13.00,
-          "Hogar y jardín": 14.00,
-          "Juguetes": 13.00,
-          "Resto": 13.00,
-        },
-        cargo_fijo: (precio: number) => precio < 50000 ? 1500 : 0,
-      },
-      premium: {
-        categorias: {
-          "Electrónica/tecnología": 13.00,
-          "Electrodomésticos": 13.00,
-          "Ropa y accesorios": 18.00,
-          "Deportes y fitness": 16.00,
-          "Hogar y jardín": 16.00,
-          "Juguetes": 16.00,
-          "Resto": 15.00,
-        },
-        cargo_fijo: (_precio: number) => 0,
-      },
-    },
-  };
 
-  const paisComisiones = comisionesPorPais[pais] ?? comisionesPorPais.AR;
-  const tipoPublicacion = perfil === "principiante" ? "clasica" : "premium";
-  const tablaComisiones = tipoPublicacion === "clasica"
-    ? paisComisiones.clasica
-    : paisComisiones.premium;
+  // EL BLOQUE QUE INVIERTE LA RELACION CON EL MODELO (TAB 3, 20/9).
+  // Antes: el prompt describia reglas en prosa y le pedia a Gemini que
+  // derivara el numero. Medido el 13/9: 45 puntos de variacion con el input
+  // identico. Ahora el numero ya viene calculado por lib/score.ts y el modelo
+  // recibe el desglose para EXPLICARLO. No tiene que producir ningun numero.
+  const bloqueVeredicto = `
+VEREDICTO YA CALCULADO — NO LO RECALCULES, NO LO DISCUTAS, NO LO CONTRADIGAS
+
+Score: ${score.score}/100 → ${score.veredicto}
+Precio de entrada para un vendedor ${perfil}: ${score.precio_sugerido} ${currencyCode}
+Comisión de Mercado Libre (${score.comision.tipo_publicacion}, ${score.comision.categoria}): ${score.comision.porcentaje}% + ${score.comision.cargo_fijo} fijo = ${score.comision.monto_total} ${currencyCode}
+Margen neto a ese precio: ${score.margen_neto_pct}%
+
+Cómo se compone el score (${score.puntos_obtenidos} de ${score.puntos_posibles} puntos posibles):
+${explicarScore(score)}
+
+Este score sale de una fórmula determinista sobre los datos del scrape. Tu trabajo es
+explicarlo en palabras, no producirlo. Reglas duras:
+- Todo lo que escribas tiene que ser coherente con el veredicto ${score.veredicto}. Si el
+  score es bajo, no cierres el resumen en tono optimista, y al revés.
+- Usá los componentes de arriba como el esqueleto del resumen: el lector tiene que
+  entender POR QUÉ ese número, con los datos concretos.
+- No inventes otro score, otro margen ni otro precio sugerido en ningún campo de texto.
+`;
+
   return `Eres un analista experto de Mercado Libre.${imagenBase64 ? " Evaluá también la imagen adjunta: calidad visual, diferenciación y posicionamiento." : ""}
 
-Producto: "${producto}" | País: ${pais} (${scrape.domain}) | Costo/unidad USD: ${costoEstimadoUsd} | Publicaciones: ${scrape.totalListings}
+Producto: "${producto}" | País: ${pais} (${scrape.domain}) | Costo/unidad: ${costoLocal} ${currencyCode} | Publicaciones: ${scrape.totalListings}
+
+Todos los precios de este análisis están en ${currencyCode}. No conviertas a ninguna otra moneda.
+Cuando menciones el costo, usá siempre ${costoLocal} ${currencyCode}.
 
 ${mlData?.trends?.interest ? `TENDENCIA EN GOOGLE (último año en ${pais}):
 Interés promedio: ${mlData.trends.interest}/100
 En tendencia creciente: ${mlData.trends.trending ? "SÍ" : "NO"}
 ${mlData.trends.related?.length ? `- Búsquedas relacionadas: ${mlData.trends.related.join(', ')}` : ''}
 
-Usá estos datos para la sección de tendencia y demanda del análisis.
+Usá estos datos SOLO para las secciones de tendencia y estacionalidad. No entran en el veredicto.
 
-` : ''}MONEDA LOCAL: ${currencyName} (${currencyCode})
-TASA DE CAMBIO HOY: 1 USD = ${rate} ${currencyCode}
-REGLA DE COSTO EN RESUMEN Y RECOMENDACIÓN:
-El costo del producto en moneda local es ${costoEnMonedaLocal} ${currencyCode}.
-Cuando menciones el costo en el resumen o recomendación, usá SIEMPRE ${costoEnMonedaLocal} ${currencyCode}, NUNCA el valor en USD.
-Ejemplo correcto: "tu costo de ${costoEnMonedaLocal} ${currencyCode}"
-Ejemplo incorrecto: "tu costo de 55.69 USD"
-REGLA DE PRECIOS CRÍTICA:
-- Todos los precios del scraping ya están en ${currencyCode} (moneda local)
-- Reportá precio_promedio, precio_minimo, precio_maximo y precio_sugerido en ${currencyCode} (moneda local) — NO convertir a USD
-- SOLO el costo_estimado y la ganancia_estimada van en USD (porque el usuario los ingresó en USD)
-- Para calcular margen: convertí el precio_sugerido de ${currencyCode} a USD usando la tasa (dividir por ${rate}), luego restá el costo en USD
-- Ejemplo: si precio_sugerido = ${Math.round(rate * 25)} ${currencyCode} y costo = 10 USD → precio en USD = 25 → ganancia = 25 - 10 - comision = X USD
-
+` : ''}${bloqueVeredicto}
 ${preciosCalculados}${bloqueConfianza}
 PERFIL DEL VENDEDOR: ${perfil}
-Reglas según perfil:
-- Si es "principiante": Aplicar escala de penalización según REGLAS DE SCORE definidas abajo — 11-20 vendedores: -10 puntos, 21-30: -20 puntos, +30: máximo score 50. El precio de entrada recomendado debe ser el percentil 10 del mercado (los más baratos con ventas), no el promedio. La recomendación debe incluir consejos específicos para construir reputación desde cero (primeras ventas, precios de lanzamiento, envío gratis inicial).
-- Si es "intermedio": Usar precio del percentil 25-50. Score normal según competencia. Recomendación enfocada en diferenciación y optimización.
-- Si es "experto": Usar precio del percentil 40-65 (puede acercarse al promedio). Score puede ser más alto en mercados competidos. Recomendación enfocada en escala y volumen.
-
-COMISIONES DE MERCADO LIBRE ${paisComisiones.nombre.toUpperCase()} (datos reales 2026):
-
-Tipo de publicación según perfil:
-- principiante → CLÁSICA | intermedio/experto → PREMIUM
-
-Tabla de comisiones para ${paisComisiones.nombre} (${tipoPublicacion.toUpperCase()}):
-${Object.entries(tablaComisiones.categorias).map(([cat, pct]) => `- ${cat}: ${pct}%`).join('\n')}
-
-Cargo fijo por unidad: depende del precio de venta en ${currencyCode} — aplicá la lógica del país.
-${pais === 'AR' ? '- Precio < 33.000 ARS → 2.500 ARS fijo\n- Precio 33.000-60.000 ARS → 4.000 ARS fijo\n- Precio > 60.000 ARS → sin cargo fijo' : ''}
-${pais === 'MX' ? '- Precio < 99 MXN → 25 MXN fijo (solo Clásica)\n- Precio 99-198 MXN → 30 MXN fijo (solo Clásica)\n- Precio 199-298 MXN → 37 MXN fijo (solo Clásica)\n- Precio ≥ 299 MXN → sin cargo fijo' : ''}
-${pais === 'CO' ? '- Precio < 50.000 COP → 1.500 COP fijo (solo Clásica)\n- Precio ≥ 50.000 COP → sin cargo fijo' : ''}
-
-Para calcular comision_detalle:
-1. tipo_publicacion: "${tipoPublicacion === 'clasica' ? 'Clásica' : 'Premium'}"
-2. Estimá la categoría del producto por su nombre
-3. porcentaje = % de la tabla de arriba para esa categoría
-4. monto_local = round(precio_sugerido_venta × porcentaje / 100) + cargo_fijo
-5. monto_usd = round(monto_local / ${rate}, 2)
-6. Usá monto_usd como comision_ml_estimada en margen
-
-REGLA DE PRECIO SUGERIDO: ya está definida arriba con los percentiles calculados. Usá exactamente esos valores.
-
-Si el margen resultante es negativo o menor al 10%, indicarlo claramente en el resumen y recomendacion, pero mantener el precio_sugerido dentro del rango de mercado. El vendedor necesita conocer la viabilidad real, no un precio irreal basado solo en su costo.
+- principiante: publicación Clásica, entra por el percentil 10. La recomendación tiene que incluir cómo construir reputación desde cero (primeras ventas, precio de lanzamiento, envío gratis inicial).
+- intermedio: publicación Premium, entra por el percentil 25. Recomendación enfocada en diferenciación.
+- experto: publicación Premium, entra por el percentil 65. Recomendación enfocada en escala y volumen.
 
 Datos del scrape (${sample.length} publicaciones de ML):
 Cada item tiene: title, price (en ${currencyCode}), soldQuantity (unidades vendidas — null si no hay datos), seller, rating, reviewsCount, isFreeShipping, url.
-IMPORTANTE: si soldQuantity es null en la mayoría de los items, NO apliques el cap de score 65 automáticamente — la ausencia de datos de ventas no significa que no haya ventas.
 ${JSON.stringify(sample)}
 
-PRODUCTOS ALTERNATIVOS (incluir si score <= 74):
-Si el score del análisis es 74 o menos, sugerí 2-3 productos alternativos relacionados que podrían tener mejor oportunidad en el mismo mercado.
-Para cada alternativa incluir:
-- nombre: nombre específico del producto (no genérico)
-- razon: por qué tiene mejor oportunidad (1 frase)
-- nicho: "específico" | "adyacente" | "segmento"
+${score.score <= 74 ? `PRODUCTOS ALTERNATIVOS (obligatorio: el score es ${score.score}):
+Sugerí 2-3 productos alternativos relacionados que podrían tener mejor oportunidad en el mismo mercado.
+Para cada uno: nombre específico (no genérico), razón en una frase, y nicho: "específico" | "adyacente" | "segmento".
+Ejemplo: "Auriculares TWS genéricos" (saturado) → "Auriculares TWS con cancelación de ruido ANC" (específico), "Auriculares óseos deportivos" (adyacente), "Auriculares TWS para niños con limitador de volumen" (segmento).` : `PRODUCTOS ALTERNATIVOS: devolvé "productos_alternativos": [] — el score es ${score.score} y el producto se sostiene solo.`}
 
-Ejemplos:
-- "Auriculares TWS genéricos" (saturado) → "Auriculares TWS con cancelación de ruido ANC" (específico), "Auriculares óseos deportivos" (adyacente), "Auriculares TWS para niños con limitador de volumen" (segmento)
-- "Camiseta deportiva genérica" (saturado) → "Camiseta deportiva UV protection" (específico), "Camiseta térmica running" (adyacente)
-
-Si el veredicto es VIABLE, devolver "productos_alternativos": []
-
-Respondé SOLO con JSON válido (sin markdown):
-{"veredicto":"VIABLE"|"SATURADO"|"MARGINAL","score":0-100,"resumen":"Arranca DIRECTO con la conclusión principal (ej: 'El costo es competitivo pero la competencia es alta'). Sin introducción ni contexto genérico. Máximo 3-4 líneas. Incluir el dato más importante para la decisión de compra.","competencia":{"cantidad_vendedores":int,"precio_minimo":${currencyCode},"precio_maximo":${currencyCode},"precio_promedio":${currencyCode},"top_vendedores":[{"nombre":"","precio":${currencyCode},"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"margen":{"precio_sugerido_venta":${currencyCode},"comision_ml_estimada":USD,"ganancia_estimada":USD,"margen_porcentaje":número,"costo_evaluacion":"COMPETITIVO"|"ALTO"|"MUY_ALTO"},"comision_detalle":{"tipo_publicacion":"Clásica|Premium","porcentaje":número,"monto_ars":número,"monto_usd":número,"cargo_fijo_ars":número},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"Exactamente 3 bullets separados por ' | '. Cada bullet: acción concreta + por qué. Ordenados de mayor a menor impacto. Ejemplo: 'Entrá al percentil 10 de precios para las primeras 10 ventas — la reputación inicial es más valiosa que el margen | Ofrecé envío gratis los primeros 30 días — mejora conversión 30-40% | Armá combo funda + vidrio templado — diferenciás sin bajar precio'","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"USD/unidad","evaluacion":""},"productos_alternativos":[{"nombre":"","razon":"","nicho":"específico"|"adyacente"|"segmento"}]}
+Respondé SOLO con JSON válido (sin markdown). No incluyas score, veredicto, margen ni comisión: esos ya están calculados.
+{"resumen":"Arranca DIRECTO con la conclusión principal (ej: 'El costo es competitivo pero la competencia es alta'). Sin introducción ni contexto genérico. Máximo 3-4 líneas. Tiene que ser coherente con el veredicto ${score.veredicto} y apoyarse en el componente que más pesó.","competencia":{"top_vendedores":[{"nombre":"","precio":${currencyCode},"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"Exactamente 3 bullets separados por ' | '. Cada bullet: acción concreta + por qué. Ordenados de mayor a menor impacto. Ejemplo: 'Entrá al percentil 10 de precios para las primeras 10 ventas — la reputación inicial es más valiosa que el margen | Ofrecé envío gratis los primeros 30 días — mejora conversión 30-40% | Armá combo funda + vidrio templado — diferenciás sin bajar precio'","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"${currencyCode}/unidad","evaluacion":""},"productos_alternativos":[{"nombre":"","razon":"","nicho":"específico"|"adyacente"|"segmento"}]}
 
 REGLA DE TENDENCIA Y ESTACIONALIDAD:
-- Si no hay datos de ventas en el scraping, inferí la tendencia basándote en: a) La categoría del producto (electrónica, hogar, moda, etc.) b) El país (Argentina, México, Colombia) c) El contexto general del mercado de e-commerce latinoamericano
+- Si no hay datos de ventas en el scraping, inferí la tendencia basándote en: a) la categoría del producto b) el país c) el contexto general del e-commerce latinoamericano
 - NUNCA devuelvas "No hay datos suficientes" — siempre inferí algo útil
-- Ejemplos válidos: "Crecimiento sostenido en electrónica de consumo en Argentina 2024-2026", "Demanda estable con picos en Hot Sale y Navidad", "Categoría en expansión post-pandemia en LATAM"
-- Para estacionalidad, si es electrónica: mencionar Hot Sale (mayo), CyberMonday (noviembre), Navidad
-- Si es hogar/electrodomésticos: mencionar inicio de año (enero-febrero) y Hot Sale
-- Si es moda: temporadas + Hot Sale
-
-REGLAS DE SCORE (aplicar en este orden):
-1. Si hay más de 2.000 publicaciones totales en ML (mlData.total): mercado saturado base
-2. Escala de competencia por vendedores activos en el scrape:
-   - 0-10 vendedores: sin penalización
-   - 11-20 vendedores: -10 puntos si es principiante, -5 si es intermedio
-   - 21-30 vendedores: -20 puntos si es principiante, -10 si es intermedio, -5 si es experto
-   - +30 vendedores: máximo 50 para principiante, máximo 65 para intermedio, máximo 80 para experto
-3. Si soldQuantity es null en más del 80% de los listings: máximo 65 (datos insuficientes)
-4. Si hay evidencia de ventas reales (soldQuantity > 0 en al menos 3 listings): score puede llegar a 100
-5. VIABLE = 75-100 (margen > 25%, competencia manejable) | MARGINAL = 50-74 | SATURADO = 0-49
+- Para estacionalidad: si es electrónica mencioná Hot Sale (mayo), CyberMonday (noviembre) y Navidad; si es hogar/electrodomésticos, inicio de año y Hot Sale; si es moda, temporadas + Hot Sale
 
 Reglas generales:
-- VIABLE score 75-100 (>25% margen, poca competencia) | MARGINAL 50-74 (10-25% margen) | SATURADO 0-49 (<10% margen)
-- costo_evaluacion: COMPETITIVO=similar/menor a importación directa; ALTO=20-50% mayor; MUY_ALTO=>50% mayor
 - top_vendedores: los 3 mejores por ventas; distribucion_precios: al menos 2 rangos
-- precio_sugerido: según perfil vendedor y REGLA DE PRECIO SUGERIDO arriba, en ${currencyCode}; comision_ml_estimada y ganancia_estimada en USD
-- Precios de mercado en ${currencyCode}; comision y ganancia en USD.${datosPro ? `
+- Todos los precios que escribas van en ${currencyCode}${datosPro ? `
 
 DATOS ADICIONALES DEL VENDEDOR (usar para personalizar el análisis):
 - Origen del producto: ${datosPro.origen_producto || 'no especificado'}
-- Presupuesto inicial disponible: ${datosPro.presupuesto_inicial ? `USD ${datosPro.presupuesto_inicial}` : 'no especificado'}
+- Presupuesto inicial disponible: ${datosPro.presupuesto_inicial ? `${datosPro.presupuesto_inicial} ${currencyCode}` : 'no especificado'}
 - Producto con variantes: ${datosPro.tiene_variantes || 'no especificado'}${datosPro.detalle_variantes ? ` (${datosPro.detalle_variantes})` : ''}
 - Canal de distribución: ${datosPro.canal_distribucion || 'no especificado'}
 
@@ -395,22 +268,16 @@ function extractJson(text: string): unknown | null {
 
 function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
   const r = (raw ?? {}) as Partial<AnalysisResult> & Record<string, unknown>;
-  const scoreCrudo = clampInt(r.score, 0, 100, 50);
 
-  // El cap por confianza se aplica ACA, no solo en el prompt. Pedirselo al
-  // modelo es una sugerencia; esto es una garantia. Todo el bug original
-  // (ROI 1283% en verde) nacio de confiar en que el output se autorregulara.
-  const techo =
-    args.confianza?.nivel === "baja" ? 60 : args.confianza?.nivel === "media" ? 75 : 100;
-  const score = Math.min(scoreCrudo, techo);
-
-  const veredicto: AnalysisResult["veredicto"] =
-    score >= 75 ? "VIABLE" : score >= 50 ? "MARGINAL" : "SATURADO";
+  // El score y el veredicto ya NO se leen de la respuesta del modelo. Salen de
+  // lib/score.ts, que tambien aplica el techo por confianza. Si el modelo
+  // devuelve un "score" igual —el prompt le pide que no lo haga— se ignora en
+  // silencio: no hay camino por el que un numero del LLM llegue a la base.
+  const score = args.score.score;
+  const veredicto: AnalysisResult["veredicto"] = args.score.veredicto;
 
   const competencia = (r.competencia ?? {}) as Partial<AnalysisResult["competencia"]> & Record<string, unknown>;
-  const margen = (r.margen ?? {}) as Partial<AnalysisResult["margen"]> & Record<string, unknown>;
   const analisisCosto = (r.analisis_costo_proveedor ?? {}) as Record<string, unknown>;
-  const comisionDetalle = (r.comision_detalle ?? null) as Record<string, unknown> | null;
 
   const topVendedores = Array.isArray(competencia.top_vendedores)
     ? competencia.top_vendedores.slice(0, 5).map((v) => {
@@ -492,18 +359,22 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
     avanzado = tieneAlgo ? bloque : null;
   }
 
-  const costoEvalRaw = String(margen.costo_evaluacion ?? "COMPETITIVO").toUpperCase();
-  const costoEval =
-    costoEvalRaw === "ALTO" || costoEvalRaw === "MUY_ALTO"
-      ? (costoEvalRaw as "ALTO" | "MUY_ALTO")
-      : "COMPETITIVO";
+  // costo_evaluacion tambien deja de ser opinion del modelo. Se deriva del
+  // margen neto ya calculado, que es la unica lectura honesta de "tu costo es
+  // alto": alto respecto de que se puede cobrar en este mercado.
+  const m = args.score.margen_neto_pct;
+  const costoEval: AnalysisResult["margen"]["costo_evaluacion"] =
+    m >= 20 ? "COMPETITIVO" : m >= 5 ? "ALTO" : "MUY_ALTO";
 
   return {
     veredicto,
     score,
     resumen: typeof r.resumen === "string" ? r.resumen : "Análisis no disponible.",
     competencia: {
-      cantidad_vendedores: clampInt(competencia.cantidad_vendedores, 0, 99999, args.scrape.totalListings),
+      // Vendedores UNICOS contados en codigo. En los 36 historicos el modelo
+      // devolvia la cantidad de publicaciones (30/30, 52/52, 60/60): nunca
+      // conto vendedores. Ahora sale de lib/score.ts.
+      cantidad_vendedores: args.score.metricas.vendedores_unicos,
       // Si tenemos las estadisticas calculadas, mandan ellas. El prompt ya dice
       // "usá estos valores exactos, NO los recalcules", pero cuando el modelo
       // igual los recalcula la UI terminaba mostrando un promedio distinto del
@@ -517,11 +388,18 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
         : [],
       distribucion_precios: distribucionPrecios,
     },
+    // Todo el bloque de margen sale de la aritmetica de lib/score.ts +
+    // lib/comisiones.ts. Ya no se le pide al modelo: era la mitad del ruido y
+    // ademas el origen de los margenes de -1358% que hay en la base.
     margen: {
-      precio_sugerido_venta: toNumber(margen.precio_sugerido_venta, 0),
-      comision_ml_estimada: toNumber(margen.comision_ml_estimada, 0),
-      ganancia_estimada: toNumber(margen.ganancia_estimada, 0),
-      margen_porcentaje: toNumber(margen.margen_porcentaje, 0),
+      precio_sugerido_venta: args.score.precio_sugerido,
+      comision_ml_estimada: args.score.comision.monto_total,
+      ganancia_estimada: Math.round(
+        args.score.precio_sugerido -
+          args.score.comision.monto_total -
+          args.costoEstimadoUsd * (args.exchangeRate ?? 1)
+      ),
+      margen_porcentaje: args.score.margen_neto_pct,
       costo_evaluacion: costoEval,
     },
     tendencia: typeof r.tendencia === "string" ? r.tendencia : "No pudimos estimar la tendencia para este producto en este momento. El resto del análisis no se ve afectado.",
@@ -561,15 +439,15 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
           };
         }).filter((a) => a.nombre)
       : [],
-    ...(comisionDetalle ? {
-      comision_detalle: {
-        tipo_publicacion: typeof comisionDetalle.tipo_publicacion === "string" ? comisionDetalle.tipo_publicacion : "Clásica",
-        porcentaje: toNumber(comisionDetalle.porcentaje, 0),
-        monto_ars: toNumber(comisionDetalle.monto_ars, 0),
-        monto_usd: toNumber(comisionDetalle.monto_usd, 0),
-        cargo_fijo_ars: toNumber(comisionDetalle.cargo_fijo_ars, 0),
-      },
-    } : {}),
+    comision_detalle: {
+      tipo_publicacion: args.score.comision.tipo_publicacion,
+      porcentaje: args.score.comision.porcentaje,
+      monto_ars: args.score.comision.monto_total,
+      // monto_usd se conserva por compatibilidad con la UI: desde la migracion
+      // a ARS-only (13/9) la tasa es 1, asi que es el mismo numero.
+      monto_usd: args.score.comision.monto_total,
+      cargo_fijo_ars: args.score.comision.cargo_fijo,
+    },
     ...(avanzado ? { analisis_avanzado: avanzado } : {}),
   };
 }

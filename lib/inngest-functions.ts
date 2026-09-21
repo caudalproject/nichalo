@@ -194,6 +194,30 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal);
           const precioStats = calculado?.stats ?? null;
 
+          // EL SCORE SE CALCULA ACA, ANTES DE HABLAR CON GEMINI (TAB 3, 20/9).
+          // El orden importa: el modelo recibe el veredicto ya hecho y su
+          // trabajo pasa a ser explicarlo. Mientras el numero salia del LLM,
+          // dos corridas identicas daban SATURADO y MARGINAL (medido el 13/9,
+          // 45 puntos de variacion con el mismo scrape).
+          const { calcularScore } = await import("./score");
+          const scoreCalculado = precioStats
+            ? calcularScore({
+                producto,
+                pais,
+                perfil: perfil_vendedor ?? "principiante",
+                costoLocal,
+                listings: finalScrape.listings,
+                stats: precioStats,
+                confianza: calculado?.confianza ?? null,
+              })
+            : null;
+
+          if (!scoreCalculado) {
+            throw new NonRetriableError(
+              "No se encontraron precios válidos en las publicaciones. Intentá con un término más específico."
+            );
+          }
+
           if (finalScrape.totalListings === 0) {
             throw new NonRetriableError(
               "No se encontraron publicaciones en Mercado Libre para este producto. Intentá con un término más general."
@@ -212,6 +236,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             datosPro: datos_pro ?? undefined,
             precioStats: precioStats ?? undefined,
             confianza: calculado?.confianza,
+            score: scoreCalculado,
           });
 
           // La confianza y los percentiles viajan por el RETORNO del step, no
@@ -222,6 +247,24 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             ...resultado,
             confianza: calculado?.confianza ?? null,
             precio_stats: calculado?.stats ?? null,
+            // El desglose del score y las metricas crudas viajan al
+            // resultado_json. Dos motivos: la pagina de resultado (TAB 4) tiene
+            // que poder mostrar la aritmetica del veredicto, y el seguimiento
+            // (TAB 5) necesita una serie de metricas comparables entre fechas.
+            // Hasta hoy no se guardaba ninguna metrica del scrape, y por eso la
+            // pregunta "cuanto cambio este nicho" no se podia responder ni
+            // retroactivamente ni hacia adelante.
+            score_detalle: {
+              formula: scoreCalculado.formula,
+              score_bruto: scoreCalculado.score_bruto,
+              puntos_obtenidos: scoreCalculado.puntos_obtenidos,
+              puntos_posibles: scoreCalculado.puntos_posibles,
+              componentes: scoreCalculado.componentes,
+              omitidos: scoreCalculado.omitidos,
+              techo_aplicado: scoreCalculado.techo_aplicado,
+              motivo_techo: scoreCalculado.motivo_techo,
+            },
+            metricas: scoreCalculado.metricas,
           };
         },
       );

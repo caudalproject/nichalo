@@ -1,4 +1,9 @@
 /**
+ * NOTA 20/9 (TAB 3): este script quedo desactualizado. `analizarConGemini`
+ * ahora exige el argumento `score` ya calculado por lib/score.ts. Se deja como
+ * registro de la medicion del 13/9; si hace falta volver a correrlo, hay que
+ * agregarle la llamada a calcularScore como hace scripts/validar-score.mjs.
+ *
  * Mide si "Analisis avanzado Pro" cambia el OUTPUT o solo el input.
  *
  * Corre Apify UNA vez y le pasa EL MISMO scrape a Gemini dos veces: una sin
