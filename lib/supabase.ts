@@ -54,15 +54,10 @@ export interface AnalysisResult {
     costo_evaluacion: "COMPETITIVO" | "ALTO" | "MUY_ALTO";
   };
   tendencia: string;
-  estacionalidad: string;
   diferenciadores_oportunidad: string[];
   riesgos: string[];
   recomendacion: string;
   titulo_sugerido_publicacion: string;
-  analisis_costo_proveedor: {
-    rango_mayorista_estimado: string;
-    evaluacion: string;
-  };
   imagen_url?: string;
   publicaciones_analizadas?: number;
   cache_date?: string;

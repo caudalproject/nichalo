@@ -204,7 +204,7 @@ Interés promedio: ${mlData.trends.interest}/100
 En tendencia creciente: ${mlData.trends.trending ? "SÍ" : "NO"}
 ${mlData.trends.related?.length ? `- Búsquedas relacionadas: ${mlData.trends.related.join(', ')}` : ''}
 
-Usá estos datos SOLO para las secciones de tendencia y estacionalidad. No entran en el veredicto.
+Usá estos datos SOLO para la sección de tendencia. No entran en el veredicto.
 
 ` : ''}${bloqueVeredicto}
 ${preciosCalculados}${bloqueConfianza}
@@ -223,12 +223,12 @@ Para cada uno: nombre específico (no genérico), razón en una frase, y nicho: 
 Ejemplo: "Auriculares TWS genéricos" (saturado) → "Auriculares TWS con cancelación de ruido ANC" (específico), "Auriculares óseos deportivos" (adyacente), "Auriculares TWS para niños con limitador de volumen" (segmento).` : `PRODUCTOS ALTERNATIVOS: devolvé "productos_alternativos": [] — el score es ${score.score} y el producto se sostiene solo.`}
 
 Respondé SOLO con JSON válido (sin markdown). No incluyas score, veredicto, margen ni comisión: esos ya están calculados.
-{"resumen":"Arranca DIRECTO con la conclusión principal (ej: 'El costo es competitivo pero la competencia es alta'). Sin introducción ni contexto genérico. Máximo 3-4 líneas. Tiene que ser coherente con el veredicto ${score.veredicto} y apoyarse en el componente que más pesó.","competencia":{"top_vendedores":[{"nombre":"","precio":${currencyCode},"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"tendencia":"","estacionalidad":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"Exactamente 3 bullets separados por ' | '. Cada bullet: acción concreta + por qué. Ordenados de mayor a menor impacto. Ejemplo: 'Entrá al percentil 10 de precios para las primeras 10 ventas — la reputación inicial es más valiosa que el margen | Ofrecé envío gratis los primeros 30 días — mejora conversión 30-40% | Armá combo funda + vidrio templado — diferenciás sin bajar precio'","titulo_sugerido_publicacion":"≤60 chars","analisis_costo_proveedor":{"rango_mayorista_estimado":"${currencyCode}/unidad","evaluacion":""},"productos_alternativos":[{"nombre":"","razon":"","nicho":"específico"|"adyacente"|"segmento"}]}
+{"resumen":"Arranca DIRECTO con la conclusión principal (ej: 'El costo es competitivo pero la competencia es alta'). Sin introducción ni contexto genérico. Máximo 3-4 líneas. Tiene que ser coherente con el veredicto ${score.veredicto} y apoyarse en el componente que más pesó.","competencia":{"top_vendedores":[{"nombre":"","precio":${currencyCode},"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"tendencia":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"Exactamente 3 bullets separados por ' | '. Cada bullet: acción concreta + por qué. Ordenados de mayor a menor impacto. Ejemplo: 'Entrá al percentil 10 de precios para las primeras 10 ventas — la reputación inicial es más valiosa que el margen | Ofrecé envío gratis los primeros 30 días — mejora conversión 30-40% | Armá combo funda + vidrio templado — diferenciás sin bajar precio'","titulo_sugerido_publicacion":"≤60 chars","productos_alternativos":[{"nombre":"","razon":"","nicho":"específico"|"adyacente"|"segmento"}]}
 
-REGLA DE TENDENCIA Y ESTACIONALIDAD:
+REGLA DE TENDENCIA:
 - Si no hay datos de ventas en el scraping, inferí la tendencia basándote en: a) la categoría del producto b) el país c) el contexto general del e-commerce latinoamericano
 - NUNCA devuelvas "No hay datos suficientes" — siempre inferí algo útil
-- Para estacionalidad: si es electrónica mencioná Hot Sale (mayo), CyberMonday (noviembre) y Navidad; si es hogar/electrodomésticos, inicio de año y Hot Sale; si es moda, temporadas + Hot Sale
+- NO inventes estacionalidad ni rangos de precio mayorista: no hay ninguna serie temporal ni ninguna fuente de precios de proveedor conectada al sistema, y esos dos bloques se sacaron del producto el 21/9 por eso mismo (TAB 4)
 
 Reglas generales:
 - top_vendedores: los 3 mejores por ventas; distribucion_precios: al menos 2 rangos
@@ -277,7 +277,6 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
   const veredicto: AnalysisResult["veredicto"] = args.score.veredicto;
 
   const competencia = (r.competencia ?? {}) as Partial<AnalysisResult["competencia"]> & Record<string, unknown>;
-  const analisisCosto = (r.analisis_costo_proveedor ?? {}) as Record<string, unknown>;
 
   const topVendedores = Array.isArray(competencia.top_vendedores)
     ? competencia.top_vendedores.slice(0, 5).map((v) => {
@@ -403,7 +402,6 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
       costo_evaluacion: costoEval,
     },
     tendencia: typeof r.tendencia === "string" ? r.tendencia : "No pudimos estimar la tendencia para este producto en este momento. El resto del análisis no se ve afectado.",
-    estacionalidad: typeof r.estacionalidad === "string" ? r.estacionalidad : "No pudimos identificar patrones estacionales para este producto en este momento.",
     diferenciadores_oportunidad: Array.isArray(r.diferenciadores_oportunidad)
       ? (r.diferenciadores_oportunidad as unknown[]).map(String).slice(0, 5)
       : [],
@@ -414,14 +412,6 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
     titulo_sugerido_publicacion: typeof r.titulo_sugerido_publicacion === "string"
       ? r.titulo_sugerido_publicacion
       : "",
-    analisis_costo_proveedor: {
-      rango_mayorista_estimado: typeof analisisCosto.rango_mayorista_estimado === "string"
-        ? analisisCosto.rango_mayorista_estimado
-        : "No disponible",
-      evaluacion: typeof analisisCosto.evaluacion === "string"
-        ? analisisCosto.evaluacion
-        : "No disponible",
-    },
     moneda: args.currency?.code ?? "ARS",
     tasa_cambio: args.exchangeRate ?? 1400,
     productos_alternativos: Array.isArray(r.productos_alternativos)

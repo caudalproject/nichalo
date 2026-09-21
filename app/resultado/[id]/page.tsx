@@ -253,12 +253,10 @@ export default async function ResultadoPage({ params }: Params) {
       distribucion_precios: [],
     },
     tendencia: null,
-    estacionalidad: null,
     diferenciadores_oportunidad: [],
     riesgos: [],
     recomendacion: null,
     productos_alternativos: [],
-    analisis_costo_proveedor: null,
   } : result;
 
   const publicaciones =
@@ -793,16 +791,6 @@ export default async function ResultadoPage({ params }: Params) {
               </CardContent>
             </Card>
 
-            {resultadoParaMostrar.estacionalidad && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Estacionalidad</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">{sanitizeText(resultadoParaMostrar.estacionalidad)}</p>
-                </CardContent>
-              </Card>
-            )}
           </div>
           </LockedSection>
 
@@ -863,33 +851,6 @@ export default async function ResultadoPage({ params }: Params) {
                 ))}
               </div>
             </div>
-            </LockedSection>
-          )}
-
-          {/* CAPA 12: Análisis de costo vs proveedores */}
-          {resultadoParaMostrar.analisis_costo_proveedor &&
-            resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado &&
-            !resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado.toLowerCase().includes("no disponible") && (
-            <LockedSection locked={isFree} veredicto={analysis.veredicto}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Análisis de costo vs. proveedores</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <Row label="Rango mayorista estimado (importación)">
-                  <span className="font-medium">
-                    {resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado}
-                  </span>
-                </Row>
-                {result.margen.costo_evaluacion && (
-                  <Row label="Evaluación del costo">
-                    <Badge className={costoBadgeClasses(result.margen.costo_evaluacion)}>
-                      {costoLabel(result.margen.costo_evaluacion)}
-                    </Badge>
-                  </Row>
-                )}
-              </CardContent>
-            </Card>
             </LockedSection>
           )}
 
