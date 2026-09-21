@@ -114,6 +114,28 @@ export interface AnalysisResult {
     razon: string;
     nicho: 'específico' | 'adyacente' | 'segmento';
   }[];
+  /**
+   * Desglose del score, escrito por `lib/inngest-functions.ts` desde el TAB 3
+   * (20/9). Ausente en todo analisis anterior a esa fecha: la UI tiene que
+   * tratar `undefined` como "este analisis se corrio con la formula vieja" y
+   * no mostrar el bloque, nunca como "el score no tiene componentes".
+   *
+   * Es la pieza que contesta "por que 62 y no 80", que es la diferencia entre
+   * un numero que se cree y un numero que parece inventado. Ver
+   * `lib/score.ts` para la formula y los pesos.
+   */
+  score_detalle?: {
+    formula: string;
+    score_bruto: number;
+    puntos_obtenidos: number;
+    puntos_posibles: number;
+    componentes: import("./score").ComponenteScore[];
+    omitidos: import("./score").ComponenteOmitido[];
+    techo_aplicado: number | null;
+    motivo_techo: string | null;
+  } | null;
+  /** Metricas crudas del scrape. Es la serie que consume el seguimiento del TAB 5. */
+  metricas?: import("./score").MetricasScrape | null;
 }
 
 export interface AnalysisRow {

@@ -9,12 +9,13 @@ import { ShareButton } from "@/components/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn, formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { AvisoConfianza } from "@/components/AvisoConfianza";
 import { AnalisisAvanzado } from "@/components/AnalisisAvanzado";
 import { confianzaHeredada } from "@/lib/confianza";
 import { PacksOffer } from "@/components/PacksOffer";
+import { DesgloseScore } from "@/components/DesgloseScore";
 
 export const dynamic = "force-dynamic";
 
@@ -96,33 +97,6 @@ function formatLocalPrice(value: number, currencyCode: string | undefined): stri
     maximumFractionDigits: 0,
   }).format(value);
 }
-
-const SCORE_PILLS = [
-  {
-    label: "0–49",
-    sublabel: "Saturado",
-    min: 0,
-    max: 49,
-    base: "bg-red-100 text-red-700 border-red-200",
-    active: "bg-red-500 text-white border-red-500",
-  },
-  {
-    label: "50–74",
-    sublabel: "Marginal",
-    min: 50,
-    max: 74,
-    base: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    active: "bg-yellow-500 text-white border-yellow-500",
-  },
-  {
-    label: "75–100",
-    sublabel: "Viable",
-    min: 75,
-    max: 100,
-    base: "bg-green-100 text-green-700 border-green-200",
-    active: "bg-[#16A34A] text-white border-[#16A34A]",
-  },
-];
 
 export default async function ResultadoPage({ params }: Params) {
   const supabase = createSupabaseServerClient();
@@ -254,8 +228,21 @@ export default async function ResultadoPage({ params }: Params) {
       ).count ?? 0) > 0
     : false;
 
+  // TAB 4 (21/9/2026): `!user` SALIO de esta condicion.
+  //
+  // Hasta hoy un visitante sin sesion veia 11 secciones borrosas. Al mismo
+  // tiempo la landing promete "mira un analisis real, sin registrarte" y
+  // `components/ShareButton.tsx` invita a compartir el link: cada link
+  // compartido aterrizaba en una pared de blur. Era el unico generador de
+  // confianza gratis del producto, y estaba apagado.
+  //
+  // El agujero conocido y aceptado: un usuario free logueado que ya gasto su
+  // primer analisis ve blur, y si cierra sesion ve todo. Se acepta a
+  // proposito. Lo que el anonimo NO puede hacer es generar un analisis nuevo,
+  // que es lo que cuesta plata (~$102 ARS de scrape + modelo por corrida). Ver
+  // una pagina ya generada es costo cero y es la mejor demo que tenemos.
   const isFree =
-    (!user || !profile || (profile.plan === "free" && !compro)) && !isPrimerAnalisis;
+    !!user && (!profile || (profile.plan === "free" && !compro)) && !isPrimerAnalisis;
 
   const resultadoParaMostrar = isFree ? {
     ...result,
@@ -291,21 +278,21 @@ export default async function ResultadoPage({ params }: Params) {
       />
       <main className="container py-10">
         <div className="mx-auto max-w-3xl space-y-6">
-          {/* Contexto para el visitante sin cuenta. La landing lo manda aca
-              con "Mira un analisis real, sin registrarte", y lo que ve es la
-              version publica: sin competencia en detalle, sin riesgos y sin
-              recomendacion (`isFree` mas arriba tapa esas secciones para
-              cualquiera sin sesion). Sin este cartel la pagina se lee como si
-              estuviera rota; con el, el hueco es la oferta. */}
+          {/* Contexto para el visitante sin cuenta. Desde el TAB 4 (21/9) ve
+              el analisis ENTERO, asi que el cartel ya no tiene que explicar un
+              hueco: tiene que decir que lo que esta viendo es real y que lo
+              que falta es el analisis de SU producto. El viejo texto
+              ("version publica... tu primer analisis lo ves entero") prometia
+              de menos y hoy seria mentira al reves. */}
           {!user && (
             <div className="rounded-xl border border-[#16A34A]/25 bg-[#F0FDF4] px-4 py-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
               <p className="text-sm text-[#0A0A0A]">
-                Estás viendo la <strong>versión pública</strong> de un análisis
-                real. Creá una cuenta gratis y tu primer análisis lo ves entero.
+                Este es un <strong>análisis real y completo</strong>, sin
+                registrarte y sin recortes. Lo que falta es el de tu producto.
               </p>
               <Link href="/login" className="mt-3 block sm:mt-0 sm:shrink-0">
                 <Button size="sm" className="w-full sm:w-auto">
-                  Empezar gratis →
+                  Analizar mi producto →
                 </Button>
               </Link>
             </div>
@@ -403,6 +390,13 @@ export default async function ResultadoPage({ params }: Params) {
             }
           />
 
+          {/* De que se compone el score. Va inmediatamente despues de la
+              confianza de los datos y ANTES de cualquier numero derivado: es
+              la aritmetica del veredicto que se acaba de mostrar arriba. No
+              esta gateado por plan a proposito — ver el comentario en
+              components/DesgloseScore.tsx. */}
+          <DesgloseScore detalle={result.score_detalle} score={analysis.score} />
+
           {/* CAPA 2: Resumen ejecutivo */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 text-center">
@@ -496,7 +490,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 6: Competencia + Margen */}
-          <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+          <LockedSection locked={isFree} veredicto={analysis.veredicto}>
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -659,14 +653,14 @@ export default async function ResultadoPage({ params }: Params) {
           {/* CAPA 6b: Análisis avanzado Pro — solo si el usuario cargó los
               datos del formulario avanzado. */}
           {result.analisis_avanzado && (
-            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+            <LockedSection locked={isFree} veredicto={analysis.veredicto}>
               <AnalisisAvanzado datos={result.analisis_avanzado} formatUsd={formatLocal} />
             </LockedSection>
           )}
 
           {/* CAPA 7: Top vendedores */}
           {hasTopVendedores && (
-            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+            <LockedSection locked={isFree} veredicto={analysis.veredicto}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Top vendedores</CardTitle>
@@ -742,7 +736,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 8: Distribución de precios */}
           {hasChart && (
-            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+            <LockedSection locked={isFree} veredicto={analysis.veredicto}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Distribución de precios</CardTitle>
@@ -769,7 +763,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 9: Palabras clave */}
           {hasKeywords && (
-            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+            <LockedSection locked={isFree} veredicto={analysis.veredicto}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Palabras clave en títulos</CardTitle>
@@ -788,7 +782,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 10: Tendencia + Estacionalidad */}
-          <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+          <LockedSection locked={isFree} veredicto={analysis.veredicto}>
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -814,7 +808,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 11: Oportunidades de diferenciación */}
           {hasDiferenciadores && (
-            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+            <LockedSection locked={isFree} veredicto={analysis.veredicto}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Oportunidades de diferenciación</CardTitle>
@@ -837,7 +831,7 @@ export default async function ResultadoPage({ params }: Params) {
 
           {/* CAPA 11b: Productos alternativos */}
           {resultadoParaMostrar.productos_alternativos && resultadoParaMostrar.productos_alternativos.length > 0 && (
-            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+            <LockedSection locked={isFree} veredicto={analysis.veredicto}>
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-1">
                 Productos con mejor oportunidad
@@ -876,7 +870,7 @@ export default async function ResultadoPage({ params }: Params) {
           {resultadoParaMostrar.analisis_costo_proveedor &&
             resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado &&
             !resultadoParaMostrar.analisis_costo_proveedor.rango_mayorista_estimado.toLowerCase().includes("no disponible") && (
-            <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+            <LockedSection locked={isFree} veredicto={analysis.veredicto}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Análisis de costo vs. proveedores</CardTitle>
@@ -900,7 +894,7 @@ export default async function ResultadoPage({ params }: Params) {
           )}
 
           {/* CAPA 13: Riesgos */}
-          <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+          <LockedSection locked={isFree} veredicto={analysis.veredicto}>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Riesgos a tener en cuenta</CardTitle>
@@ -922,7 +916,7 @@ export default async function ResultadoPage({ params }: Params) {
           </LockedSection>
 
           {/* CAPA 14: Recomendación */}
-          <LockedSection locked={isFree} isLoggedIn={!!user} veredicto={analysis.veredicto}>
+          <LockedSection locked={isFree} veredicto={analysis.veredicto}>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Recomendación</CardTitle>
@@ -976,15 +970,23 @@ export default async function ResultadoPage({ params }: Params) {
   );
 }
 
+/**
+ * Tapa una seccion detras del paywall.
+ *
+ * Desde el TAB 4 (21/9/2026) `locked` solo puede ser true para un usuario
+ * LOGUEADO: `isFree` arriba empieza con `!!user`. Por eso ya no existe la rama
+ * de "crea una cuenta gratis" que este componente tenia para anonimos — era
+ * inalcanzable y contradecia el cartel de arriba, que ahora le dice al anonimo
+ * que esta viendo el analisis completo. Si algun dia se vuelve a tapar algo
+ * para anonimos, la rama hay que reponerla junto con ese cambio, no antes.
+ */
 function LockedSection({
   children,
   locked,
-  isLoggedIn = true,
   veredicto,
 }: {
   children: React.ReactNode;
   locked: boolean;
-  isLoggedIn?: boolean;
   veredicto?: string;
 }) {
   if (!locked) return <>{children}</>;
@@ -995,39 +997,23 @@ function LockedSection({
       </div>
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 rounded-lg border border-[#E5E7EB] backdrop-blur-sm">
         <span className="text-2xl mb-2">🔒</span>
-        {isLoggedIn ? (
-          <>
-            <p className="text-sm font-semibold text-[#0A0A0A] mb-1">
-              {veredicto === "VIABLE"
-                ? "¿Es viable? Ahora desbloqueá quién lo vende y a qué precio"
-                : veredicto === "SATURADO"
-                ? "Mercado saturado — desbloqueá los productos alternativos con más chances"
-                : "Desbloqueá el análisis completo"}
-            </p>
-            <p className="text-xs text-[#6B7280] mb-3 text-center px-4">
-              {veredicto === "VIABLE"
-                ? "Top vendedores, precios, keywords y recomendación completa"
-                : veredicto === "SATURADO"
-                ? "3 nichos relacionados con mejor oportunidad te esperan desbloqueados"
-                : "Competencia, márgenes, top vendedores y más"}
-            </p>
-            <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
-              Ver planes →
-            </a>
-          </>
-        ) : (
-          <>
-            <p className="text-sm font-semibold text-[#0A0A0A] mb-1">
-              Creá una cuenta gratis
-            </p>
-            <p className="text-xs text-[#6B7280] mb-3 text-center px-4">
-              Para ver el análisis completo
-            </p>
-            <Link href="/login" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
-              Registrarse gratis →
-            </Link>
-          </>
-        )}
+        <p className="text-sm font-semibold text-[#0A0A0A] mb-1">
+          {veredicto === "VIABLE"
+            ? "¿Es viable? Ahora desbloqueá quién lo vende y a qué precio"
+            : veredicto === "SATURADO"
+            ? "Mercado saturado — desbloqueá los productos alternativos con más chances"
+            : "Desbloqueá el análisis completo"}
+        </p>
+        <p className="text-xs text-[#6B7280] mb-3 text-center px-4">
+          {veredicto === "VIABLE"
+            ? "Top vendedores, precios, keywords y recomendación completa"
+            : veredicto === "SATURADO"
+            ? "3 nichos relacionados con mejor oportunidad te esperan desbloqueados"
+            : "Competencia, márgenes, top vendedores y más"}
+        </p>
+        <a href="/#planes" className="inline-flex items-center rounded-full bg-[#16A34A] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#15803D] transition-colors">
+          Ver planes →
+        </a>
       </div>
     </div>
   );
