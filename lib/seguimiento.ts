@@ -1,0 +1,180 @@
+/**
+ * TAB 5 — el re-chequeo de un nicho vigilado.
+ *
+ * LA DECISION DE COSTO DE ESTE ARCHIVO: aca NO se llama a Gemini.
+ *
+ * El delta que le importa al vendedor — entraron 12 vendedores, el precio
+ * mediano bajo 18%, aparecieron 3 publicaciones con envio gratis — sale entero
+ * del scrape. Es un diff de `precioStats` y de la lista de vendedores. Meter al
+ * modelo aca multiplicaria el costo por una frase que `armarTitular()` en
+ * lib/delta.ts arma sola y gratis.
+ *
+ * Resultado: un re-chequeo de 30 publicaciones cuesta ~$119 ARS contra los ~$102
+ * de un analisis completo... pero sin la parte cara. Y esquiva por construccion
+ * el problema de determinismo: el delta se calcula sobre cantidades medidas.
+ */
+
+import { NonRetriableError } from "inngest";
+import { createClient } from "@supabase/supabase-js";
+import { inngest } from "./inngest";
+import { startApifyRun, checkApifyRun, getApifyResults } from "./apify";
+import { calcularPrecioStats } from "./confianza";
+import { calcularScore, calcularMetricas } from "./score";
+import { PLAN_CONFIG } from "./plans";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+/** El re-chequeo siempre scrapea la misma profundidad, sin importar el plan:
+ *  una serie temporal medida con distinta n no es una serie temporal. */
+const PROFUNDIDAD_RECHEQUEO = PLAN_CONFIG.free.maxItems;
+
+const actualizarRun = async (run_id: string, fields: Record<string, unknown>) => {
+  await supabase.from("watch_runs").update(fields).eq("id", run_id);
+};
+
+export const rechequearNicho = inngest.createFunction(
+  {
+    id: "rechequear-nicho",
+    triggers: [{ event: "nichalo/seguimiento.rechequeo" }],
+    retries: 20,
+  },
+  async ({ event, step }) => {
+    const { run_id, watchlist_id, producto, pais, search_keyword, perfil_vendedor, costo_estimado } =
+      event.data as {
+        run_id: string;
+        watchlist_id: string;
+        producto: string;
+        pais: "AR" | "MX" | "CO";
+        search_keyword?: string | null;
+        perfil_vendedor: string;
+        costo_estimado: number | null;
+      };
+
+    try {
+      const runId = await step.run("start-apify", async () => {
+        await actualizarRun(run_id, { status: "scraping" });
+        // `search_keyword ?? producto`: la misma keyword que uso el analisis de
+        // origen. Scrapear otra compararia dos mercados distintos y lo
+        // reportaria como si el nicho hubiera cambiado.
+        return await startApifyRun(search_keyword || producto, pais, "free");
+      });
+
+      const scrape = await step.run("wait-apify", async () => {
+        const result = await checkApifyRun(runId);
+        if (["FAILED", "ABORTED", "TIMED-OUT"].includes(result.status)) {
+          throw new NonRetriableError(`Apify falló con status: ${result.status}`);
+        }
+        if (result.status !== "SUCCEEDED") {
+          throw new Error(`Apify en progreso: ${result.status}`);
+        }
+        return await getApifyResults(runId, producto, pais, PROFUNDIDAD_RECHEQUEO);
+      });
+
+      await step.run("medir-y-guardar", async () => {
+        if (scrape.totalListings === 0) {
+          throw new NonRetriableError(
+            "El scrape no devolvió publicaciones para este nicho."
+          );
+        }
+
+        const precios = scrape.listings
+          .map((l) => l.price)
+          .filter((p): p is number => p !== null && p > 0);
+        const totalConVentas = scrape.listings.filter(
+          (l) => (l.soldQuantity ?? 0) > 0
+        ).length;
+
+        // Sin conversion de moneda: desde el 13/9 todo el pipeline vive en ARS
+        // y getExchangeRate() es un no-op que devuelve 1 (ver lib/currency.ts).
+        const costoLocal = costo_estimado !== null ? costo_estimado : undefined;
+
+        const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal);
+        if (!calculado) {
+          throw new NonRetriableError(
+            "No se encontraron precios válidos en el re-chequeo."
+          );
+        }
+
+        // El score se recalcula solo si hay costo: sin costo no hay margen, y el
+        // margen pesa 40 de los puntos. Un score sin el se veria como una caida
+        // del nicho cuando lo unico que falta es un input del usuario.
+        const scoreCalculado =
+          costoLocal !== undefined
+            ? calcularScore({
+                producto,
+                pais,
+                perfil: perfil_vendedor,
+                costoLocal,
+                listings: scrape.listings,
+                stats: calculado.stats,
+                confianza: calculado.confianza,
+              })
+            : null;
+
+        const metricas =
+          scoreCalculado?.metricas ?? calcularMetricas(scrape.listings, calculado.stats);
+
+        const vendedores = Array.from(
+          new Set(
+            scrape.listings
+              .map((l) => (l.seller ?? "").trim())
+              .filter((v) => v.length > 0)
+          )
+        );
+
+        // Snapshot acotado: las 10 mas baratas. Alcanza para mostrar QUE
+        // publicacion aparecio sin guardar 30 filas de jsonb cada semana.
+        const topListings = [...scrape.listings]
+          .filter((l) => typeof l.price === "number" && (l.price ?? 0) > 0)
+          .sort((a, b) => (a.price ?? 0) - (b.price ?? 0))
+          .slice(0, 10)
+          .map((l) => ({
+            title: l.title,
+            price: l.price,
+            seller: l.seller,
+            url: l.url,
+            isFreeShipping: l.isFreeShipping,
+          }));
+
+        await actualizarRun(run_id, {
+          status: "done",
+          fetched_at: new Date().toISOString(),
+          n_listings: scrape.totalListings,
+          precio_stats: calculado.stats,
+          metricas,
+          vendedores,
+          top_listings: topListings,
+          score: scoreCalculado?.score ?? null,
+          score_detalle: scoreCalculado
+            ? {
+                formula: scoreCalculado.formula,
+                score_bruto: scoreCalculado.score_bruto,
+                puntos_obtenidos: scoreCalculado.puntos_obtenidos,
+                puntos_posibles: scoreCalculado.puntos_posibles,
+                componentes: scoreCalculado.componentes,
+                omitidos: scoreCalculado.omitidos,
+                techo_aplicado: scoreCalculado.techo_aplicado,
+                motivo_techo: scoreCalculado.motivo_techo,
+              }
+            : null,
+          formula: scoreCalculado?.formula ?? null,
+          apify_run_id: runId,
+        });
+
+        await supabase
+          .from("watchlist")
+          .update({ last_check_at: new Date().toISOString() })
+          .eq("id", watchlist_id);
+      });
+
+      return { ok: true };
+    } catch (err) {
+      const mensaje = err instanceof Error ? err.message : "Error desconocido";
+      await actualizarRun(run_id, { status: "error", error_message: mensaje });
+      throw err;
+    }
+  }
+);

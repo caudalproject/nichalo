@@ -128,6 +128,12 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
                   Dashboard
                 </Link>
                 <Link
+                  href="/vigilancia"
+                  className="hidden md:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
+                >
+                  Vigilancia
+                </Link>
+                <Link
                   href="/analizar"
                   className="hidden md:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
                 >
@@ -267,6 +273,13 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Dashboard
+              </Link>
+              <Link
+                href="/vigilancia"
+                className="block px-5 py-4 text-sm text-[#6B7280] hover:text-[#0A0A0A] hover:bg-gray-50 border-b border-gray-100 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Vigilancia
               </Link>
               <Link
                 href="/analizar"

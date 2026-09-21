@@ -140,7 +140,9 @@ export async function getApifyResults(
       reviewsCount: toNum(item.reviewCount),
       soldQuantity: toNum(item.soldQuantity),
       url: str(item.permalink),
-      isFreeShipping: item.freeShipping === true,
+      // Mismo criterio que toNum: ausencia !== false. Antes, un nulo se volvia
+      // `false` y el 100% del mercado figuraba "sin envio gratis".
+      isFreeShipping: item.freeShipping == null ? null : item.freeShipping === true,
     };
   });
 
@@ -157,6 +159,14 @@ export async function getApifyResults(
 
 function toNum(v: unknown): number | null {
   if (typeof v === "number" && Number.isFinite(v)) return v;
+  // Guarda explicita de ausencia. Sin esto, Number(null) === 0 y Number("") === 0:
+  // un dato que Mercado Libre no publica entraba al sistema como un cero real e
+  // indistinguible. Medido el 20/9 sobre 300 publicaciones: soldQuantity,
+  // reviewCount y ratingAverage vienen null en el 100% de los casos, y Gemini
+  // venia infiriendo reputacion de vendedores sobre esos ceros inventados.
+  // El score del TAB 3 ya se defendia con filtros `> 0`, asi que este cambio es
+  // score-neutral: verificado 10/10 sobre el golden set el 21/9.
+  if (v === null || v === undefined || v === "") return null;
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 }

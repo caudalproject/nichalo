@@ -16,6 +16,7 @@ import { AnalisisAvanzado } from "@/components/AnalisisAvanzado";
 import { confianzaHeredada } from "@/lib/confianza";
 import { PacksOffer } from "@/components/PacksOffer";
 import { DesgloseScore } from "@/components/DesgloseScore";
+import { BotonVigilar } from "@/components/BotonVigilar";
 
 export const dynamic = "force-dynamic";
 
@@ -394,6 +395,14 @@ export default async function ResultadoPage({ params }: Params) {
               esta gateado por plan a proposito — ver el comentario en
               components/DesgloseScore.tsx. */}
           <DesgloseScore detalle={result.score_detalle} score={analysis.score} />
+
+          {/* Seguimiento (TAB 5). Va aca, pegado al desglose, porque el momento
+              en que alguien decide vigilar un nicho es justo despues de
+              entender por que dio lo que dio. Solo para el dueno: el link
+              compartido lo abre cualquiera, pero vigilar es de la cuenta. */}
+          {user && analysis.user_id === user.id && (
+            <BotonVigilar analysisId={analysis.id} />
+          )}
 
           {/* CAPA 2: Resumen ejecutivo */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

@@ -86,10 +86,15 @@ export interface MetricasScrape {
   /** vendedores_unicos / n_con_vendedor. Nunca sobre n_listings: ver nota abajo. */
   ratio_vendedores: number | null;
   reviews_mediana_baratos: number | null;
-  listings_con_ventas: number;
+  /** null = ninguna publicacion expone unidades vendidas. Distinto de 0 = las
+   *  expone y ninguna vendio. Mismo criterio que pct_envio_gratis. */
+  listings_con_ventas: number | null;
   pct_con_ventas: number | null;
   mediana_unidades_vendidas: number | null;
-  pct_envio_gratis: number;
+  /** null = ninguna publicacion expone el dato. Distinto de 0 = nadie ofrece
+   *  envio gratis. El TAB 5 diffea este campo: confundirlos reportaba "sin
+   *  cambios" sobre una metrica que nunca existio. */
+  pct_envio_gratis: number | null;
   spread_p90_p50: number | null;
 }
 
@@ -217,10 +222,12 @@ export function calcularMetricas(listings: MLListing[], stats: PrecioStats): Met
     .map((l) => l.reviewsCount)
     .filter((r): r is number => typeof r === "number" && r > 0);
 
-  const conVentas = ordenados.filter((l) => (l.soldQuantity ?? 0) > 0);
+  const exponenVentas = ordenados.filter((l) => l.soldQuantity !== null);
+  const conVentas = exponenVentas.filter((l) => (l.soldQuantity ?? 0) > 0);
   const unidades = conVentas.map((l) => l.soldQuantity as number);
 
-  const envioGratis = ordenados.filter((l) => l.isFreeShipping === true).length;
+  const exponenEnvio = ordenados.filter((l) => l.isFreeShipping !== null);
+  const envioGratis = exponenEnvio.filter((l) => l.isFreeShipping === true).length;
 
   return {
     n_listings: ordenados.length,
@@ -235,10 +242,14 @@ export function calcularMetricas(listings: MLListing[], stats: PrecioStats): Met
     ratio_vendedores:
       conVendedor.length > 0 ? vendedores.size / conVendedor.length : null,
     reviews_mediana_baratos: mediana(reviewsBaratas),
-    listings_con_ventas: conVentas.length,
-    pct_con_ventas: conPrecio.length > 0 ? conVentas.length / conPrecio.length : null,
+    listings_con_ventas: exponenVentas.length > 0 ? conVentas.length : null,
+    pct_con_ventas:
+      exponenVentas.length > 0 && conPrecio.length > 0
+        ? conVentas.length / conPrecio.length
+        : null,
     mediana_unidades_vendidas: mediana(unidades),
-    pct_envio_gratis: ordenados.length > 0 ? envioGratis / ordenados.length : 0,
+    pct_envio_gratis:
+      exponenEnvio.length > 0 ? envioGratis / exponenEnvio.length : null,
     spread_p90_p50: stats.p50 > 0 ? stats.p90 / stats.p50 : null,
   };
 }
@@ -369,7 +380,7 @@ export function calcularScore(args: {
   // irregular; inferir demanda cuando no hay dato es exactamente lo que hacia
   // el modelo y lo que estamos sacando.
   const pct = metricas.pct_con_ventas;
-  if (metricas.listings_con_ventas >= 3 && pct != null) {
+  if ((metricas.listings_con_ventas ?? 0) >= 3 && pct != null) {
     const porDensidad = 12 * Math.min(1, pct / 0.6);
     const porVolumen = 8 * Math.min(1, (metricas.mediana_unidades_vendidas ?? 0) / 50);
     componentes.push({
@@ -407,13 +418,13 @@ export function calcularScore(args: {
     // el dato. No se computa si NINGUNA publicacion lo declara: no se puede
     // distinguir "nadie ofrece envio gratis" de "el dato no vino".
     const castigoEnvio =
-      metricas.pct_envio_gratis > 0 && metricas.pct_envio_gratis >= 0.85 ? 4 : 0;
+      metricas.pct_envio_gratis !== null && metricas.pct_envio_gratis >= 0.85 ? 4 : 0;
     componentes.push({
       id: "techo_diferenciacion",
       nombre: "Techo de diferenciación",
       puntos: Math.max(0, base - castigoEnvio),
       maximo: MAX_TECHO,
-      metrica: `el percentil 90 vale ${spread.toFixed(1)}× la mediana${castigoEnvio ? `, y el ${Math.round(metricas.pct_envio_gratis * 100)}% ofrece envío gratis` : ""}`,
+      metrica: `el percentil 90 vale ${spread.toFixed(1)}× la mediana${castigoEnvio ? `, y el ${Math.round((metricas.pct_envio_gratis ?? 0) * 100)}% ofrece envío gratis` : ""}`,
       lectura:
         spread >= 2
           ? "Hay un segmento que paga bastante más que la mediana: se puede diferenciar hacia arriba."
