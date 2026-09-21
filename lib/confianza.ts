@@ -42,6 +42,20 @@ export type MotivoConfianza =
   | "sin_datos_de_venta"
   | "costo_fuera_de_rango";
 
+/**
+ * Version corta y legible de cada motivo. `explicarConfianza` de mas abajo da
+ * la version larga para el cartel de AvisoConfianza; esto es para cuando el
+ * motivo entra en el medio de otra frase — por ejemplo el techo del score
+ * (`lib/score.ts`), que hasta el 21/9 imprimia el identificador crudo y le
+ * mostraba al usuario "la confianza de los datos es media (sin_datos_de_venta)".
+ */
+export const ETIQUETA_MOTIVO: Record<MotivoConfianza, string> = {
+  dispersion_precios: "los precios están muy dispersos",
+  muestra_chica: "hay pocas publicaciones con precio",
+  sin_datos_de_venta: "ninguna publicación expone unidades vendidas",
+  costo_fuera_de_rango: "el costo ingresado no cierra con los precios del mercado",
+};
+
 export interface Confianza {
   nivel: NivelConfianza;
   /** Dispersion sobre el set recortado. Reemplaza al viejo max/min. */

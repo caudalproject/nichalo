@@ -50,7 +50,7 @@
  */
 
 import type { MLListing } from "./apify";
-import type { Confianza, PrecioStats } from "./confianza";
+import { ETIQUETA_MOTIVO, type Confianza, type PrecioStats } from "./confianza";
 import { calcularComision, type ComisionCalculada, type PaisML } from "./comisiones";
 
 export type IdComponente =
@@ -164,6 +164,17 @@ function rampa(x: number, puntos: Array<[number, number]>): number {
   return ultimo[1];
 }
 
+/**
+ * Separador de miles segun el pais. Estos strings terminan guardados dentro de
+ * `score_detalle` en resultado_json y se muestran tal cual en la pagina, asi
+ * que se formatean aca y no en la UI: cada analisis queda con el numero escrito
+ * como corresponde a su pais, para siempre.
+ */
+function formatearNumero(n: number, pais: PaisML): string {
+  const locale = pais === "MX" ? "es-MX" : pais === "CO" ? "es-CO" : "es-AR";
+  return Math.round(n).toLocaleString(locale);
+}
+
 function mediana(xs: number[]): number | null {
   if (xs.length === 0) return null;
   const o = [...xs].sort((a, b) => a - b);
@@ -271,7 +282,10 @@ export function calcularScore(args: {
       nombre: "Margen neto",
       puntos,
       maximo: MAX_MARGEN,
-      metrica: `${margenPct}% sobre un precio de entrada de ${Math.round(precioSugerido)}`,
+      metrica: `${margenPct}% sobre un precio de entrada de ${formatearNumero(
+        precioSugerido,
+        pais
+      )}`,
       lectura:
         margenPct <= 0
           ? "A ese precio se vende a perdida una vez descontada la comision."
@@ -448,7 +462,9 @@ export function calcularScore(args: {
     confianza?.nivel === "baja" ? 60 : confianza?.nivel === "media" ? 75 : null;
   if (techoConfianza != null && score > techoConfianza) {
     techo = techoConfianza;
-    motivoTecho = `la confianza de los datos es ${confianza?.nivel} (${confianza?.motivos.join(", ")})`;
+    motivoTecho = `la confianza de los datos es ${confianza?.nivel}: ${
+      confianza?.motivos.map((m) => ETIQUETA_MOTIVO[m] ?? m).join("; ") ?? ""
+    }`;
     score = techoConfianza;
   }
 
