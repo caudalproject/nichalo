@@ -263,6 +263,13 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
               omitidos: scoreCalculado.omitidos,
               techo_aplicado: scoreCalculado.techo_aplicado,
               motivo_techo: scoreCalculado.motivo_techo,
+              // TAB 4.1 (21/9): el acto "Que hacer" de la pagina de resultado
+              // se para sobre este numero. Sin persistirlo, la unica via por
+              // la que el precio de equilibrio llegaba al usuario era la
+              // prosa de Gemini, que puede redondearlo, omitirlo o no
+              // mencionarlo.
+              precio_equilibrio: scoreCalculado.precio_equilibrio,
+              margen_mediana_pct: scoreCalculado.margen_mediana_pct,
             },
             metricas: scoreCalculado.metricas,
           };

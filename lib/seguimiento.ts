@@ -158,6 +158,8 @@ export const rechequearNicho = inngest.createFunction(
                 omitidos: scoreCalculado.omitidos,
                 techo_aplicado: scoreCalculado.techo_aplicado,
                 motivo_techo: scoreCalculado.motivo_techo,
+                precio_equilibrio: scoreCalculado.precio_equilibrio,
+                margen_mediana_pct: scoreCalculado.margen_mediana_pct,
               }
             : null,
           formula: scoreCalculado?.formula ?? null,

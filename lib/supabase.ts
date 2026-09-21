@@ -128,6 +128,22 @@ export interface AnalysisResult {
     omitidos: import("./score").ComponenteOmitido[];
     techo_aplicado: number | null;
     motivo_techo: string | null;
+    /**
+     * Precio al que el margen neto cruza cero, y margen a la mediana del
+     * mercado. Los calcula la formula v1.1 desde el 21/9 (TAB 3.1) pero hasta
+     * el TAB 4.1 NO se persistian: existian solo dentro del prompt de Gemini
+     * (`lib/gemini.ts`), asi que el unico lugar donde el usuario podia leer el
+     * precio de equilibrio era la prosa que devolviera el modelo — es decir,
+     * un numero calculado en codigo que llegaba a la pantalla reescrito por un
+     * LLM, o no llegaba.
+     *
+     * Ambos son `?` y `| null` a proposito: los analisis corridos entre el
+     * 20/9 y el 21/9 tienen `score_detalle` pero no estos dos campos. La UI
+     * tiene que distinguir "no hay equilibrio que dar" de "este analisis es
+     * viejo y no lo guardo".
+     */
+    precio_equilibrio?: number | null;
+    margen_mediana_pct?: number | null;
   } | null;
   /** Metricas crudas del scrape. Es la serie que consume el seguimiento del TAB 5. */
   metricas?: import("./score").MetricasScrape | null;
