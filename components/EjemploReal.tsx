@@ -1,14 +1,20 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { EJEMPLO_LANDING, FEATURED_RESULT_ID } from "@/lib/ejemplo-landing";
+import { EJEMPLO_LANDING } from "@/lib/ejemplo-landing";
 
 /**
  * Seccion "#ejemplo" — el informe de muestra que enseña el formato del output.
  *
  * Los numeros son construidos, no medidos (ver lib/ejemplo-landing.ts). Por eso
  * el titulo dice "Asi se ve" y no "Mira un analisis real": la card muestra el
- * FORMATO, y la prueba de que el producto funciona es el link del pie, que abre
- * un analisis que corrio de verdad y resuelve sin cuenta.
+ * FORMATO, no un resultado medido.
+ *
+ * El 21/9 se saco el link a un analisis publico destacado que habia al pie. El
+ * unico candidato era de junio, anterior al campo `confianza`, y la
+ * reconstruccion de `confianzaHeredada()` lo marcaba baja por markup 7,66x
+ * (costo 3.995 contra sugerido 30.602) — o sea que la vidriera abria un informe
+ * con el cartel de "datos poco confiables". Se prefirio no afirmar nada
+ * verificable antes que afirmarlo con material que no lo sostiene.
  *
  * No repite la card del hero: muestra la CONTINUACION del mismo informe
  * (competencia, margen, riesgos), asi el ejemplo aparece una sola vez y este
@@ -202,14 +208,6 @@ export function EjemploReal() {
           </div>
         </div>
 
-        <p className="mt-6 text-center text-sm">
-          <a
-            href={`/resultado/${FEATURED_RESULT_ID}`}
-            className="text-[#16A34A] hover:underline font-medium"
-          >
-            Mirá un análisis real que corrió Nichalo, sin registrarte →
-          </a>
-        </p>
       </div>
     </section>
   );

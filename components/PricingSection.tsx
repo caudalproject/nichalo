@@ -9,7 +9,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { PacksZone } from "@/components/PacksZone";
 import { ComparisonTable } from "@/components/ComparisonTable";
-import { FEATURED_RESULT_ID } from "@/lib/ejemplo-landing";
 import { MonedaPais } from "@/components/PreciosPais";
 import { PlanRecommender, type PlanRecommendation } from "@/components/PlanRecommender";
 
@@ -31,9 +30,6 @@ interface Props {
   cards: PricingCard[];
 }
 
-// El ID del resultado destacado vive en lib/ejemplo-landing.ts, junto con los
-// valores que la landing muestra de ese mismo analisis (hero y seccion
-// #ejemplo), para que no puedan desincronizarse entre si.
 
 // Ring de énfasis para la card que el recomendador (arriba) señala. No
 // reemplaza el estilo propio de cada card (ej. el badge "Más completo" de
@@ -164,10 +160,10 @@ export function PricingSection({ cards }: Props) {
           </p>
           <p className="text-sm">
             <a
-              href={`/resultado/${FEATURED_RESULT_ID}`}
+              href="#ejemplo"
               className="text-[#16A34A] hover:underline font-medium"
             >
-              Mirá un análisis real, sin registrarte →
+              Mirá un informe de ejemplo completo →
             </a>
           </p>
         </div>

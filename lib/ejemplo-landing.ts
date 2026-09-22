@@ -13,11 +13,14 @@
  * de producto normal; el mismo ejemplo vendido como "analisis real y
  * verificable" es otra cosa.
  *
- * Por eso la prueba real no se tira a la basura: el link a FEATURED_RESULT_ID
- * sigue apuntando a un analisis que corrio de verdad y que cualquiera puede
- * abrir sin cuenta. Esa es la afirmacion verificable de la landing. Lo que ya
- * no se exige es que los numeros de esta card coincidan con los de ese
- * registro — son dos cosas distintas y ahora se anuncian distinto.
+ * NO HAY analisis publico destacado (decision 21/9). El unico candidato era de
+ * junio, anterior al campo `confianza`, y la reconstruccion conservadora lo
+ * marcaba baja por markup 7,66x: la landing terminaba linkeando a un informe
+ * con cartel de "datos poco confiables". Se saco el link de la landing y de la
+ * seccion de planes. Si alguna vez vuelve a haber un analisis real que valga la
+ * pena mostrar, `scripts/proponer-ejemplo.mjs` genera este bloque desde la base
+ * y hay que volver a poner el link y el check de prebuild (ver historial de
+ * git: scripts/check-featured-result.mjs).
  *
  * REGLA AL EDITAR: los numeros tienen que cerrar entre si. Un visitante que
  * vende en ML suma. Antes de tocar nada, verificar:
@@ -30,10 +33,6 @@
  *                                lib/confianza.ts — el ejemplo no puede
  *                                violar la regla que el propio producto aplica)
  */
-
-export const FEATURED_RESULT_ID =
-  process.env.NEXT_PUBLIC_FEATURED_RESULT_ID ||
-  "3ac26d02-3530-4178-8680-a5245635c62b";
 
 export const EJEMPLO_LANDING = {
   producto: "Botella térmica 750ml acero inoxidable",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { EJEMPLO_LANDING, FEATURED_RESULT_ID } from "@/lib/ejemplo-landing";
+import { EJEMPLO_LANDING } from "@/lib/ejemplo-landing";
 
 declare function fbq(...args: unknown[]): void;
 
@@ -103,13 +103,7 @@ export function HeroResultadoReal() {
       </div>
 
       <p className="mt-2 text-center text-xs text-gray-400">
-        Informe de ejemplo · ver{" "}
-        <a
-          href={`/resultado/${FEATURED_RESULT_ID}`}
-          className="text-[#16A34A] hover:underline"
-        >
-          un análisis real →
-        </a>
+        Informe de ejemplo — mismo formato que el tuyo
       </p>
     </div>
   );
