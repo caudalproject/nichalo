@@ -28,9 +28,13 @@ function isInRange(rango: string, precio: number): boolean {
 }
 
 function detectCurrency(data: DistribucionPrecio[]): string {
+  // El fallback era "USD" y se disparaba SIEMPRE: los rangos que arma Gemini
+  // vienen como "20000-40000", sin sufijo de moneda, asi que el regex nunca
+  // matcheaba y el eje del grafico decia "Rango USD" sobre precios en pesos.
+  // Nichalo opera solo en AR (lib/currency.ts, decision 13/9) -> ARS.
   const rango = data[0]?.rango ?? "";
   const match = rango.match(/[A-Z]{3}$/);
-  return match ? match[0] : "USD";
+  return match ? match[0] : "ARS";
 }
 
 export function PriceDistributionChart({ data, precioSugerido }: Props) {

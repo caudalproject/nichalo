@@ -204,6 +204,15 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
       setError("Ingresá un costo estimado mayor a 0.");
       return;
     }
+    // La foto pasa a ser obligatoria (21/9). Sin imagen, Apify busca por el
+    // texto tipeado: "almohadilla electrica cervical" trae la categoria entera
+    // y el scrape queda disperso, que es lo que despues degrada la confianza.
+    // Con imagen, route.ts extrae una keyword descriptiva y la busqueda apunta
+    // al producto real.
+    if (!imageBase64) {
+      setError("Subí una foto del producto. Sin la foto no podemos identificar cuál es y el análisis sale impreciso.");
+      return;
+    }
 
     setLoading(true);
     setProgress(5);
@@ -331,12 +340,14 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
 
           <div className="space-y-2">
             {(() => {
+              // Nichalo opera solo en AR y el pipeline entero quedo en pesos
+              // (ver lib/currency.ts, decision 13/9). El hint "≈ $X USD" era
+              // codigo muerto de la epoca del USD puente: con tasa = 1 imprimia
+              // el MISMO numero tipeado rotulado como dolares — un costo de
+              // 15.000 ARS se mostraba como "≈ $15000.00 USD". Ademas pisaba al
+              // texto que aclara la moneda, asi que el formulario primero pedia
+              // pesos y despues se contradecia. Se muestra ARS y nada mas.
               const currency = getCurrencyForCountry(pais);
-              const costoLocal = parseFloat(costo.replace(",", "."));
-              const costoUSD =
-                exchangeRate && !isNaN(costoLocal) && costoLocal > 0
-                  ? costoLocal / exchangeRate
-                  : null;
               return (
                 <>
                   <Label htmlFor="costo">Costo estimado ({currency.code})</Label>
@@ -344,22 +355,14 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
                     id="costo"
                     type="text"
                     inputMode="decimal"
-                    placeholder={currency.code === "USD" ? "Ej: 35.00" : "Ej: 14.900"}
+                    placeholder="Ej: 14.900"
                     value={costo}
                     onChange={(e) => setCosto(e.target.value)}
                     required
                   />
-                  {costoUSD !== null ? (
-                    <p className="text-xs text-muted-foreground">
-                      ≈ ${costoUSD.toFixed(2)} USD
-                    </p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      {currency.code === "USD"
-                        ? "Ingresá el costo en dólares"
-                        : `Ingresá el costo en ${currency.name}`}
-                    </p>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Ingresá el costo en {currency.name}
+                  </p>
                 </>
               );
             })()}
@@ -367,7 +370,12 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
 
           {/* Image upload */}
           <div className="space-y-2">
-            <Label>Foto del producto (opcional)</Label>
+            <Label>Foto del producto</Label>
+            <p className="text-xs text-muted-foreground">
+              Con el nombre solo no alcanza para saber qué producto es: la foto
+              es lo que hace que comparemos contra publicaciones del mismo
+              producto y no de toda la categoría.
+            </p>
             {selectedFileName ? (
               <div className="flex items-center gap-3 p-3 border border-[#E5E7EB] rounded-lg bg-[#F9FAFB]">
                 <CheckCircle className="h-5 w-5 text-[#16A34A] shrink-0" />
@@ -446,11 +454,9 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
 
               <div>
                 {(() => {
+                  // Mismo leak que en Costo estimado: el hint en USD imprimia el
+                  // numero tipeado sin convertir. Solo ARS.
                   const currency = getCurrencyForCountry(pais);
-                  const presupuestoLocal = parseFloat(presupuesto.replace(',', '.'));
-                  const presupuestoUSD = exchangeRate && !isNaN(presupuestoLocal) && presupuestoLocal > 0
-                    ? presupuestoLocal / exchangeRate
-                    : null;
                   return (
                     <>
                       <label className="text-sm font-medium text-gray-700 mb-1 block">
@@ -459,16 +465,12 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
                       <input
                         type="text"
                         inputMode="decimal"
-                        placeholder={currency.code === 'USD' ? 'Ej: 500' : 'Ej: 500.000'}
+                        placeholder="Ej: 500.000"
                         value={presupuesto}
                         onChange={e => setPresupuesto(e.target.value)}
                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                       />
-                      {presupuestoUSD !== null ? (
-                        <p className="text-xs text-gray-400 mt-1">≈ ${presupuestoUSD.toFixed(2)} USD</p>
-                      ) : (
-                        <p className="text-xs text-gray-400 mt-1">Cuánto tenés disponible para invertir en stock</p>
-                      )}
+                      <p className="text-xs text-gray-400 mt-1">Cuánto tenés disponible para invertir en stock</p>
                     </>
                   );
                 })()}
