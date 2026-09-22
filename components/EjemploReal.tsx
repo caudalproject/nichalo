@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { EJEMPLO_REAL, FEATURED_RESULT_ID } from "@/lib/ejemplo-real";
+import { EJEMPLO_LANDING, FEATURED_RESULT_ID } from "@/lib/ejemplo-landing";
 
 /**
- * Seccion "#ejemplo" — reemplaza a la vieja "Esto es lo que vas a ver", que
- * repetia por cuarta vez el mock del cargador inalambrico.
+ * Seccion "#ejemplo" — el informe de muestra que enseña el formato del output.
  *
- * No repite la card del hero: muestra la CONTINUACION del mismo informe real
- * (competencia, margen, riesgos), asi el analisis aparece una sola vez y este
+ * Los numeros son construidos, no medidos (ver lib/ejemplo-landing.ts). Por eso
+ * el titulo dice "Asi se ve" y no "Mira un analisis real": la card muestra el
+ * FORMATO, y la prueba de que el producto funciona es el link del pie, que abre
+ * un analisis que corrio de verdad y resuelve sin cuenta.
+ *
+ * No repite la card del hero: muestra la CONTINUACION del mismo informe
+ * (competencia, margen, riesgos), asi el ejemplo aparece una sola vez y este
  * bloque agrega informacion en vez de volver a decir lo mismo.
  *
  * El bloque borroso del final ya no contradice al Free. Antes decia
@@ -22,11 +26,11 @@ export function EjemploReal() {
     <section id="ejemplo" className="container py-20 scroll-mt-16">
       <div className="mx-auto max-w-3xl text-center mb-10">
         <h2 className="text-3xl font-bold text-[#0A0A0A]">
-          Mirá un análisis real, entero
+          Así se ve un informe de Nichalo
         </h2>
         <p className="mt-3 text-[#6B7280]">
-          No es una maqueta: es un análisis que corrió Nichalo, público y
-          verificable.
+          Un ejemplo del informe completo: las mismas secciones, el mismo
+          formato y el mismo nivel de detalle que vas a recibir.
         </p>
       </div>
 
@@ -34,10 +38,10 @@ export function EjemploReal() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-6 md:px-8 md:py-8">
             <p className="text-xs text-gray-400 mb-6">
-              {EJEMPLO_REAL.producto} · {EJEMPLO_REAL.pais} ·{" "}
-              {EJEMPLO_REAL.publicacionesAnalizadas} publicaciones ·{" "}
+              {EJEMPLO_LANDING.producto} · {EJEMPLO_LANDING.pais} ·{" "}
+              {EJEMPLO_LANDING.publicacionesAnalizadas} publicaciones ·{" "}
               <span className="text-green-700 font-medium">
-                score {EJEMPLO_REAL.score} · {EJEMPLO_REAL.veredicto}
+                score {EJEMPLO_LANDING.score} · {EJEMPLO_LANDING.veredicto}
               </span>
             </p>
 
@@ -47,9 +51,9 @@ export function EjemploReal() {
             </p>
             <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4">
               {[
-                { label: "Precio mínimo", value: EJEMPLO_REAL.precioMinimo },
-                { label: "Precio promedio", value: EJEMPLO_REAL.precioPromedio },
-                { label: "Precio máximo", value: EJEMPLO_REAL.precioMaximo },
+                { label: "Precio mínimo", value: EJEMPLO_LANDING.precioMinimo },
+                { label: "Precio promedio", value: EJEMPLO_LANDING.precioPromedio },
+                { label: "Precio máximo", value: EJEMPLO_LANDING.precioMaximo },
               ].map((m) => (
                 <div
                   key={m.label}
@@ -63,17 +67,28 @@ export function EjemploReal() {
               ))}
             </div>
 
+            {/* Barras proporcionales al bucket mas poblado. Antes el ancho era
+                `cantidad * 22px`, calibrado para los valores viejos (3/4/2); con
+                una distribucion que suma las 60 publicaciones, 34 * 22 = 748px
+                se escapaba de la card. */}
             <div className="space-y-1.5 mb-8">
-              {EJEMPLO_REAL.distribucion.map((d) => (
-                <div key={d.rango} className="flex items-center gap-3 text-xs">
-                  <span className="text-gray-500 w-28 md:w-32 shrink-0">{d.rango}</span>
-                  <span
-                    className="h-2 rounded-full bg-green-500/70"
-                    style={{ width: `${d.cantidad * 22}px` }}
-                  />
-                  <span className="text-gray-400">{d.cantidad}</span>
-                </div>
-              ))}
+              {(() => {
+                const max = Math.max(
+                  ...EJEMPLO_LANDING.distribucion.map((d) => d.cantidad)
+                );
+                return EJEMPLO_LANDING.distribucion.map((d) => (
+                  <div key={d.rango} className="flex items-center gap-3 text-xs">
+                    <span className="text-gray-500 w-28 md:w-32 shrink-0">{d.rango}</span>
+                    <span className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+                      <span
+                        className="block h-full rounded-full bg-green-500/70"
+                        style={{ width: `${(d.cantidad / max) * 100}%` }}
+                      />
+                    </span>
+                    <span className="text-gray-400 w-6 text-right shrink-0">{d.cantidad}</span>
+                  </div>
+                ));
+              })()}
             </div>
 
             {/* Margen — el unico lugar de la landing donde aparece, con el
@@ -83,9 +98,9 @@ export function EjemploReal() {
             </p>
             <div className="rounded-xl border border-gray-100 divide-y divide-gray-100 mb-8">
               {[
-                { label: "Tu costo por unidad", value: EJEMPLO_REAL.costo },
-                { label: "Precio sugerido de venta", value: EJEMPLO_REAL.precioSugerido },
-                { label: "Comisión de Mercado Libre", value: `− ${EJEMPLO_REAL.comisionMl}` },
+                { label: "Tu costo por unidad", value: EJEMPLO_LANDING.costo },
+                { label: "Precio sugerido de venta", value: EJEMPLO_LANDING.precioSugerido },
+                { label: "Comisión de Mercado Libre", value: `− ${EJEMPLO_LANDING.comisionMl}` },
               ].map((r) => (
                 <div key={r.label} className="flex justify-between px-4 py-2.5 text-sm">
                   <span className="text-gray-500">{r.label}</span>
@@ -95,9 +110,9 @@ export function EjemploReal() {
               <div className="flex justify-between px-4 py-2.5 text-sm bg-green-50/60">
                 <span className="font-medium text-gray-900">Ganancia por unidad</span>
                 <span className="font-bold text-green-700">
-                  {EJEMPLO_REAL.ganancia}{" "}
+                  {EJEMPLO_LANDING.ganancia}{" "}
                   <span className="font-normal text-green-700/70">
-                    ({EJEMPLO_REAL.margenPorcentaje})
+                    ({EJEMPLO_LANDING.margenPorcentaje})
                   </span>
                 </span>
               </div>
@@ -107,12 +122,12 @@ export function EjemploReal() {
               impuestos consumen el margen.
             </p>
 
-            {/* Riesgos — textuales del analisis real */}
+            {/* Riesgos */}
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
               Riesgos detectados
             </p>
             <ul className="space-y-2">
-              {EJEMPLO_REAL.riesgos.map((r) => (
+              {EJEMPLO_LANDING.riesgos.map((r) => (
                 <li key={r} className="flex items-start gap-2.5 text-sm text-gray-700">
                   <span className="text-amber-500 mt-0.5 shrink-0">▲</span>
                   <span>{r}</span>
@@ -192,7 +207,7 @@ export function EjemploReal() {
             href={`/resultado/${FEATURED_RESULT_ID}`}
             className="text-[#16A34A] hover:underline font-medium"
           >
-            Mirá este análisis real, sin registrarte →
+            Mirá un análisis real que corrió Nichalo, sin registrarte →
           </a>
         </p>
       </div>

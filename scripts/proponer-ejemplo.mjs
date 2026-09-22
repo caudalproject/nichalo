@@ -1,5 +1,5 @@
 // Valida un analisis candidato para ser el ejemplo destacado de la landing y
-// emite el bloque EJEMPLO_REAL listo para pegar en lib/ejemplo-real.ts.
+// emite el bloque EJEMPLO_LANDING listo para pegar en lib/ejemplo-landing.ts.
 //
 // Por que existe: el 21/9 se detecto que el destacado de la landing
 // (3ac26d02, "Camiseta deportiva talle unico") renderizaba con confianza BAJA.
@@ -83,7 +83,7 @@ function emitirBloque(row, e) {
     .map((r) => `    ${JSON.stringify(r)},`)
     .join("\n");
 
-  return `export const EJEMPLO_REAL = {
+  return `export const EJEMPLO_LANDING = {
   producto: ${JSON.stringify(row.producto)},
   pais: "Argentina",
   score: ${row.score},
@@ -180,7 +180,7 @@ async function main() {
 
   const bloqueantes = e.problemas.filter((p) => !p.startsWith("sin score_detalle"));
   if (bloqueantes.length === 0) {
-    console.log(`\n--- Pegar en lib/ejemplo-real.ts (reemplaza EJEMPLO_REAL) ---\n`);
+    console.log(`\n--- Pegar en lib/ejemplo-landing.ts (reemplaza EJEMPLO_LANDING) ---\n`);
     console.log(emitirBloque(row, e));
     console.log(`\n--- Y setear en Vercel ---\nNEXT_PUBLIC_FEATURED_RESULT_ID=${row.id}\n`);
     console.log(`Despues: npm run build  (el prebuild valida que todo coincida)\n`);

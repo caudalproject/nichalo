@@ -21,7 +21,7 @@ import { PricingSection } from "@/components/PricingSection";
 // (Negocios/Nichalo/AI-Sessions/2026-09-13-auditoria-landing-y-briefs.md):
 // - El producto inventado ("cargador inalámbrico 15W, score 78") aparecía en
 //   cuatro secciones. Se fue entero: ahora hay un análisis REAL y público
-//   (lib/ejemplo-real.ts), que aparece una sola vez en el hero, y la sección
+//   (lib/ejemplo-landing.ts), que aparece una sola vez en el hero, y la sección
 //   #ejemplo muestra la continuación de ese mismo informe, no una repetición.
 // - Se cayeron los tres testimonios anónimos (confirmados inventados el 13/9)
 //   y el titular "Desarrollado junto a vendedores top" (plural y no

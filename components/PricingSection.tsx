@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { PacksZone } from "@/components/PacksZone";
 import { ComparisonTable } from "@/components/ComparisonTable";
-import { FEATURED_RESULT_ID } from "@/lib/ejemplo-real";
+import { FEATURED_RESULT_ID } from "@/lib/ejemplo-landing";
 import { MonedaPais } from "@/components/PreciosPais";
 import { PlanRecommender, type PlanRecommendation } from "@/components/PlanRecommender";
 
@@ -31,7 +31,7 @@ interface Props {
   cards: PricingCard[];
 }
 
-// El ID del resultado destacado vive en lib/ejemplo-real.ts, junto con los
+// El ID del resultado destacado vive en lib/ejemplo-landing.ts, junto con los
 // valores que la landing muestra de ese mismo analisis (hero y seccion
 // #ejemplo), para que no puedan desincronizarse entre si.
 

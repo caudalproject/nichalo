@@ -1,21 +1,18 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { EJEMPLO_REAL, FEATURED_RESULT_ID } from "@/lib/ejemplo-real";
+import { EJEMPLO_LANDING, FEATURED_RESULT_ID } from "@/lib/ejemplo-landing";
 
 declare function fbq(...args: unknown[]): void;
 
 /**
- * La card del hero. Reemplaza al viejo HeroMock (producto inventado, score 78)
- * por el analisis real destacado — ver lib/ejemplo-real.ts.
+ * La card del hero. Muestra el informe de ejemplo — ver lib/ejemplo-landing.ts.
  *
- * Las dos metricas que se muestran son deliberadamente las dos verificables:
- * cuantas publicaciones se scrapearon y a que precio promedio estan. Un
- * visitante que vende en ML puede buscar el producto y comprobarlas en diez
- * segundos. El margen (71,9%) NO va aca a proposito: es un numero derivado,
- * no chequeable desde afuera, y en el hero se lee como inventado — que es
- * exactamente el problema que esta pagina venia teniendo. El margen aparece
- * una sola vez, mas abajo, en EjemploReal, con el costo al lado.
+ * Las dos metricas elegidas son las dos que se leen como dato y no como
+ * promesa: cuantas publicaciones se analizaron y a que precio promedio estan.
+ * El margen NO va aca a proposito — es un numero derivado y en el hero se lee
+ * como inflado. Aparece una sola vez, mas abajo, en EjemploReal, con el costo
+ * al lado para que se pueda sumar.
  */
 export function HeroResultadoReal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -50,7 +47,7 @@ export function HeroResultadoReal() {
           {/* Badge + label */}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xs font-semibold tracking-widest uppercase px-2.5 py-0.5 rounded-full bg-green-50 text-green-700">
-              {EJEMPLO_REAL.veredicto}
+              {EJEMPLO_LANDING.veredicto}
             </span>
             <span className="text-xs text-gray-400">Mercado con oportunidad real</span>
           </div>
@@ -58,20 +55,20 @@ export function HeroResultadoReal() {
           {/* Score */}
           <div className="flex items-baseline gap-1.5 mb-3">
             <span className="text-5xl font-black leading-none text-green-500">
-              {EJEMPLO_REAL.score}
+              {EJEMPLO_LANDING.score}
             </span>
             <span className="text-lg text-gray-300 font-light">/100</span>
           </div>
 
           {/* Producto */}
           <p className="text-sm font-semibold text-gray-900 mb-0.5">
-            {EJEMPLO_REAL.producto}
+            {EJEMPLO_LANDING.producto}
           </p>
           {/* Sin repetir las publicaciones: el numero ya esta en la metrica
               de abajo. Tenerlo dos veces a un centimetro de distancia es la
               misma metrica duplicada que la auditoria marco en el dashboard
               ("27 analisis restantes" junto a "3/30 usados"). */}
-          <p className="text-xs text-gray-400 mb-3">{EJEMPLO_REAL.pais}</p>
+          <p className="text-xs text-gray-400 mb-3">{EJEMPLO_LANDING.pais}</p>
 
           {/* Metricas — las dos verificables (ver comentario arriba) */}
           <div className="grid grid-cols-2 gap-2 mb-3">
@@ -80,7 +77,7 @@ export function HeroResultadoReal() {
                 Publicaciones analizadas
               </div>
               <div className="mt-1 text-base font-bold text-gray-900">
-                {EJEMPLO_REAL.publicacionesAnalizadas}
+                {EJEMPLO_LANDING.publicacionesAnalizadas}
               </div>
             </div>
             <div className="rounded-lg border border-gray-100 bg-gray-50 p-2.5 text-center">
@@ -88,30 +85,30 @@ export function HeroResultadoReal() {
                 Precio promedio del mercado
               </div>
               <div className="mt-1 text-base font-bold text-gray-900">
-                {EJEMPLO_REAL.precioPromedio}
+                {EJEMPLO_LANDING.precioPromedio}
               </div>
             </div>
           </div>
 
-          {/* Resumen — textual del analisis real */}
+          {/* Resumen */}
           <div className="rounded-xl border border-gray-100 p-3">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
               Resumen
             </p>
             <p className="text-xs text-gray-700 leading-relaxed">
-              {EJEMPLO_REAL.resumen}
+              {EJEMPLO_LANDING.resumen}
             </p>
           </div>
         </div>
       </div>
 
       <p className="mt-2 text-center text-xs text-gray-400">
-        Análisis real hecho con Nichalo ·{" "}
+        Informe de ejemplo · ver{" "}
         <a
           href={`/resultado/${FEATURED_RESULT_ID}`}
           className="text-[#16A34A] hover:underline"
         >
-          abrirlo →
+          un análisis real →
         </a>
       </p>
     </div>
