@@ -3,8 +3,21 @@ import type { Plan } from "./supabase";
 export interface PlanConfig {
   maxItems: number;
   maxPagesPerQuery: number;
+  /**
+   * OJO CON EL NOMBRE: solo es "por mes" en Pro. El unico refill que existe es
+   * la funcion SQL `refrescar_ciclo_pro`, que tiene `and plan = 'pro'` adentro
+   * — el free NO se recarga nunca. Para el free este numero es el credito
+   * unico de bienvenida, de por vida. La landing ya lo dice bien ("1 analisis
+   * de cortesia, sin recarga automatica"); el que miente es este campo.
+   * Medido el 21/9 (TAB 6): 13 usuarios externos llevan meses en 0 creditos y
+   * no existe ningun camino por el que vuelvan sin pagar.
+   */
   analisisPorMes: number;
   allowImage: boolean;
+  /** Nichos simultaneos en la watchlist del TAB 5. */
+  nichosVigilados: number;
+  /** Re-chequeos totales por mes calendario, sumando todos los nichos. */
+  rechequeosPorMes: number;
 }
 
 /**
@@ -39,8 +52,27 @@ export interface PlanConfig {
  * cambia el resultado: secciones completas, confianza medida y reintento sin
  * cargo. No por un numero de publicaciones que no mueve el veredicto.
  */
+/**
+ * TOPES DEL SEGUIMIENTO (decision del TAB 6, 21/9/2026).
+ *
+ * El TAB 5 dejo watchlist y re-chequeo desplegados SIN ningun tope por plan:
+ * el unico freno era el cooldown de 6 h por nicho. Un usuario free podia
+ * vigilar N nichos y re-chequear cada uno 4 veces por dia, a $119 ARS el
+ * scrape. Con el video del 22/9 trayendo trafico eso es una factura abierta,
+ * asi que el tope se cierra aca y no en el TAB 5.1.
+ *
+ * Los numeros salen de la tabla de margen del TAB 5:
+ * - Pro: 5 nichos x re-chequeo semanal = 20/mes = $2.389 ARS => 85,1% de
+ *   margen sobre $16.000. Ademas "5 nichos, uno por semana cada uno" es una
+ *   frase que describe exactamente lo que hace el producto, sin inventar nada.
+ * - Free: 1 nicho y 1 re-chequeo por mes ($119 ARS de techo por usuario). Es
+ *   una probada: alcanza para ver el delta funcionando una vez, no para vivir
+ *   del seguimiento gratis.
+ * - Starter no se vende (se elimino como suscripcion el 12/9); queda coherente
+ *   por si el enum vuelve a usarse.
+ */
 export const PLAN_CONFIG: Record<Plan, PlanConfig> = {
-  free:    { maxItems: 30, maxPagesPerQuery: 1, analisisPorMes: 1,  allowImage: true },
-  starter: { maxItems: 30, maxPagesPerQuery: 1, analisisPorMes: 10, allowImage: true },
-  pro:     { maxItems: 30, maxPagesPerQuery: 1, analisisPorMes: 30, allowImage: true },
+  free:    { maxItems: 30, maxPagesPerQuery: 1, analisisPorMes: 1,  allowImage: true, nichosVigilados: 1, rechequeosPorMes: 1  },
+  starter: { maxItems: 30, maxPagesPerQuery: 1, analisisPorMes: 10, allowImage: true, nichosVigilados: 3, rechequeosPorMes: 6  },
+  pro:     { maxItems: 30, maxPagesPerQuery: 1, analisisPorMes: 30, allowImage: true, nichosVigilados: 5, rechequeosPorMes: 20 },
 };

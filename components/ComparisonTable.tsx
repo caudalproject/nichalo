@@ -15,6 +15,17 @@ const ROWS: { label: string; free: Valor; packs: Valor; pro: Valor }[] = [
   // profundidad del analisis no depende de cuanto pagues.
   { label: "Publicaciones", free: "30", packs: "30", pro: "30" },
   { label: "Imagen del producto", free: "yes", packs: "yes", pro: "yes" },
+  // TAB 6 (21/9): la fila que de verdad separa suscripcion de pack. Un pack
+  // compra analisis; solo el Pro sigue mirando el nicho cuando el usuario no
+  // esta. Los numeros salen de PLAN_CONFIG en lib/plans.ts — si cambian alla,
+  // cambian aca. `sub` mantiene la celda angosta en mobile (ver comentario de
+  // arriba: es lo que empujaba la columna Pro fuera de pantalla a 393px).
+  {
+    label: "Seguimiento del nicho",
+    free: { v: "1 nicho", sub: "1 medición" },
+    packs: { v: "1 nicho", sub: "1 medición" },
+    pro: { v: "5 nichos", sub: "semanal" },
+  },
   { label: "Análisis avanzado", free: "no", packs: "no", pro: "yes" },
   { label: "Precio sugerido", free: "yes", packs: "yes", pro: "yes" },
   { label: "Secciones completas", free: "1er análisis", packs: "yes", pro: "yes" },

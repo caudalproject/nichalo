@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { inngest } from "@/lib/inngest";
+import { PLAN_CONFIG } from "@/lib/plans";
+import type { Plan } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,6 +42,44 @@ export async function POST(
         { status: 429 }
       );
     }
+  }
+
+  // Tope mensual de re-chequeos por plan (TAB 6, 21/9). El cooldown de 6 h de
+  // arriba limita la frecuencia POR NICHO, no el gasto total: sin esto, con N
+  // nichos el techo de costo es N x 4 x $119 ARS por dia. Se cuentan todas las
+  // corridas del mes calendario, incluidas las que fallaron: si el scrape ya
+  // salio, Apify lo cobro igual.
+  const { data: perfilUsuario } = await supabase
+    .from("users")
+    .select("plan")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const plan = (perfilUsuario?.plan ?? "free") as Plan;
+  const topeMensual = PLAN_CONFIG[plan].rechequeosPorMes;
+
+  const inicioDeMes = new Date();
+  inicioDeMes.setUTCDate(1);
+  inicioDeMes.setUTCHours(0, 0, 0, 0);
+
+  const { count: usados } = await supabase
+    .from("watch_runs")
+    .select("id, watchlist!inner(user_id)", { count: "exact", head: true })
+    .eq("watchlist.user_id", user.id)
+    .gte("fetched_at", inicioDeMes.toISOString());
+
+  if ((usados ?? 0) >= topeMensual) {
+    return NextResponse.json(
+      {
+        error:
+          plan === "pro"
+            ? `Llegaste a los ${topeMensual} re-chequeos de este mes. Se renuevan el 1.`
+            : `Tu plan incluye ${topeMensual} re-chequeo${topeMensual === 1 ? "" : "s"} por mes. Pasate a Pro para vigilar 5 nichos con re-chequeo semanal.`,
+        motivo: "tope_rechequeos",
+        tope: topeMensual,
+      },
+      { status: 403 }
+    );
   }
 
   // El insert es la traba real contra el doble click: hay un indice unico

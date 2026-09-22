@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { PLAN_CONFIG } from "@/lib/plans";
+import type { Plan } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,6 +48,50 @@ export async function POST(req: Request) {
     typeof resultado.perfil_vendedor === "string"
       ? resultado.perfil_vendedor
       : "principiante";
+
+  // Tope de nichos por plan (TAB 6). Se chequea DESPUES de resolver el perfil
+  // porque el upsert de abajo desduplica por (user, producto, pais, perfil):
+  // volver a guardar un nicho que ya esta en la lista no consume cupo, y por
+  // eso no puede bloquearse por conteo.
+  const { data: perfilUsuario } = await supabase
+    .from("users")
+    .select("plan")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const plan = (perfilUsuario?.plan ?? "free") as Plan;
+  const topeNichos = PLAN_CONFIG[plan].nichosVigilados;
+
+  const { data: yaEsta } = await supabase
+    .from("watchlist")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("producto", analysis.producto)
+    .eq("pais", analysis.pais)
+    .eq("perfil_vendedor", perfil)
+    .maybeSingle();
+
+  if (!yaEsta) {
+    const { count } = await supabase
+      .from("watchlist")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("activo", true);
+
+    if ((count ?? 0) >= topeNichos) {
+      return NextResponse.json(
+        {
+          error:
+            topeNichos === 1
+              ? "Tu plan permite vigilar 1 nicho. Dejá de vigilar el actual o pasate a Pro para vigilar 5."
+              : `Tu plan permite vigilar ${topeNichos} nichos a la vez.`,
+          motivo: "tope_nichos",
+          tope: topeNichos,
+        },
+        { status: 403 }
+      );
+    }
+  }
 
   const { data: fila, error } = await supabase
     .from("watchlist")

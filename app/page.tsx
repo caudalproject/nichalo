@@ -83,6 +83,10 @@ const PRICING_CARDS = [
       { label: "30 publicaciones analizadas — la misma profundidad que el plan pago", included: true, subItems: null as string[] | null },
       { label: "Subida de imagen del producto", included: true, subItems: null as string[] | null },
       { label: "Primer análisis completo — sin restricciones", included: true, subItems: null as string[] | null },
+      // TAB 6 (21/9): la probada del seguimiento. Sin esta linea el free no se
+      // entera de que la feature existe y nunca llega a chocar el tope, que es
+      // justo donde el Pro tiene algo para ofrecer. Tope real en lib/plans.ts.
+      { label: "Vigilá 1 nicho y medilo una vez", included: true, subItems: null as string[] | null },
     ],
     cta: "Empezar gratis",
     href: "/login",
@@ -100,8 +104,28 @@ const PRICING_CARDS = [
     highlighted: false,
     badge: "⭐ Más completo" as null | string,
     features: [
-      // Primero, porque es lo único que justifica pagar una suscripción en
-      // vez de un pack (punto 8 del brief).
+      // REENCUADRE DEL TAB 6 (21/9/2026). Hasta hoy esta card abria con
+      // "Análisis avanzado Pro" y vendia CANTIDAD: 30 análisis por mes. Medido
+      // el 21/9: de 23 usuarios externos, 13 hicieron exactamente 1 análisis y
+      // NINGUN desconocido pidio un segundo. Vender 30 de algo que nadie quiso
+      // dos veces es lo que dejo al Pro 4 meses sin una sola conversion.
+      //
+      // El seguimiento sube al primer lugar porque es lo unico que da una
+      // razon para volver el mes que viene — que es lo que una suscripcion
+      // necesita y un pack no puede dar. No es una promesa: watchlist,
+      // re-chequeo y vista de delta estan desplegados desde el 21/9 (TAB 5,
+      // commit c1bf7c7). Los topes viven en lib/plans.ts y los aplican
+      // app/api/seguimiento/route.ts y .../rechequear/route.ts.
+      {
+        label: "Seguimiento de hasta 5 nichos",
+        included: true,
+        subItems: [
+          "Un re-chequeo por semana de cada nicho que vigiles",
+          "Cuántos vendedores nuevos entraron desde la última medición",
+          "Cuánto se movió el precio mediano y la dispersión del nicho",
+          "Comparación contra tu corrida anterior, no contra un promedio",
+        ] as string[] | null,
+      },
       // Estos cuatro eran las PREGUNTAS del formulario ("de donde conviene
       // importarlo", "cuanto necesitas para arrancar"): campos que el usuario
       // llena, no resultados que recibe. Nadie paga por un formulario mas
