@@ -5,6 +5,7 @@ import { inngest } from "@/lib/inngest";
 import { extractKeywordsFromImage } from "@/lib/gemini";
 import { sendUpsellEmail } from "@/lib/resend";
 import type { Plan, AnalysisResult } from "@/lib/supabase";
+import { FORMULA_VERSION } from "@/lib/score";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -199,7 +200,26 @@ export async function POST(request: Request) {
         .gte("created_at", cutoff)
         .maybeSingle();
 
-      if (cached) {
+      // TAB 3.2 (22/9) — EL CACHE NO PUEDE CRUZAR VERSIONES DE FORMULA.
+      //
+      // La clave del cache es producto + pais + perfil + costo, y NO incluye la
+      // version de formula. Cada vez que el score cambia, el cache sigue
+      // sirviendo el resultado viejo con total confianza: paso el 20/9 (v1) y
+      // otra vez el 21/9 (v1.1), y las dos veces se resolvio purgando filas a
+      // mano. El plan de tabs dejo escrito que a la tercera se arreglaba en la
+      // lectura. Esta es la tercera: la v1.2 cambia el score de todo producto
+      // que se venda por pack, y sin esto un usuario pediria un analisis nuevo
+      // para recibir exactamente el numero equivocado que acabamos de corregir
+      // — pagando el credito igual.
+      //
+      // Se resuelve en la lectura y no en la clave a proposito: no toca el
+      // esquema, y las filas viejas simplemente dejan de matchear y expiran
+      // solas por TTL.
+      const formulaCacheada = (cached?.resultado_json as AnalysisResult | undefined)?.score_detalle
+        ?.formula;
+      const cacheVigente = cached != null && formulaCacheada === FORMULA_VERSION;
+
+      if (cacheVigente) {
         const resultadoJson = cached.resultado_json as AnalysisResult;
         resultadoJson.publicaciones_analizadas = cached.publicaciones_analizadas as number;
         resultadoJson.cache_date = cached.created_at as string;
