@@ -16,6 +16,47 @@ import { Navbar } from "@/components/Navbar";
 const MIN_OTP_LENGTH = 6;
 const MAX_OTP_LENGTH = 8;
 
+// El paso "ingresa el codigo" vivia solo en estado de React. En mobile el
+// usuario sale a la app de mail a buscar el codigo y el WebView de
+// TikTok/Instagram mata la pagina: al volver, el estado se perdio y solo
+// queda el campo de email — con un codigo valido en la mano y ningun lugar
+// donde pegarlo. Lo persistimos para sobrevivir ese viaje de ida y vuelta.
+const PENDING_KEY = "nichalo:otp-pendiente";
+const PENDING_TTL_MS = 30 * 60 * 1000;
+
+function leerPendiente(): string | null {
+  try {
+    const raw = window.localStorage.getItem(PENDING_KEY);
+    if (!raw) return null;
+    const { email, ts } = JSON.parse(raw) as { email?: string; ts?: number };
+    if (!email || !ts || Date.now() - ts > PENDING_TTL_MS) {
+      window.localStorage.removeItem(PENDING_KEY);
+      return null;
+    }
+    return email;
+  } catch {
+    return null;
+  }
+}
+
+function guardarPendiente(email: string) {
+  try {
+    window.localStorage.setItem(
+      PENDING_KEY,
+      JSON.stringify({ email, ts: Date.now() })
+    );
+  } catch {
+    // localStorage bloqueado (modo privado) — el flujo sigue funcionando
+    // mientras la pestana no se recargue.
+  }
+}
+
+function borrarPendiente() {
+  try {
+    window.localStorage.removeItem(PENDING_KEY);
+  } catch {}
+}
+
 function LoginContent() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/dashboard";
@@ -34,6 +75,9 @@ function LoginContent() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
+  // El usuario tiene un codigo pero llego a /login sin el estado previo
+  // (otro navegador, localStorage bloqueado): pide email + codigo juntos.
+  const [manualEntry, setManualEntry] = useState(false);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -61,6 +105,15 @@ function LoginContent() {
     });
   }, []);
 
+  // Si ya pidio un codigo hace poco, volver directo al paso de ingresarlo.
+  useEffect(() => {
+    const pendiente = leerPendiente();
+    if (pendiente) {
+      setEmail(pendiente);
+      setMagicSent(true);
+    }
+  }, []);
+
   async function sendCode() {
     if (!email.trim()) return;
     setMagicLoading(true);
@@ -76,6 +129,8 @@ function LoginContent() {
     if (error) {
       setMagicError(error.message);
     } else {
+      guardarPendiente(email.trim());
+      setManualEntry(false);
       setMagicSent(true);
       setResendCooldown(60);
     }
@@ -93,7 +148,7 @@ function LoginContent() {
 
   async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
-    if (otp.trim().length < MIN_OTP_LENGTH) return;
+    if (!email.trim() || otp.trim().length < MIN_OTP_LENGTH) return;
     setOtpLoading(true);
     setOtpError(null);
     const supabase = createSupabaseBrowserClient();
@@ -107,6 +162,8 @@ function LoginContent() {
       setOtpError(error.message);
       return;
     }
+
+    borrarPendiente();
 
     // verifyOtp ya dejo la sesion en las cookies (createBrowserClient usa
     // @supabase/ssr) — este endpoint corre el bootstrap de usuario nuevo
@@ -190,9 +247,27 @@ function LoginContent() {
               magic link ahi abriria OTRO navegador y perderia la sesion. */}
           {magicSent ? (
             <form onSubmit={handleVerifyOtp} className="space-y-2">
-              <div className="rounded-md border border-green-200 bg-green-50 p-3 text-center text-sm text-green-700">
-                Te mandamos un código a <strong>{email.trim()}</strong>. Revisá spam.
-              </div>
+              {manualEntry ? (
+                <>
+                  <p className="text-center text-sm text-muted-foreground">
+                    Escribí el email al que te llegó el código y pegalo abajo.
+                  </p>
+                  <Input
+                    type="email"
+                    placeholder="tu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={otpLoading}
+                    autoComplete="email"
+                    inputMode="email"
+                    className="w-full"
+                  />
+                </>
+              ) : (
+                <div className="rounded-md border border-green-200 bg-green-50 p-3 text-center text-sm text-green-700">
+                  Te mandamos un código a <strong>{email.trim()}</strong>. Revisá spam.
+                </div>
+              )}
               <Input
                 type="text"
                 inputMode="numeric"
@@ -211,7 +286,9 @@ function LoginContent() {
                 type="submit"
                 size="lg"
                 className="w-full"
-                disabled={otpLoading || otp.length < MIN_OTP_LENGTH}
+                disabled={
+                  otpLoading || !email.trim() || otp.length < MIN_OTP_LENGTH
+                }
               >
                 {otpLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {otpLoading ? "Verificando…" : "Confirmar código"}
@@ -220,6 +297,8 @@ function LoginContent() {
                 <button
                   type="button"
                   onClick={() => {
+                    borrarPendiente();
+                    setManualEntry(false);
                     setMagicSent(false);
                     setOtp("");
                     setOtpError(null);
@@ -267,6 +346,17 @@ function LoginContent() {
               <p className="text-center text-xs text-muted-foreground">
                 Sin contraseña. Te llega un código por email.
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setManualEntry(true);
+                  setOtpError(null);
+                  setMagicSent(true);
+                }}
+                className="w-full text-center text-xs text-muted-foreground underline"
+              >
+                Ya tengo un código
+              </button>
             </form>
           )}
 
