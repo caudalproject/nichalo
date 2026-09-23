@@ -402,14 +402,27 @@ export default async function ResultadoPage({ params }: Params) {
               confianza={confianza}
               stats={result.precio_stats ?? result.competencia}
               formatear={(n: number) => formatLocalPrice(n, moneda ?? "ARS")}
+              busqueda={
+                result.search_keyword
+                  ? { termino: result.search_keyword, desdeFoto: true }
+                  : { termino: analysis.producto, desdeFoto: false }
+              }
               reintento={
                 reintentoDisponible
                   ? {
                       // A proposito NO se prefillea el costo: si el motivo fue
                       // costo_fuera_de_rango, que lo vuelva a tipear es
                       // exactamente lo que queremos que revise.
+                      //
+                      // El PRODUCTO si se prefillea, y desde el 23/9 con el
+                      // termino que de verdad se uso (`search_keyword`) y no con
+                      // el que el usuario habia tipeado. Antes el boton
+                      // reintentaba con el mismo texto que ya habia fallado:
+                      // mismo scrape, mismo veredicto, y el "una sola vez por
+                      // analisis" gastado en nada — nos costaba ~$102 ARS y al
+                      // usuario su unica chance.
                       href: `/analizar?reintento_de=${analysis.id}&producto=${encodeURIComponent(
-                        analysis.producto
+                        result.search_keyword || analysis.producto
                       )}&pais=${analysis.pais}`,
                     }
                   : null

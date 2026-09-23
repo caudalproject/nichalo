@@ -39,17 +39,48 @@ interface AnalyzeArgs {
   score: ScoreCalculado;
 }
 
+/**
+ * Convierte la foto del producto en el termino con el que se va a scrapear.
+ *
+ * REESCRITO EL 23/9. La version anterior tenia tres defectos que se sumaban
+ * justo en el caso que mas duele — el scrape que mezcla categorias:
+ *
+ * 1. No recibia lo que el usuario habia tipeado, asi que la foto competia con
+ *    el texto en vez de precisarlo. Ahora el texto es el ancla y la imagen
+ *    aporta lo que el texto no dice (tipo exacto, formato, marca visible).
+ * 2. Pedia "3 a 5 keywords que un comprador usaria" y despues se quedaba con
+ *    la primera. O sea: pedia variedad y usaba una al azar. Ahora pide UNA y
+ *    se le explica para que es.
+ * 3. No pedia especificidad. "Keywords que un comprador usaria" son, por
+ *    definicion, las genericas — las que traen la categoria entera, que es
+ *    exactamente el problema que la foto venia a resolver.
+ */
 export async function extractKeywordsFromImage(
   imagenBase64: string,
-  mimeType: string = "image/jpeg"
+  mimeType: string = "image/jpeg",
+  /** Lo que tipeo el usuario. Ancla la lectura de la imagen. */
+  productoTipeado?: string
 ): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const prompt = `Analizá esta imagen de producto y generá entre 3 y 5 keywords descriptivas en español que un comprador usaría para buscarlo en Mercado Libre.
-Devolvé SOLO las keywords separadas por coma, sin explicación, sin markdown.
-Ejemplo: lámpara sal rosa, luz ambiente sal, lámpara himalaya decorativa`;
+  const prompt = `Esta es la foto de un producto que alguien quiere vender${
+    productoTipeado ? ` y describió como "${productoTipeado}"` : ""
+  }.
+
+Devolvé UN solo término de búsqueda para Mercado Libre que traiga ESTE producto y no su categoría entera.
+
+Reglas:
+- Entre 2 y 5 palabras. Más corto trae de todo; más largo no trae nada.
+- Incluí lo que hace único a este producto y se ve en la foto: tipo exacto, formato, material, tamaño o potencia si está impresa, marca si es legible.
+- NO incluyas color salvo que sea lo que define al producto.
+- NO uses palabras de marketing ("premium", "calidad", "original").
+- Si la foto es ambigua o no se ve bien qué es, devolvé exactamente: SIN_DATO
+
+Devolvé SOLO el término, sin comillas, sin explicación, sin markdown.
+Ejemplo bueno: almohadilla eléctrica cervical 12v
+Ejemplo malo: almohadilla`;
 
   for (const modelName of MODELS) {
     try {
@@ -63,8 +94,15 @@ Ejemplo: lámpara sal rosa, luz ambiente sal, lámpara himalaya decorativa`;
       ]);
       const text = result.response.text().trim();
       if (!text) continue;
-      const first = text.split(",")[0].trim();
-      return first || null;
+      // Se queda con la primera linea por si el modelo agrega algo abajo. El
+      // split por coma de antes ya no aplica: ahora se pide un termino solo.
+      const termino = text.split("\n")[0].replace(/^["'\`]|["'\`]$/g, "").trim();
+      // SIN_DATO es la salida honesta cuando la foto no alcanza. Devolver null
+      // hace que el caller use el texto del usuario, que es el comportamiento
+      // correcto: mejor buscar por lo que el sabe que por lo que el modelo
+      // adivino de una foto borrosa.
+      if (!termino || termino.toUpperCase().includes("SIN_DATO")) return null;
+      return termino;
     } catch (err: unknown) {
       const e = err as { message?: string; status?: number };
       const is503 = e?.message?.includes("503") || e?.status === 503;

@@ -40,7 +40,8 @@ export type MotivoConfianza =
   | "dispersion_precios"
   | "muestra_chica"
   | "sin_datos_de_venta"
-  | "costo_fuera_de_rango";
+  | "costo_fuera_de_rango"
+  | "mezcla_de_productos";
 
 /**
  * Version corta y legible de cada motivo. `explicarConfianza` de mas abajo da
@@ -54,6 +55,7 @@ export const ETIQUETA_MOTIVO: Record<MotivoConfianza, string> = {
   muestra_chica: "hay pocas publicaciones con precio",
   sin_datos_de_venta: "ninguna publicación expone unidades vendidas",
   costo_fuera_de_rango: "el costo ingresado no cierra con los precios del mercado",
+  mezcla_de_productos: "la búsqueda trajo más de un producto distinto",
 };
 
 export interface Confianza {
@@ -65,6 +67,16 @@ export interface Confianza {
   motivos: MotivoConfianza[];
   /** Que estadistico debe mostrar la UI como tendencia central. */
   tendencia_central: "mediana" | "promedio";
+  /**
+   * Publicaciones descartadas por `lib/relevancia.ts` antes de llegar aca: no
+   * eran el producto. Es un numero distinto de `n_descartados`, que son las
+   * que se cayeron por precio. Se informan por separado a proposito — "no era
+   * el producto" y "estaba fuera de rango" son dos cosas que el usuario lee
+   * distinto.
+   */
+  n_irrelevantes?: number;
+  /** Hasta 3 titulos de los irrelevantes, para poder mostrar QUE se tiro. */
+  muestra_irrelevante?: string[];
 }
 
 export interface PrecioStats {
@@ -90,7 +102,7 @@ const DISPERSION_MEDIA = 4;
 const DISPERSION_BAJA = 8;
 
 /** Debajo de esto la muestra no alcanza para un veredicto firme. */
-const MUESTRA_MEDIA = 15;
+export const MUESTRA_MEDIA = 15;
 const MUESTRA_BAJA = 8;
 
 /** Debajo de esto no se recorta: tirar el 10% costaria mas de lo que limpia. */
@@ -142,7 +154,19 @@ export function calcularPrecioStats(
   precios: number[],
   totalConVentas: number,
   /** Costo ingresado por el usuario, en la MISMA moneda que los precios. */
-  costoLocal?: number
+  costoLocal?: number,
+  /**
+   * Lo que reporto `lib/relevancia.ts` sobre el scrape ANTES de llegar aca.
+   * Opcional: `lib/seguimiento.ts` y los tests lo pueden omitir y el
+   * comportamiento queda identico al de antes del 23/9.
+   */
+  relevancia?: {
+    n_descartados: number;
+    aplicado: boolean;
+    muestra_descartada: string[];
+    /** Total de publicaciones que miro el filtro, para sacar la proporcion. */
+    n_evaluados: number;
+  }
 ): { stats: PrecioStats; confianza: Confianza } | null {
   const validos = precios
     .filter((p) => typeof p === "number" && Number.isFinite(p) && p > 0)
@@ -229,6 +253,27 @@ export function calcularPrecioStats(
     nivel = peor(nivel, "baja");
   }
 
+  // MEZCLA DE PRODUCTOS NO RESUELTA.
+  //
+  // Solo se levanta cuando el filtro de relevancia vio mucha mezcla y NO pudo
+  // limpiarla: descartar habria dejado la muestra por debajo de MUESTRA_MEDIA,
+  // asi que devolvio el scrape entero. Es el peor de los casos — la busqueda
+  // trajo mayormente otra cosa — y hasta hoy se manifestaba solo de rebote,
+  // como dispersion de precios. Dicho asi es accionable: el problema es el
+  // termino de busqueda, no el mercado.
+  //
+  // Si el filtro SI se aplico, esto no se levanta: la mezcla ya se fue y los
+  // percentiles de arriba estan calculados sobre publicaciones del producto.
+  if (
+    relevancia != null &&
+    !relevancia.aplicado &&
+    relevancia.n_evaluados > 0 &&
+    relevancia.n_descartados / relevancia.n_evaluados > 0.4
+  ) {
+    motivos.push("mezcla_de_productos");
+    nivel = peor(nivel, "baja");
+  }
+
   const confianza: Confianza = {
     nivel,
     ratio_p90_p10: Number.isFinite(ratio) ? Math.round(ratio * 10) / 10 : 999,
@@ -236,6 +281,8 @@ export function calcularPrecioStats(
     n_descartados: descartados,
     motivos,
     tendencia_central: nivel === "alta" ? "promedio" : "mediana",
+    n_irrelevantes: relevancia?.aplicado ? relevancia.n_descartados : 0,
+    muestra_irrelevante: relevancia?.aplicado ? relevancia.muestra_descartada : [],
   };
 
   return { stats, confianza };
@@ -322,6 +369,11 @@ export function explicarConfianza(
   if (confianza.motivos.includes("sin_datos_de_venta")) {
     partes.push(
       `ninguna publicación expone unidades vendidas, así que la demanda es una estimación y no un dato`
+    );
+  }
+  if (confianza.motivos.includes("mezcla_de_productos")) {
+    partes.push(
+      `buena parte de las publicaciones que trajo la búsqueda no son este producto, sino accesorios, repuestos o artículos parecidos — y son tantas que descartarlas dejaría una muestra demasiado chica para un veredicto`
     );
   }
   if (confianza.motivos.includes("costo_fuera_de_rango")) {

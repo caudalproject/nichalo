@@ -19,14 +19,20 @@ export function AvisoConfianza({
   confianza,
   stats,
   formatear,
-  sugerencia,
+  busqueda,
   reintento,
 }: {
   confianza: Confianza | null | undefined;
   stats: Pick<PrecioStats, "precio_minimo" | "precio_maximo"> | null | undefined;
   formatear: (n: number) => string;
-  /** Termino de busqueda mas especifico, si aplica. */
-  sugerencia?: string | null;
+  /**
+   * Con que se scrapeo REALMENTE. Antes existia una prop `sugerencia` para
+   * proponer "un termino mas especifico", pero el unico caller nunca la pasaba
+   * — era codigo muerto — y ademas proponia algo que el sistema no sabia: la
+   * sugerencia util no es otra palabra inventada, es decirle al usuario con que
+   * se busco para que EL la corrija. Eso es lo que muestra esto.
+   */
+  busqueda?: { termino: string; desdeFoto: boolean } | null;
   /**
    * Oferta de reintento sin costo. Solo se pasa cuando el analisis es del
    * usuario logueado, tiene confianza baja y todavia no genero un reintento.
@@ -74,10 +80,32 @@ export function AvisoConfianza({
               parezca preciso cuando no lo es.
             </p>
           )}
-          {sugerencia && (
-            <p className="text-sm text-amber-800">
-              Probá de nuevo con un término más específico, por ejemplo{" "}
-              <strong className="font-semibold">“{sugerencia}”</strong>.
+          {busqueda && (
+            <p className={`text-sm ${esBaja ? "text-amber-800" : "text-[#6B7280]"}`}>
+              Buscamos en Mercado Libre con{" "}
+              <strong className="font-semibold">“{busqueda.termino}”</strong>
+              {busqueda.desdeFoto ? " (lo derivamos de tu foto)" : ""}. Si eso no
+              describe exactamente tu producto, cambiá el término al reintentar —
+              es lo que más mueve la aguja.
+            </p>
+          )}
+          {/* Dos lineas distintas y en este orden: primero "no era el
+              producto" (la causa que el usuario puede corregir cambiando el
+              termino) y despues "fuera de rango" (limpieza estadistica, que no
+              depende de el). Juntarlas en una sola frase las volvia ruido. */}
+          {(confianza.n_irrelevantes ?? 0) > 0 && (
+            <p
+              className={`text-xs ${
+                esBaja ? "text-amber-700" : "text-[#6B7280]"
+              }`}
+            >
+              Descartamos {confianza.n_irrelevantes}{" "}
+              {confianza.n_irrelevantes === 1 ? "publicación" : "publicaciones"}{" "}
+              que no eran este producto
+              {confianza.muestra_irrelevante && confianza.muestra_irrelevante.length > 0
+                ? ` (por ejemplo: “${confianza.muestra_irrelevante[0]}”)`
+                : ""}
+              . Los números de abajo se calcularon sin ellas.
             </p>
           )}
           {confianza.n_descartados > 0 && (

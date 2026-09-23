@@ -263,9 +263,14 @@ export async function POST(request: Request) {
     let searchKeyword = producto;
     if (imagenBase64) {
       try {
+        // El producto tipeado viaja como ancla (23/9): la foto precisa el
+        // texto, no compite con el. Sin esto el modelo leia la imagen en el
+        // vacio y podia devolver un termino mas generico que el que el usuario
+        // ya habia escrito.
         const keyword = await extractKeywordsFromImage(
           imagenBase64,
-          imagenMimeType ?? "image/jpeg"
+          imagenMimeType ?? "image/jpeg",
+          producto
         );
         if (keyword) searchKeyword = keyword;
       } catch {

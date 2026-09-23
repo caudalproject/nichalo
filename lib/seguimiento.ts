@@ -21,6 +21,7 @@ import { startApifyRun, checkApifyRun, getApifyResults } from "./apify";
 import { calcularPrecioStats } from "./confianza";
 import { calcularScore, calcularMetricas } from "./score";
 import { normalizarUnidadDeVenta } from "./unidad";
+import { filtrarRelevantes } from "./relevancia";
 import { PLAN_CONFIG } from "./plans";
 import { notificarSiCorresponde } from "./notificar-seguimiento";
 
@@ -90,10 +91,21 @@ export const rechequearNicho = inngest.createFunction(
         // analisis inicial. Tiene que estar en los dos lados o el delta del
         // TAB 5 compararia un score por unidad contra uno por pack y llamaria
         // "cambio del nicho" a un cambio de aritmetica nuestro.
+        // El mismo filtro de relevancia que corre en el analisis inicial
+        // (23/9). Tiene que estar en los dos lados por la misma razon que la
+        // normalizacion de unidad: si el analisis midio 22 publicaciones del
+        // producto y el re-chequeo mide 30 mezcladas con accesorios, el delta
+        // reporta como "cambio del nicho" un cambio de criterio nuestro.
+        const relevancia = filtrarRelevantes({
+          producto,
+          searchKeyword: search_keyword,
+          listings: scrape.listings,
+        });
+
         const normalizado = normalizarUnidadDeVenta({
           producto,
           costoLocal: costoIngresado,
-          listings: scrape.listings,
+          listings: relevancia.listings,
         });
         const listingsNormalizados = normalizado.listings;
         const costoLocal = normalizado.costoUnitario;
@@ -105,7 +117,12 @@ export const rechequearNicho = inngest.createFunction(
           (l) => (l.soldQuantity ?? 0) > 0
         ).length;
 
-        const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal);
+        const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal, {
+          n_descartados: relevancia.n_descartados,
+          aplicado: relevancia.aplicado,
+          muestra_descartada: relevancia.muestra_descartada,
+          n_evaluados: scrape.listings.length,
+        });
         if (!calculado) {
           throw new NonRetriableError(
             "No se encontraron precios válidos en el re-chequeo."

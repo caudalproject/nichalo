@@ -194,11 +194,28 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           // ($150.000) contra una mediana de rollo suelto ($62.980), margen
           // -1375% y SATURADO sobre un producto que podia ser viable.
           // Si no hay packs en ningun lado esto es un no-op exacto.
+          // FILTRO DE RELEVANCIA (23/9) — CORRE PRIMERO, ANTES QUE LA UNIDAD.
+          //
+          // Saca del scrape lo que no es el producto: fundas, repuestos, partes
+          // sueltas. Va antes de `normalizarUnidadDeVenta` porque normalizar el
+          // precio de un accesorio por su multiplicador de pack es trabajo
+          // tirado, y antes de `calcularPrecioStats` porque la mezcla es lo que
+          // ensancha los percentiles. Hasta hoy la unica defensa era el recorte
+          // [p05,p95], que mueve las colas pero no saca la mezcla.
+          //
+          // Si no hay nada que descartar, es un no-op exacto.
+          const { filtrarRelevantes } = await import("./relevancia");
+          const relevancia = filtrarRelevantes({
+            producto,
+            searchKeyword: search_keyword,
+            listings: finalScrape.listings,
+          });
+
           const { normalizarUnidadDeVenta } = await import("./unidad");
           const normalizado = normalizarUnidadDeVenta({
             producto,
             costoLocal: costoIngresado,
-            listings: finalScrape.listings,
+            listings: relevancia.listings,
           });
           const listingsNormalizados = normalizado.listings;
           const costoLocal = normalizado.costoUnitario ?? costoIngresado;
@@ -208,7 +225,12 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             .filter((p): p is number => p !== null && p > 0);
           const totalConVentas = listingsNormalizados.filter(l => (l.soldQuantity ?? 0) > 0).length;
 
-          const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal);
+          const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal, {
+            n_descartados: relevancia.n_descartados,
+            aplicado: relevancia.aplicado,
+            muestra_descartada: relevancia.muestra_descartada,
+            n_evaluados: finalScrape.listings.length,
+          });
           const precioStats = calculado?.stats ?? null;
 
           // EL SCORE SE CALCULA ACA, ANTES DE HABLAR CON GEMINI (TAB 3, 20/9).
@@ -303,6 +325,18 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         const resultadoJson = {
           ...analysis,
           publicaciones_analizadas: finalScrape.totalListings,
+          // CON QUE SE BUSCO REALMENTE (23/9).
+          //
+          // `search_keyword` llegaba al worker, se usaba para el scrape y se
+          // perdia. Dos consecuencias, las dos arregladas aca: (a) no habia
+          // forma de auditar si un analisis uso la foto o el texto tipeado, y
+          // (b) `app/api/seguimiento/route.ts` lo leia de este mismo objeto
+          // para guardar el nicho, encontraba undefined y guardaba null — asi
+          // que el re-chequeo semanal scrapeaba con el texto tipeado mientras
+          // el analisis original habia usado la keyword de la foto. Dos
+          // mercados distintos comparados como si fueran el mismo: deltas
+          // fantasma, justo lo que el TAB 3 fue a matar.
+          search_keyword: search_keyword ?? null,
           // Columna deprecada el 20/9 (TAB 1): salia de la API de ML que hoy
           // devuelve 403. Se deja en 0 en vez de borrar la columna (fuera de
           // alcance de este tab). No se usa en ningun lado de la UI.

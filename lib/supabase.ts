@@ -81,6 +81,13 @@ export interface AnalysisResult {
   confianza?: import("./confianza").Confianza | null;
   precio_stats?: import("./confianza").PrecioStats | null;
   /**
+   * El termino con el que se scrapeo de verdad. Difiere de `producto` cuando la
+   * foto produjo una keyword mas especifica. Persistido desde el 23/9: antes se
+   * usaba y se tiraba, y `app/api/seguimiento/route.ts` lo leia de aca
+   * encontrando siempre undefined.
+   */
+  search_keyword?: string | null;
+  /**
    * Lo que produce el "Analisis avanzado Pro". Existe como bloque propio desde
    * el 16/9: antes los cuatro inputs del Pro solo alteraban la prosa de campos
    * que el free tambien recibe, asi que el usuario no tenia forma de saber que
