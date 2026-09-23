@@ -52,6 +52,21 @@ export interface ResultadoRelevancia {
   /** Los listings que sobrevivieron. Si `aplicado` es false, son todos. */
   listings: MLListing[];
   n_descartados: number;
+  /**
+   * Cuantas publicaciones el filtro IDENTIFICO como no-producto, se hayan
+   * removido o no.
+   *
+   * Existe separado de `n_descartados` por el bug del 23/9: cuando el filtro se
+   * abstiene devuelve `n_descartados: 0` (correcto — no saco nada), y
+   * `confianza.ts` medía la mezcla con ese cero. El motivo
+   * `mezcla_de_productos` era por eso inalcanzable: la única condición que lo
+   * levanta es `!aplicado`, y en `!aplicado` el numerador siempre valia 0.
+   *
+   * `n_descartados` = lo que se saco. `n_descartables` = lo que se vio.
+   * La mezcla se mide con el segundo; lo que se le informa al usuario que se
+   * removio, con el primero.
+   */
+  n_descartables: number;
   /** false = el filtro se auto-desactivo por las guardas de abajo. */
   aplicado: boolean;
   /** Hasta 3 titulos descartados. Van a la UI: el usuario tiene que poder ver
@@ -174,6 +189,7 @@ export function filtrarRelevantes(args: {
   const sinFiltrar: ResultadoRelevancia = {
     listings,
     n_descartados: 0,
+    n_descartables: 0,
     aplicado: false,
     muestra_descartada: [],
   };
@@ -239,12 +255,24 @@ export function filtrarRelevantes(args: {
   // de ahi, el problema no son cuatro accesorios sueltos sino que la busqueda
   // entera trajo otra cosa — y eso se informa degradando la confianza, que es
   // lo que pasa solo si no tocamos nada.
-  if (sobreviven.length < MUESTRA_MEDIA) return sinFiltrar;
-  if (descartados.length / listings.length > MAXIMO_DESCARTABLE) return sinFiltrar;
+  //
+  // Se abstiene, pero REPORTA lo que vio: `n_descartables` viaja hasta
+  // `confianza.ts`, que con eso levanta `mezcla_de_productos`. Antes de este
+  // fix las dos guardas devolvian `sinFiltrar` tal cual — con n_descartables en
+  // 0 — y el peor caso del sistema (la busqueda trajo mayormente otra cosa)
+  // salia reportado solo de rebote como dispersion de precios, que es
+  // exactamente lo que este trabajo vino a dejar de hacer.
+  const abstenerse: ResultadoRelevancia = {
+    ...sinFiltrar,
+    n_descartables: descartados.length,
+  };
+  if (sobreviven.length < MUESTRA_MEDIA) return abstenerse;
+  if (descartados.length / listings.length > MAXIMO_DESCARTABLE) return abstenerse;
 
   return {
     listings: sobreviven,
     n_descartados: descartados.length,
+    n_descartables: descartados.length,
     aplicado: true,
     muestra_descartada: descartados.slice(0, 3).map((l) => l.title).filter(Boolean),
   };
@@ -273,8 +301,30 @@ export function aplicarPertenencia(args: {
   nOriginal: number;
   /** Cuantas se habian descartado ya por palabras. */
   descartadosPrevios: number;
+  /** Cuantas habia VISTO el filtro de palabras (se hayan sacado o no). */
+  descartablesPrevios?: number;
+  /**
+   * Titulos que ya habia descartado el filtro de palabras.
+   *
+   * Sin esto se perdian: `sinCambios` devolvia `muestra_descartada: []` y la
+   * UI quedaba diciendo "Descartamos 7 publicaciones que no eran este
+   * producto" sin un solo ejemplo — un acto de fe, que es justo lo que el
+   * campo existe para evitar. Y pasaba en el camino MAS comun, el de la
+   * pasada semantica que no marca nada (los fixtures limpios dan 0 descartes).
+   */
+  muestraPrevia?: string[];
 }): ResultadoRelevancia {
-  const { listings, descartar, nOriginal, descartadosPrevios } = args;
+  const {
+    listings,
+    descartar,
+    nOriginal,
+    descartadosPrevios,
+    descartablesPrevios,
+    muestraPrevia,
+  } = args;
+
+  const previos = muestraPrevia ?? [];
+  const descartablesAntes = descartablesPrevios ?? descartadosPrevios;
 
   const marcados = new Set(descartar);
   const sobreviven = listings.filter((_, i) => !marcados.has(i));
@@ -283,8 +333,11 @@ export function aplicarPertenencia(args: {
   const sinCambios: ResultadoRelevancia = {
     listings,
     n_descartados: descartadosPrevios,
+    // La pasada semantica se ignoro, pero lo que vio sigue siendo evidencia de
+    // mezcla: se suma a lo que ya habia visto el filtro de palabras.
+    n_descartables: descartablesAntes + descartados.length,
     aplicado: descartadosPrevios > 0,
-    muestra_descartada: [],
+    muestra_descartada: previos.slice(0, 3),
   };
 
   if (descartados.length === 0) return sinCambios;
@@ -304,7 +357,14 @@ export function aplicarPertenencia(args: {
   return {
     listings: sobreviven,
     n_descartados: totalDescartado,
+    n_descartables: descartablesAntes + descartados.length,
     aplicado: true,
-    muestra_descartada: descartados.slice(0, 3).map((l) => l.title).filter(Boolean),
+    // Los titulos de la pasada semantica primero: son los que el usuario menos
+    // se espera ("esto se parecia, pero no es tu producto") y los que mejor
+    // explican por que la mediana no es la que veia buscando a mano.
+    muestra_descartada: [
+      ...descartados.map((l) => l.title).filter(Boolean),
+      ...previos,
+    ].slice(0, 3),
   };
 }

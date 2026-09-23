@@ -48,6 +48,8 @@ for (const nombre of pedidos) {
     descartar: marcados,
     nOriginal: listings.length,
     descartadosPrevios: r1.n_descartados,
+    descartablesPrevios: r1.n_descartables,
+    muestraPrevia: r1.muestra_descartada,
   });
 
   const st = (ls, rel) =>

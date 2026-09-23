@@ -232,6 +232,8 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             descartar: marcados,
             nOriginal: finalScrape.listings.length,
             descartadosPrevios: relevancia.n_descartados,
+            descartablesPrevios: relevancia.n_descartables,
+            muestraPrevia: relevancia.muestra_descartada,
           });
 
           const { normalizarUnidadDeVenta } = await import("./unidad");
@@ -250,6 +252,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
 
           const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal, {
             n_descartados: relevanciaFinal.n_descartados,
+            n_descartables: relevanciaFinal.n_descartables,
             aplicado: relevanciaFinal.aplicado,
             muestra_descartada: relevanciaFinal.muestra_descartada,
             n_evaluados: finalScrape.listings.length,

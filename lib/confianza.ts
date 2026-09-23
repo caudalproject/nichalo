@@ -162,6 +162,13 @@ export function calcularPrecioStats(
    */
   relevancia?: {
     n_descartados: number;
+    /**
+     * Cuantas vio el filtro como no-producto, se hayan removido o no. Es el
+     * numerador correcto para medir mezcla: cuando el filtro se abstiene,
+     * `n_descartados` vale 0 por definicion. Opcional por compatibilidad con
+     * los tests viejos; si falta se cae a `n_descartados`.
+     */
+    n_descartables?: number;
     aplicado: boolean;
     muestra_descartada: string[];
     /** Total de publicaciones que miro el filtro, para sacar la proporcion. */
@@ -264,11 +271,17 @@ export function calcularPrecioStats(
   //
   // Si el filtro SI se aplico, esto no se levanta: la mezcla ya se fue y los
   // percentiles de arriba estan calculados sobre publicaciones del producto.
+  //
+  // OJO CON EL NUMERADOR (fix del 23/9). Tiene que ser `n_descartables` —
+  // lo que el filtro VIO — y no `n_descartados` — lo que SACO. Cuando el
+  // filtro se abstiene no saca nada, asi que `n_descartados` vale 0, y como
+  // la condicion de arriba exige `!aplicado`, este motivo no podia dispararse
+  // nunca. La copy ya existia en `explicarConfianza` y no se renderizo jamas.
   if (
     relevancia != null &&
     !relevancia.aplicado &&
     relevancia.n_evaluados > 0 &&
-    relevancia.n_descartados / relevancia.n_evaluados > 0.4
+    (relevancia.n_descartables ?? relevancia.n_descartados) / relevancia.n_evaluados > 0.4
   ) {
     motivos.push("mezcla_de_productos");
     nivel = peor(nivel, "baja");

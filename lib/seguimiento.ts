@@ -121,6 +121,8 @@ export const rechequearNicho = inngest.createFunction(
           descartar: marcados,
           nOriginal: scrape.listings.length,
           descartadosPrevios: relevancia.n_descartados,
+          descartablesPrevios: relevancia.n_descartables,
+          muestraPrevia: relevancia.muestra_descartada,
         });
 
         const normalizado = normalizarUnidadDeVenta({
@@ -140,6 +142,7 @@ export const rechequearNicho = inngest.createFunction(
 
         const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal, {
           n_descartados: relevanciaFinal.n_descartados,
+          n_descartables: relevanciaFinal.n_descartables,
           aplicado: relevanciaFinal.aplicado,
           muestra_descartada: relevanciaFinal.muestra_descartada,
           n_evaluados: scrape.listings.length,
