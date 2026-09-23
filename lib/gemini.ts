@@ -155,6 +155,33 @@ ESTADÍSTICAS DE PRECIOS (calculadas del scrape — usá estos valores exactos, 
 - Listings con ventas registradas (soldQuantity > 0): ${precioStats.total_con_ventas}
 ` : '';
 
+  // TAB 3.2 (22/9) — el unico cambio que este tab hace en el prompt, y existe
+  // para evitar una contradiccion que el tab mismo introduce.
+  //
+  // Desde la normalizacion de unidad de venta, las ESTADISTICAS de arriba estan
+  // POR UNIDAD, mientras que el JSON del scrape sigue trayendo los precios
+  // REALES de cada publicacion. Esa asimetria es deliberada: la tabla de
+  // competidores que ve el usuario lleva un link a Mercado Libre, y mostrar ahi
+  // un precio por unidad que no coincide con la pagina destruiria la confianza
+  // mas de lo que el bug arreglaba. Pero sin este aviso el modelo ve mediana
+  // $20.993 y publicaciones de $62.980 y "corrige" una de las dos inventando
+  // una explicacion.
+  //
+  // Se activa SOLO cuando hubo normalizacion. Sin packs, el prompt queda
+  // exactamente como estaba.
+  const bloqueUnidad = score.unidad?.aplicada ? `
+UNIDAD DE VENTA — LEER ANTES DE ESCRIBIR NADA SOBRE PRECIOS:
+${score.unidad.multiplicador_consulta > 1
+  ? `- El usuario cotizó un PACK de ${score.unidad.multiplicador_consulta} unidades. El costo que se usó para el margen es el costo POR UNIDAD (el total dividido ${score.unidad.multiplicador_consulta}).`
+  : `- El usuario cotizó una unidad suelta.`}
+${score.unidad.listings_ajustados > 0
+  ? `- ${score.unidad.listings_ajustados} de ${score.unidad.listings_evaluados} publicaciones del scrape se venden por pack. Sus precios se llevaron a precio por unidad para los percentiles.`
+  : `- Ninguna publicación del scrape declara venderse por pack.`}
+- Las ESTADÍSTICAS DE PRECIOS de arriba están POR UNIDAD. El JSON del scrape de abajo trae el precio REAL de cada publicación, sin dividir.
+- En "top_vendedores" usá el precio REAL del JSON, nunca el dividido: ese precio va junto a un link a la publicación y tiene que coincidir.
+- No expliques esta diferencia al usuario ni menciones la palabra "normalización". Simplemente no te contradigas.
+` : '';
+
   const bloqueConfianza = confianza && confianza.nivel !== "alta" ? `
 CONFIANZA DE LOS DATOS: ${confianza.nivel.toUpperCase()}
 Motivos detectados: ${confianza.motivos.join(", ")}
@@ -217,7 +244,7 @@ ${mlData.trends.related?.length ? `- Búsquedas relacionadas: ${mlData.trends.re
 Usá estos datos SOLO para la sección de tendencia. No entran en el veredicto.
 
 ` : ''}${bloqueVeredicto}
-${preciosCalculados}${bloqueConfianza}
+${preciosCalculados}${bloqueUnidad}${bloqueConfianza}
 PERFIL DEL VENDEDOR: ${perfil}
 - principiante: publicación Clásica, entra por el percentil 10. La recomendación tiene que incluir cómo construir reputación desde cero (primeras ventas, precio de lanzamiento, envío gratis inicial).
 - intermedio: publicación Premium, entra por el percentil 25. Recomendación enfocada en diferenciación.

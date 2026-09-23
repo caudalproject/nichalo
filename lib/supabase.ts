@@ -144,6 +144,14 @@ export interface AnalysisResult {
      */
     precio_equilibrio?: number | null;
     margen_mediana_pct?: number | null;
+    /**
+     * Que hizo la normalizacion de unidad de venta (TAB 3.2, 22/9) antes de
+     * calcular este score. `undefined` en todo analisis anterior a esa fecha, y
+     * la distincion importa igual que arriba: "no hubo packs" (`aplicada:
+     * false`) no es lo mismo que "nadie miro". La tarjeta de `QueHacer` usa
+     * justamente esa diferencia para elegir entre informar y advertir.
+     */
+    unidad?: import("./unidad").UnidadDeVenta | null;
   } | null;
   /** Metricas crudas del scrape. Es la serie que consume el seguimiento del TAB 5. */
   metricas?: import("./score").MetricasScrape | null;

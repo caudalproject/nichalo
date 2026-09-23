@@ -839,6 +839,9 @@ export default async function ResultadoPage({ params }: Params) {
               }
               precioEquilibrio={result.score_detalle?.precio_equilibrio}
               margenMedianaPct={result.score_detalle?.margen_mediana_pct}
+              // TAB 3.2. `undefined` en todo analisis anterior al 22/9, y la
+              // tarjeta se cae sola a la heuristica vieja.
+              unidad={result.score_detalle?.unidad}
               precioMediana={result.precio_stats?.precio_mediano ?? null}
               precioSugerido={result.margen.precio_sugerido_venta}
               gananciaLocal={

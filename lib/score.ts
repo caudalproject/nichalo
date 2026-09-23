@@ -52,6 +52,7 @@
 import type { MLListing } from "./apify";
 import { ETIQUETA_MOTIVO, type Confianza, type PrecioStats } from "./confianza";
 import { calcularComision, type ComisionCalculada, type PaisML } from "./comisiones";
+import type { UnidadDeVenta } from "./unidad";
 
 export type IdComponente =
   | "margen"
@@ -119,12 +120,28 @@ export interface ScoreCalculado {
   margen_mediana_pct: number | null;
   comision: ComisionCalculada;
   metricas: MetricasScrape;
+  /**
+   * Que hizo la normalizacion de unidad de venta del TAB 3.2 antes de que este
+   * score se calculara. `null` = el analisis corrio con una formula anterior al
+   * 22/9. `aplicada: false` = se miro y no habia packs.
+   *
+   * Vive en el score y no en el informe porque es parte de por que el numero dio
+   * lo que dio: sin esto, un margen calculado sobre costo/3 es indistinguible de
+   * uno calculado sobre el costo entero.
+   */
+  unidad: UnidadDeVenta | null;
   /** Version de la formula. Sube cuando cambian pesos o cortes: sin esto, el
    *  seguimiento del TAB 5 compararia scores de formulas distintas. */
   formula: string;
 }
 
-export const FORMULA_VERSION = "score-v1.1-2026-09-21";
+/**
+ * Sube cuando cambian pesos, cortes **o los insumos**. La v1.2 no toco un solo
+ * peso: cambio que el costo y los precios ahora se comparan por unidad (TAB 3.2).
+ * Eso mueve el numero, asi que el delta del TAB 5 tiene que decir "no comparable"
+ * hasta la proxima corrida de cada nicho.
+ */
+export const FORMULA_VERSION = "score-v1.2-2026-09-22";
 
 /**
  * Percentil de entrada segun perfil.
@@ -315,11 +332,18 @@ export function calcularScore(args: {
   producto: string;
   pais: PaisML;
   perfil: string;
-  /** Costo por unidad en la MISMA moneda que los precios del scrape. */
+  /**
+   * Costo **por unidad individual**, en la MISMA moneda que los precios del
+   * scrape. Desde el TAB 3.2 el caller es responsable de haberlo dividido por
+   * el tamaño del pack antes de llamar aca — ver `lib/unidad.ts`. El score no
+   * normaliza: recibe un costo y unos precios que ya son comparables.
+   */
   costoLocal: number;
   listings: MLListing[];
   stats: PrecioStats;
   confianza: Confianza | null;
+  /** Que hizo esa normalizacion. Solo se guarda; no entra a ningun calculo. */
+  unidad?: UnidadDeVenta | null;
 }): ScoreCalculado {
   const { producto, pais, costoLocal, stats, listings, confianza } = args;
   const perfil = PERCENTIL_POR_PERFIL[args.perfil] ? args.perfil : "principiante";
@@ -595,6 +619,7 @@ export function calcularScore(args: {
     margen_mediana_pct: margenMedianaPct,
     comision,
     metricas,
+    unidad: args.unidad ?? null,
     formula: FORMULA_VERSION,
   };
 }

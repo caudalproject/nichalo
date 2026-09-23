@@ -182,15 +182,32 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           // el recorte, los percentiles y el nivel de confianza salen de
           // `lib/confianza.ts`, y la confianza viaja hasta la UI.
           const { calcularPrecioStats } = await import("./confianza");
-          const precios = finalScrape.listings
-            .map(l => l.price)
-            .filter((p): p is number => p !== null && p > 0);
-          const totalConVentas = finalScrape.listings.filter(l => (l.soldQuantity ?? 0) > 0).length;
 
           // El costo se ingresa en USD; los precios del scrape estan en moneda
           // local. Hay que compararlos en la misma moneda o la senal de
           // "costo fuera de rango" se dispara siempre.
-          const costoLocal = costo_estimado * (exchangeRate ?? 1);
+          const costoIngresado = costo_estimado * (exchangeRate ?? 1);
+
+          // TAB 3.2 (22/9) — NORMALIZACION DE UNIDAD DE VENTA, ANTES DE TODO LO
+          // DEMAS. Hasta aca se comparaba el costo de un pack contra precios de
+          // unidades sueltas: el caso del 21/9 fue un pack de 3 rollos
+          // ($150.000) contra una mediana de rollo suelto ($62.980), margen
+          // -1375% y SATURADO sobre un producto que podia ser viable.
+          // Si no hay packs en ningun lado esto es un no-op exacto.
+          const { normalizarUnidadDeVenta } = await import("./unidad");
+          const normalizado = normalizarUnidadDeVenta({
+            producto,
+            costoLocal: costoIngresado,
+            listings: finalScrape.listings,
+          });
+          const listingsNormalizados = normalizado.listings;
+          const costoLocal = normalizado.costoUnitario ?? costoIngresado;
+
+          const precios = listingsNormalizados
+            .map(l => l.price)
+            .filter((p): p is number => p !== null && p > 0);
+          const totalConVentas = listingsNormalizados.filter(l => (l.soldQuantity ?? 0) > 0).length;
+
           const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal);
           const precioStats = calculado?.stats ?? null;
 
@@ -206,9 +223,10 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
                 pais,
                 perfil: perfil_vendedor ?? "principiante",
                 costoLocal,
-                listings: finalScrape.listings,
+                listings: listingsNormalizados,
                 stats: precioStats,
                 confianza: calculado?.confianza ?? null,
+                unidad: normalizado.unidad,
               })
             : null;
 
@@ -270,6 +288,10 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
               // mencionarlo.
               precio_equilibrio: scoreCalculado.precio_equilibrio,
               margen_mediana_pct: scoreCalculado.margen_mediana_pct,
+              // TAB 3.2 (22/9): sin esto, un margen calculado sobre costo/3 es
+              // indistinguible en la base de uno calculado sobre el costo
+              // entero, y la pagina no puede decir sobre que unidad hablo.
+              unidad: scoreCalculado.unidad,
             },
             metricas: scoreCalculado.metricas,
           };

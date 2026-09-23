@@ -20,6 +20,7 @@ import { inngest } from "./inngest";
 import { startApifyRun, checkApifyRun, getApifyResults } from "./apify";
 import { calcularPrecioStats } from "./confianza";
 import { calcularScore, calcularMetricas } from "./score";
+import { normalizarUnidadDeVenta } from "./unidad";
 import { PLAN_CONFIG } from "./plans";
 
 const supabase = createClient(
@@ -80,16 +81,28 @@ export const rechequearNicho = inngest.createFunction(
           );
         }
 
-        const precios = scrape.listings
-          .map((l) => l.price)
-          .filter((p): p is number => p !== null && p > 0);
-        const totalConVentas = scrape.listings.filter(
-          (l) => (l.soldQuantity ?? 0) > 0
-        ).length;
-
         // Sin conversion de moneda: desde el 13/9 todo el pipeline vive en ARS
         // y getExchangeRate() es un no-op que devuelve 1 (ver lib/currency.ts).
-        const costoLocal = costo_estimado !== null ? costo_estimado : undefined;
+        const costoIngresado = costo_estimado !== null ? costo_estimado : undefined;
+
+        // TAB 3.2 (22/9) — la misma normalizacion de unidad que corre en el
+        // analisis inicial. Tiene que estar en los dos lados o el delta del
+        // TAB 5 compararia un score por unidad contra uno por pack y llamaria
+        // "cambio del nicho" a un cambio de aritmetica nuestro.
+        const normalizado = normalizarUnidadDeVenta({
+          producto,
+          costoLocal: costoIngresado,
+          listings: scrape.listings,
+        });
+        const listingsNormalizados = normalizado.listings;
+        const costoLocal = normalizado.costoUnitario;
+
+        const precios = listingsNormalizados
+          .map((l) => l.price)
+          .filter((p): p is number => p !== null && p > 0);
+        const totalConVentas = listingsNormalizados.filter(
+          (l) => (l.soldQuantity ?? 0) > 0
+        ).length;
 
         const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal);
         if (!calculado) {
@@ -108,14 +121,17 @@ export const rechequearNicho = inngest.createFunction(
                 pais,
                 perfil: perfil_vendedor,
                 costoLocal,
-                listings: scrape.listings,
+                listings: listingsNormalizados,
                 stats: calculado.stats,
                 confianza: calculado.confianza,
+                unidad: normalizado.unidad,
               })
             : null;
 
         const metricas =
-          scoreCalculado?.metricas ?? calcularMetricas(scrape.listings, calculado.stats);
+          // Listings normalizados, no crudos: las `stats` que van al lado ya
+          // estan por unidad y mezclarlos daria metricas de dos escalas.
+          scoreCalculado?.metricas ?? calcularMetricas(listingsNormalizados, calculado.stats);
 
         const vendedores = Array.from(
           new Set(
@@ -127,6 +143,13 @@ export const rechequearNicho = inngest.createFunction(
 
         // Snapshot acotado: las 10 mas baratas. Alcanza para mostrar QUE
         // publicacion aparecio sin guardar 30 filas de jsonb cada semana.
+        //
+        // OJO: va sobre `scrape.listings` CRUDO, no sobre los normalizados del
+        // TAB 3.2, y es a proposito. Cada fila lleva `url` a la publicacion
+        // real: mostrar ahi un precio por unidad que no coincide con la pagina
+        // de Mercado Libre rompe la confianza mas de lo que el bug arreglaba.
+        // Los percentiles y el score van por unidad; lo que se muestra con link
+        // al lado, no.
         const topListings = [...scrape.listings]
           .filter((l) => typeof l.price === "number" && (l.price ?? 0) > 0)
           .sort((a, b) => (a.price ?? 0) - (b.price ?? 0))
@@ -160,6 +183,7 @@ export const rechequearNicho = inngest.createFunction(
                 motivo_techo: scoreCalculado.motivo_techo,
                 precio_equilibrio: scoreCalculado.precio_equilibrio,
                 margen_mediana_pct: scoreCalculado.margen_mediana_pct,
+                unidad: scoreCalculado.unidad,
               }
             : null,
           formula: scoreCalculado?.formula ?? null,

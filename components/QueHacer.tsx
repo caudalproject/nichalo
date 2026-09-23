@@ -17,25 +17,35 @@
  *
  * OJO CON EL NUMERO (esto no es opcional)
  *
- * El calculo NO distingue unidad de venta: un pack x3 se compara contra el
- * scrape de unidades sueltas. Es el TAB 3.2, pendiente al escribir esto. El
- * caso vivo es el analisis del 21/9 — costo de un pack de 3 rollos ($150.000)
- * contra una mediana de rollos sueltos ($62.980), margen −1375%.
+ * Hasta el 21/9 el calculo NO distinguia unidad de venta: un pack x3 se
+ * comparaba contra el scrape de unidades sueltas. El caso vivo fue el analisis
+ * del 21/9 — costo de un pack de 3 rollos ($150.000) contra una mediana de
+ * rollos sueltos ($62.980), margen −1375%.
  *
- * Por eso el precio de equilibrio NUNCA se muestra pelado. Siempre lleva la
- * linea de "sobre que unidad esta calculado", y si el titulo del producto
- * huele a pack la advertencia sube de tono. Un numero equivocado dicho con
+ * **El TAB 3.2 (22/9) lo arreglo en el pipeline** (`lib/unidad.ts`): costo y
+ * precios se llevan a base "una unidad" antes de calcular nada. Desde entonces
+ * el analisis trae `score_detalle.unidad` con lo que efectivamente se hizo, y
+ * esta tarjeta deja de adivinar: informa.
+ *
+ * Igual el precio de equilibrio NUNCA se muestra pelado. La normalizacion solo
+ * corrige lo que el titulo DECLARA — un pack que no se anuncia como pack sigue
+ * sin detectarse. La linea de "sobre que unidad esta calculado" se queda, con
+ * tres redacciones segun lo que se sepa. Un numero equivocado dicho con
  * seguridad es peor que no dar numero: es exactamente la clase de dato
  * inventado que el bloque del desglose existe para desmentir.
  */
 
+import type { UnidadDeVenta } from "@/lib/unidad";
+
 /**
- * Heuristica, no deteccion. Busca "pack", "x3", "combo", "set de", "docena",
- * "kit" en el texto que tipeo el usuario. Falsos negativos de sobra (un pack
- * puede no decirlo) y algun falso positivo ("kit de limpieza" que se vende
- * como kit en los dos lados, donde la comparacion esta bien). Solo decide el
- * TONO de una advertencia que se muestra igual en los dos casos, asi que
- * equivocarse no rompe nada.
+ * Heuristica, no deteccion. Se usa SOLO como respaldo para los analisis
+ * anteriores al 22/9, que no traen `score_detalle.unidad`. Para todo lo nuevo
+ * manda el dato real que dejo `lib/unidad.ts`.
+ *
+ * Falsos negativos de sobra (un pack puede no decirlo) y algun falso positivo
+ * ("kit de limpieza" que se vende como kit en los dos lados, donde la
+ * comparacion esta bien). Solo decide el TONO de una advertencia que se muestra
+ * igual en los dos casos, asi que equivocarse no rompe nada.
  */
 function pareceUnPack(producto: string): boolean {
   return /\b(pack|combo|kit|set\s+de|docena|bulto|mayorista)\b|\bx\s?\d{1,2}\b|\b\d{1,2}\s?(u|un|unidades|pares)\b/i.test(
@@ -54,6 +64,7 @@ export function QueHacer({
   precioSugerido,
   gananciaLocal,
   formatear,
+  unidad,
 }: {
   producto: string;
   margenBruto: number;
@@ -75,9 +86,28 @@ export function QueHacer({
   /** Ganancia por unidad ya formateada, o null si la confianza no la sostiene. */
   gananciaLocal: string | null;
   formatear: (n: number) => string;
+  /**
+   * Lo que hizo la normalizacion del TAB 3.2. `undefined`/`null` = el analisis
+   * es anterior al 22/9 y no hay dato: se cae a la heuristica vieja.
+   */
+  unidad?: UnidadDeVenta | null;
 }) {
   const enPerdida = margenBruto < 0;
-  const esPack = pareceUnPack(producto);
+  // Tres estados, y el orden importa: el dato real le gana a la heuristica.
+  //   "normalizado" — corrio el 3.2 y encontro packs: se corrigio de verdad.
+  //   "verificado"  — corrio el 3.2 y no habia packs en ningun lado.
+  //   "sospecha"    — analisis viejo sin dato; solo queda adivinar por el texto.
+  const estadoUnidad: "normalizado" | "verificado" | "sospecha" | "limpio" = unidad
+    ? unidad.aplicada
+      ? "normalizado"
+      : "verificado"
+    : pareceUnPack(producto)
+      ? "sospecha"
+      : "limpio";
+  // Ambar = "el numero puede estar mal". Eso vale para "sospecha" y NO para
+  // "normalizado": ahi el problema ya se corrigio, y pintarlo de alarma le
+  // diria al usuario que desconfie de un numero que justamente es el bueno.
+  const esPack = estadoUnidad === "sospecha";
 
   // Con confianza baja no se afirma ningun precio: los datos que alimentan el
   // calculo son los mismos que el aviso de arriba acaba de marcar como
@@ -209,13 +239,37 @@ export function QueHacer({
         }`}
       >
         <p className={`text-xs leading-relaxed ${esPack ? "text-[#854D0E]" : "text-gray-500"}`}>
-          {esPack ? (
+          {estadoUnidad === "sospecha" ? (
             <>
               <strong className="font-semibold">Revisa la unidad antes de usar este numero.</strong>{" "}
               Tu producto parece venderse por pack y la comparacion se hace contra
               las publicaciones tal como estan en Mercado Libre. Si el mercado
               lista la unidad suelta, estas comparando tu costo de varias unidades
               contra el precio de una, y el numero de arriba queda inflado.
+            </>
+          ) : estadoUnidad === "normalizado" ? (
+            <>
+              <strong className="font-semibold">Todo esta medido por unidad.</strong>{" "}
+              {unidad!.multiplicador_consulta > 1 && (
+                <>
+                  Tu costo corresponde a un pack de {unidad!.multiplicador_consulta}, asi
+                  que se dividio por {unidad!.multiplicador_consulta} antes de comparar.{" "}
+                </>
+              )}
+              {unidad!.listings_ajustados > 0 && (
+                <>
+                  {unidad!.listings_ajustados} de {unidad!.listings_evaluados} publicaciones
+                  se venden por pack y sus precios tambien se llevaron a precio por unidad.{" "}
+                </>
+              )}
+              Solo se ajusta lo que el titulo declara: un pack que no se anuncia como
+              tal sigue contando como una unidad.
+            </>
+          ) : estadoUnidad === "verificado" ? (
+            <>
+              Calculado por unidad. Ni tu producto ni las publicaciones del mercado
+              declaran venderse por pack, asi que no hubo nada que ajustar. Si tu
+              costo igual es por varias unidades, volve a cargarlo por unidad.
             </>
           ) : (
             <>
