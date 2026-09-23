@@ -249,3 +249,62 @@ export function filtrarRelevantes(args: {
     muestra_descartada: descartados.slice(0, 3).map((l) => l.title).filter(Boolean),
   };
 }
+
+/**
+ * Aplica al scrape los descartes que marco la verificacion semantica
+ * (`verificarPertenencia` en lib/gemini.ts), con las MISMAS guardas que usa el
+ * filtro de palabras.
+ *
+ * Vive aca y no en el worker a proposito: la politica de "cuanto es demasiado
+ * descartar" tiene que existir una sola vez. Si el modelo se entusiasma y marca
+ * media muestra, la respuesta correcta es la misma que cuando se entusiasma la
+ * heuristica — abstenerse y reportar la mezcla, no achicar el mercado hasta que
+ * cierre.
+ *
+ * Las guardas se evaluan contra el scrape ORIGINAL, no contra lo que quedo del
+ * primer filtro: los dos descartes se suman y entre los dos no pueden pasarse.
+ */
+export function aplicarPertenencia(args: {
+  /** Lo que sobrevivio al filtro de palabras. */
+  listings: MLListing[];
+  /** Indices marcados por el modelo, relativos a `listings`. */
+  descartar: number[];
+  /** Cuantas publicaciones tenia el scrape antes de todo. */
+  nOriginal: number;
+  /** Cuantas se habian descartado ya por palabras. */
+  descartadosPrevios: number;
+}): ResultadoRelevancia {
+  const { listings, descartar, nOriginal, descartadosPrevios } = args;
+
+  const marcados = new Set(descartar);
+  const sobreviven = listings.filter((_, i) => !marcados.has(i));
+  const descartados = listings.filter((_, i) => marcados.has(i));
+
+  const sinCambios: ResultadoRelevancia = {
+    listings,
+    n_descartados: descartadosPrevios,
+    aplicado: descartadosPrevios > 0,
+    muestra_descartada: [],
+  };
+
+  if (descartados.length === 0) return sinCambios;
+
+  // Techo propio de la pasada semantica, mas estricto que el general. El
+  // modelo es la parte del sistema que puede equivocarse de forma masiva y
+  // coherente — cuando se convence de un criterio equivocado lo aplica a todo
+  // el scrape, que es lo que paso el 23/9 con "auriculares bluetooth" antes de
+  // exigirle el motivo. Si marca mas de un cuarto de lo que recibe, se ignora
+  // entero y queda lo que decidio el filtro de palabras.
+  if (listings.length > 0 && descartados.length / listings.length > 0.25) return sinCambios;
+
+  const totalDescartado = descartadosPrevios + descartados.length;
+  if (sobreviven.length < MUESTRA_MEDIA) return sinCambios;
+  if (nOriginal > 0 && totalDescartado / nOriginal > MAXIMO_DESCARTABLE) return sinCambios;
+
+  return {
+    listings: sobreviven,
+    n_descartados: totalDescartado,
+    aplicado: true,
+    muestra_descartada: descartados.slice(0, 3).map((l) => l.title).filter(Boolean),
+  };
+}

@@ -25,7 +25,7 @@ export async function POST(
 
   const { data: nicho } = await supabase
     .from("watchlist")
-    .select("id, user_id, producto, pais, search_keyword, perfil_vendedor, costo_estimado, last_check_at")
+    .select("id, user_id, producto, pais, search_keyword, ficha_producto, perfil_vendedor, costo_estimado, last_check_at")
     .eq("id", params.id)
     .maybeSingle();
 
@@ -107,6 +107,7 @@ export async function POST(
       producto: nicho.producto,
       pais: nicho.pais,
       search_keyword: nicho.search_keyword,
+      ficha_producto: nicho.ficha_producto,
       perfil_vendedor: nicho.perfil_vendedor ?? "principiante",
       costo_estimado: nicho.costo_estimado,
     },

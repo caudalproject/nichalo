@@ -1,0 +1,11 @@
+-- La ficha del producto viaja al seguimiento (23/9/2026).
+--
+-- El analisis de origen descarta las publicaciones que no son el producto en
+-- dos pasadas: una de palabras (lib/relevancia.ts) y una semantica, que usa la
+-- ficha derivada de la foto para distinguir gamas que se llaman igual.
+--
+-- Sin esta columna el re-chequeo semanal solo podria correr la primera, y
+-- compararia un mercado depurado contra uno sin depurar: el delta reportaria
+-- como "cambio del nicho" un cambio de criterio nuestro. Es el mismo motivo por
+-- el que search_keyword ya vivia aca.
+ALTER TABLE watchlist ADD COLUMN IF NOT EXISTS ficha_producto TEXT;

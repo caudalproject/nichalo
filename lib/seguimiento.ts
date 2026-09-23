@@ -21,7 +21,8 @@ import { startApifyRun, checkApifyRun, getApifyResults } from "./apify";
 import { calcularPrecioStats } from "./confianza";
 import { calcularScore, calcularMetricas } from "./score";
 import { normalizarUnidadDeVenta } from "./unidad";
-import { filtrarRelevantes } from "./relevancia";
+import { filtrarRelevantes, aplicarPertenencia } from "./relevancia";
+import { verificarPertenencia } from "./gemini";
 import { PLAN_CONFIG } from "./plans";
 import { notificarSiCorresponde } from "./notificar-seguimiento";
 
@@ -45,13 +46,14 @@ export const rechequearNicho = inngest.createFunction(
     retries: 20,
   },
   async ({ event, step }) => {
-    const { run_id, watchlist_id, producto, pais, search_keyword, perfil_vendedor, costo_estimado } =
+    const { run_id, watchlist_id, producto, pais, search_keyword, ficha_producto, perfil_vendedor, costo_estimado } =
       event.data as {
         run_id: string;
         watchlist_id: string;
         producto: string;
         pais: "AR" | "MX" | "CO";
         search_keyword?: string | null;
+        ficha_producto?: string | null;
         perfil_vendedor: string;
         costo_estimado: number | null;
       };
@@ -102,10 +104,29 @@ export const rechequearNicho = inngest.createFunction(
           listings: scrape.listings,
         });
 
+        // La segunda pasada tambien corre aca. La nota de arriba dice que en
+        // este archivo no se llama a Gemini, y sigue siendo cierta para lo que
+        // importaba: el delta se calcula sobre cantidades medidas, sin prosa
+        // del modelo. Esto es otra cosa — decidir que publicaciones entran a la
+        // medicion — y tiene que usar el mismo criterio que el analisis de
+        // origen o el delta compara dos mercados depurados distinto. Cuesta una
+        // llamada de texto corto contra los ~$119 ARS del re-chequeo.
+        const marcados = await verificarPertenencia({
+          producto,
+          ficha: ficha_producto,
+          titulos: relevancia.listings.map((l) => l.title ?? ""),
+        });
+        const relevanciaFinal = aplicarPertenencia({
+          listings: relevancia.listings,
+          descartar: marcados,
+          nOriginal: scrape.listings.length,
+          descartadosPrevios: relevancia.n_descartados,
+        });
+
         const normalizado = normalizarUnidadDeVenta({
           producto,
           costoLocal: costoIngresado,
-          listings: relevancia.listings,
+          listings: relevanciaFinal.listings,
         });
         const listingsNormalizados = normalizado.listings;
         const costoLocal = normalizado.costoUnitario;
@@ -118,9 +139,9 @@ export const rechequearNicho = inngest.createFunction(
         ).length;
 
         const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal, {
-          n_descartados: relevancia.n_descartados,
-          aplicado: relevancia.aplicado,
-          muestra_descartada: relevancia.muestra_descartada,
+          n_descartados: relevanciaFinal.n_descartados,
+          aplicado: relevanciaFinal.aplicado,
+          muestra_descartada: relevanciaFinal.muestra_descartada,
           n_evaluados: scrape.listings.length,
         });
         if (!calculado) {

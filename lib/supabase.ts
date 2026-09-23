@@ -60,7 +60,6 @@ export interface AnalysisResult {
   titulo_sugerido_publicacion: string;
   imagen_url?: string;
   publicaciones_analizadas?: number;
-  cache_date?: string;
   total_publicaciones_ml?: number;
   google_trends_interest?: number;
   google_trends_trending?: boolean;
@@ -87,6 +86,12 @@ export interface AnalysisResult {
    * encontrando siempre undefined.
    */
   search_keyword?: string | null;
+  /**
+   * Descripcion del producto derivada de la foto (gama, variante, atributos que
+   * lo distinguen de sus primos). Es lo que usa `verificarPertenencia` para
+   * decidir que publicaciones del scrape son el mismo producto.
+   */
+  ficha_producto?: string | null;
   /**
    * Lo que produce el "Analisis avanzado Pro". Existe como bloque propio desde
    * el 16/9: antes los cuatro inputs del Pro solo alteraban la prosa de campos

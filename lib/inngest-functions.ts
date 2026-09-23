@@ -38,6 +38,7 @@ export const analizarProducto = inngest.createFunction(
       plan,
       perfil_vendedor,
       search_keyword,
+      ficha_producto,
       datos_pro,
       reintento_de,
     } = event.data as {
@@ -49,6 +50,7 @@ export const analizarProducto = inngest.createFunction(
       plan: Plan;
       perfil_vendedor: string;
       search_keyword?: string;
+      ficha_producto?: string;
       datos_pro?: {
         origen_producto?: string | null;
         presupuesto_inicial?: number | null;
@@ -211,11 +213,32 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             listings: finalScrape.listings,
           });
 
+          // SEGUNDA PASADA, SEMANTICA. El filtro de arriba compara palabras y
+          // por eso no puede ver la diferencia entre una almohadilla cervical
+          // de $12.000 y un equipo de fisioterapia de $499.999: los titulos
+          // dicen lo mismo. Esta pasada si, y es la que protege al usuario free
+          // que tiene un solo credito y recibe el margen calculado contra la
+          // mediana de otra gama. Si la llamada falla devuelve [] y todo sigue
+          // igual que sin ella.
+          const { verificarPertenencia } = await import("./gemini");
+          const marcados = await verificarPertenencia({
+            producto,
+            ficha: ficha_producto,
+            titulos: relevancia.listings.map((l) => l.title ?? ""),
+          });
+          const { aplicarPertenencia } = await import("./relevancia");
+          const relevanciaFinal = aplicarPertenencia({
+            listings: relevancia.listings,
+            descartar: marcados,
+            nOriginal: finalScrape.listings.length,
+            descartadosPrevios: relevancia.n_descartados,
+          });
+
           const { normalizarUnidadDeVenta } = await import("./unidad");
           const normalizado = normalizarUnidadDeVenta({
             producto,
             costoLocal: costoIngresado,
-            listings: relevancia.listings,
+            listings: relevanciaFinal.listings,
           });
           const listingsNormalizados = normalizado.listings;
           const costoLocal = normalizado.costoUnitario ?? costoIngresado;
@@ -226,9 +249,9 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           const totalConVentas = listingsNormalizados.filter(l => (l.soldQuantity ?? 0) > 0).length;
 
           const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal, {
-            n_descartados: relevancia.n_descartados,
-            aplicado: relevancia.aplicado,
-            muestra_descartada: relevancia.muestra_descartada,
+            n_descartados: relevanciaFinal.n_descartados,
+            aplicado: relevanciaFinal.aplicado,
+            muestra_descartada: relevanciaFinal.muestra_descartada,
             n_evaluados: finalScrape.listings.length,
           });
           const precioStats = calculado?.stats ?? null;
@@ -320,7 +343,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         },
       );
 
-      // Step 6a: Guardar análisis en DB y cachear
+      // Step 6a: Guardar análisis en DB
       const savedAnalysis = await step.run("save-analysis", async () => {
         const resultadoJson = {
           ...analysis,
@@ -337,6 +360,10 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           // mercados distintos comparados como si fueran el mismo: deltas
           // fantasma, justo lo que el TAB 3 fue a matar.
           search_keyword: search_keyword ?? null,
+          /** La ficha con la que se decidio que publicaciones eran este
+           *  producto. Se guarda para auditar y para que el re-chequeo del TAB
+           *  5 pueda aplicar exactamente el mismo criterio. */
+          ficha_producto: ficha_producto ?? null,
           // Columna deprecada el 20/9 (TAB 1): salia de la API de ML que hoy
           // devuelve 403. Se deja en 0 en vez de borrar la columna (fuera de
           // alcance de este tab). No se usa en ningun lado de la UI.
@@ -364,31 +391,9 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           throw new Error(insertErr?.message ?? "Error guardando análisis");
         }
 
-        const productoNorm = producto.trim().toLowerCase();
-        // costo_estimado entra en la clave: el resultado_json cacheado incluye
-        // margen, ganancia, costo_evaluacion y (desde el 16/9) la senal de
-        // confianza costo_fuera_de_rango, todos calculados CON ese costo.
-        // Servirlo a alguien que ingreso otro costo le daba los numeros de un
-        // desconocido. El onConflict tiene que coincidir exactamente con la
-        // constraint analysis_cache_unique_key.
-        const { error: cacheErr } = await supabase.from("analysis_cache").upsert(
-          {
-            producto: productoNorm,
-            pais,
-            perfil_vendedor: perfil_vendedor ?? "principiante",
-            costo_estimado,
-            resultado_json: resultadoJson,
-            publicaciones_analizadas: finalScrape.totalListings,
-            created_at: new Date().toISOString(),
-          },
-          { onConflict: "producto,pais,perfil_vendedor,costo_estimado" }
-        );
-        // El cache es una optimizacion: si falla, el analisis ya esta guardado
-        // y el usuario no se entera. Pero se loguea, porque antes este upsert
-        // no chequeaba error y no habia forma de saber si estaba escribiendo.
-        if (cacheErr) {
-          console.error("[cache] no se pudo escribir:", cacheErr.message);
-        }
+        // El cache se elimino el 23/9 (ver app/api/analizar/route.ts). Antes
+        // de esto el worker escribia una fila por analisis en una tabla que el
+        // lookup ya no consultaba nunca.
 
         return { analysisId: insertData.id, resultadoJson };
       });

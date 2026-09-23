@@ -10,18 +10,6 @@ import { FORMULA_VERSION } from "@/lib/score";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Bajado de 30 a 7 dias el 15/9/2026. Medido sobre la base antes de tocarlo:
-// el cache pego 2 veces en 34 analisis historicos (6%), y las dos veces fue el
-// mismo usuario repitiendo el mismo producto en menos de 24 h — cero hits entre
-// usuarios distintos. O sea que la ventana de 30 dias no estaba ahorrando
-// practicamente nada, y a cambio permitia servir datos de precios de hasta un
-// mes de antiguedad en un mercado con inflacion mensual. 7 dias cubre el caso
-// real que si ocurre (el usuario que reanaliza lo mismo en pocos dias) sin
-// sostener precios viejos.
-//
-// El cache sigue siendo silencioso (regla dura del proyecto): esto no agrega
-// ningun aviso al usuario, solo acorta la ventana.
-const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 const DatosProSchema = z.object({
   origen_producto: z.string().nullable().optional(),
@@ -182,97 +170,45 @@ export async function POST(request: Request) {
   const plan = (profile?.plan ?? "free") as Plan;
 
   try {
-    // --- Cache lookup (only when no image) ---
-    if (!imagenBase64) {
-      const productoNorm = producto.trim().toLowerCase();
-      const cutoff = new Date(Date.now() - CACHE_TTL_MS).toISOString();
-
-      const { data: cached } = await supabase
-        .from("analysis_cache")
-        .select("resultado_json, publicaciones_analizadas, created_at")
-        .eq("producto", productoNorm)
-        .eq("pais", pais)
-        .eq("perfil_vendedor", perfilVendedor ?? "principiante")
-        // El costo entra en la busqueda porque entra en el resultado: margen,
-        // ganancia, costo_evaluacion y la senal de confianza costo_fuera_de_rango
-        // se calcularon con el costo de quien corrio el analisis original.
-        .eq("costo_estimado", costoEstimado)
-        .gte("created_at", cutoff)
-        .maybeSingle();
-
-      // TAB 3.2 (22/9) — EL CACHE NO PUEDE CRUZAR VERSIONES DE FORMULA.
-      //
-      // La clave del cache es producto + pais + perfil + costo, y NO incluye la
-      // version de formula. Cada vez que el score cambia, el cache sigue
-      // sirviendo el resultado viejo con total confianza: paso el 20/9 (v1) y
-      // otra vez el 21/9 (v1.1), y las dos veces se resolvio purgando filas a
-      // mano. El plan de tabs dejo escrito que a la tercera se arreglaba en la
-      // lectura. Esta es la tercera: la v1.2 cambia el score de todo producto
-      // que se venda por pack, y sin esto un usuario pediria un analisis nuevo
-      // para recibir exactamente el numero equivocado que acabamos de corregir
-      // — pagando el credito igual.
-      //
-      // Se resuelve en la lectura y no en la clave a proposito: no toca el
-      // esquema, y las filas viejas simplemente dejan de matchear y expiran
-      // solas por TTL.
-      const formulaCacheada = (cached?.resultado_json as AnalysisResult | undefined)?.score_detalle
-        ?.formula;
-      const cacheVigente = cached != null && formulaCacheada === FORMULA_VERSION;
-
-      if (cacheVigente) {
-        const resultadoJson = cached.resultado_json as AnalysisResult;
-        resultadoJson.publicaciones_analizadas = cached.publicaciones_analizadas as number;
-        resultadoJson.cache_date = cached.created_at as string;
-
-        const { data: inserted, error: insertErr } = await supabase
-          .from("analyses")
-          .insert({
-            user_id: user.id,
-            producto,
-            pais,
-            costo_estimado: costoEstimado,
-            resultado_json: resultadoJson,
-            score: resultadoJson.score,
-            veredicto: resultadoJson.veredicto,
-            reintento_de: reintentoGratis ? reintento_de : null,
-          })
-          .select("id")
-          .single();
-
-        if (insertErr || !inserted) {
-          // Si choca con analyses_reintento_de_unico, alguien ya uso el
-          // reintento de ese analisis. Se responde sin cobrar ni crear nada.
-          if (insertErr?.code === "23505") {
-            return NextResponse.json({ error: "reintento_ya_usado" }, { status: 409 });
-          }
-          return NextResponse.json(
-            { error: insertErr?.message ?? "Error guardando el análisis." },
-            { status: 500 }
-          );
-        }
-
-        if (!reintentoGratis) {
-          await supabase.rpc("descontar_analisis", { user_id_param: user.id });
-        }
-
-        return NextResponse.json({ id: inserted.id });
-      }
-    }
+    // EL CACHE SE ELIMINO EL 23/9/2026.
+    //
+    // Nacio para no pagar Apify dos veces por el mismo producto, pero desde
+    // que la foto es obligatoria (21/9) el lookup vivia adentro de un
+    // `if (!imagenBase64)` que ya no se cumple nunca: no podia pegar, y el
+    // worker seguia escribiendo una fila por analisis. Estaba muerto y
+    // costando.
+    //
+    // No se reanima metiendo la imagen en la clave, y ese es el punto: dos
+    // fotos distintas del "mismo" producto son dos productos distintos para el
+    // que las sube — otra marca, otra potencia, otro tamaño. Servirle a uno el
+    // analisis calculado con la foto de otro es exactamente el error que este
+    // sistema esta tratando de eliminar, y ademas seria silencioso (regla dura
+    // del proyecto: el cache nunca se anuncia). Con el volumen actual de
+    // analisis el ahorro no compensa ni de cerca ese riesgo.
+    //
+    // La tabla `analysis_cache` se dropea en la migracion
+    // 20260923120000_drop_analysis_cache.sql.
 
     // --- Si hay imagen, extraer keyword descriptiva para Apify ---
     let searchKeyword = producto;
+    let fichaProducto = "";
     if (imagenBase64) {
       try {
         // El producto tipeado viaja como ancla (23/9): la foto precisa el
         // texto, no compite con el. Sin esto el modelo leia la imagen en el
         // vacio y podia devolver un termino mas generico que el que el usuario
         // ya habia escrito.
-        const keyword = await extractKeywordsFromImage(
+        //
+        // La FICHA que vuelve es la pieza nueva: describe la gama y la variante
+        // del producto, y es lo que despues le permite al worker descartar la
+        // publicacion que se llama igual pero juega en otro mercado.
+        const identificado = await extractKeywordsFromImage(
           imagenBase64,
           imagenMimeType ?? "image/jpeg",
           producto
         );
-        if (keyword) searchKeyword = keyword;
+        if (identificado?.termino_busqueda) searchKeyword = identificado.termino_busqueda;
+        if (identificado?.ficha) fichaProducto = identificado.ficha;
       } catch {
         // Fallback silencioso al texto del usuario
       }
@@ -313,6 +249,9 @@ export async function POST(request: Request) {
     };
     if (searchKeyword !== producto) {
       eventData.search_keyword = searchKeyword;
+    }
+    if (fichaProducto) {
+      eventData.ficha_producto = fichaProducto;
     }
 
     await inngest.send({

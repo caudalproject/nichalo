@@ -106,6 +106,10 @@ export async function POST(req: Request) {
         // re-chequeo scrapearia un mercado distinto al que se midio.
         search_keyword:
           typeof resultado.search_keyword === "string" ? resultado.search_keyword : null,
+        // Misma logica que search_keyword: el re-chequeo tiene que poder
+        // aplicar el mismo criterio de pertenencia que el analisis de origen.
+        ficha_producto:
+          typeof resultado.ficha_producto === "string" ? resultado.ficha_producto : null,
         analysis_id: analysis.id,
         activo: true,
       },

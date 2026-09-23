@@ -55,12 +55,24 @@ interface AnalyzeArgs {
  *    definicion, las genericas — las que traen la categoria entera, que es
  *    exactamente el problema que la foto venia a resolver.
  */
+export interface ProductoIdentificado {
+  /** Con esto se scrapea. Entre 2 y 5 palabras. */
+  termino_busqueda: string;
+  /**
+   * Una frase que describe SOLO este producto, con lo que lo distingue de sus
+   * primos: tipo exacto, variante, potencia, tamaño, gama. Es lo que despues
+   * se usa para decidir, publicacion por publicacion, si el scrape esta
+   * hablando del mismo producto o de otro.
+   */
+  ficha: string;
+}
+
 export async function extractKeywordsFromImage(
   imagenBase64: string,
   mimeType: string = "image/jpeg",
   /** Lo que tipeo el usuario. Ancla la lectura de la imagen. */
   productoTipeado?: string
-): Promise<string | null> {
+): Promise<ProductoIdentificado | null> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
@@ -69,18 +81,16 @@ export async function extractKeywordsFromImage(
     productoTipeado ? ` y describió como "${productoTipeado}"` : ""
   }.
 
-Devolvé UN solo término de búsqueda para Mercado Libre que traiga ESTE producto y no su categoría entera.
+Devolvé un JSON con dos campos:
 
-Reglas:
-- Entre 2 y 5 palabras. Más corto trae de todo; más largo no trae nada.
-- Incluí lo que hace único a este producto y se ve en la foto: tipo exacto, formato, material, tamaño o potencia si está impresa, marca si es legible.
-- NO incluyas color salvo que sea lo que define al producto.
-- NO uses palabras de marketing ("premium", "calidad", "original").
-- Si la foto es ambigua o no se ve bien qué es, devolvé exactamente: SIN_DATO
+"termino_busqueda": el término con el que buscarías ESTE producto en Mercado Libre para que no traiga su categoría entera. Entre 2 y 5 palabras. Incluí lo que lo hace único y se ve en la foto (tipo exacto, formato, tamaño o potencia si está impresa, marca si es legible). Sin palabras de marketing ni colores, salvo que el color defina al producto.
 
-Devolvé SOLO el término, sin comillas, sin explicación, sin markdown.
-Ejemplo bueno: almohadilla eléctrica cervical 12v
-Ejemplo malo: almohadilla`;
+"ficha": una frase de hasta 25 palabras que describa este producto de forma que se lo pueda distinguir de otros parecidos. Tiene que dejar claro QUÉ ES y EN QUÉ GAMA O VARIANTE está, porque se va a usar para descartar publicaciones de productos distintos. Si de la foto surge que es una versión simple o genérica, decilo; si es premium o de marca, también.
+
+Si la foto es ambigua o no se ve bien qué es, devolvé {"termino_busqueda":"SIN_DATO","ficha":"SIN_DATO"}.
+
+Devolvé SOLO el JSON, sin markdown.
+Ejemplo: {"termino_busqueda":"almohadilla eléctrica cervical 12v","ficha":"Almohadilla eléctrica de tela para cuello y hombros, versión genérica con control de temperatura. No es un masajeador con motor ni un equipo de fisioterapia."}`;
 
   for (const modelName of MODELS) {
     try {
@@ -94,15 +104,18 @@ Ejemplo malo: almohadilla`;
       ]);
       const text = result.response.text().trim();
       if (!text) continue;
-      // Se queda con la primera linea por si el modelo agrega algo abajo. El
-      // split por coma de antes ya no aplica: ahora se pide un termino solo.
-      const termino = text.split("\n")[0].replace(/^["'\`]|["'\`]$/g, "").trim();
+      const parsed = extractJson(text) as Partial<ProductoIdentificado> | null;
+      const termino = (parsed?.termino_busqueda ?? "").trim();
+      const ficha = (parsed?.ficha ?? "").trim();
       // SIN_DATO es la salida honesta cuando la foto no alcanza. Devolver null
-      // hace que el caller use el texto del usuario, que es el comportamiento
-      // correcto: mejor buscar por lo que el sabe que por lo que el modelo
-      // adivino de una foto borrosa.
+      // hace que el caller use el texto del usuario, que es lo correcto: mejor
+      // buscar por lo que el sabe que por lo que el modelo adivino de una foto
+      // borrosa.
       if (!termino || termino.toUpperCase().includes("SIN_DATO")) return null;
-      return termino;
+      return {
+        termino_busqueda: termino,
+        ficha: ficha.toUpperCase() === "SIN_DATO" ? "" : ficha,
+      };
     } catch (err: unknown) {
       const e = err as { message?: string; status?: number };
       const is503 = e?.message?.includes("503") || e?.status === 503;
@@ -112,6 +125,133 @@ Ejemplo malo: almohadilla`;
     }
   }
   return null;
+}
+
+/**
+ * Decide, titulo por titulo, cuales publicaciones del scrape NO son el producto
+ * que el usuario esta validando.
+ *
+ * POR QUE ESTO EXISTE SI YA HAY UN FILTRO EN CODIGO
+ *
+ * `lib/relevancia.ts` compara palabras. Eso alcanza para tirar un repuesto o un
+ * lote de piedras a granel, y no alcanza para lo que mas duele: **dos productos
+ * que se llaman igual y valen distinto**. "Almohadilla electrica cervical"
+ * matchea igual de bien con una de $12.000 y con un equipo de fisioterapia de
+ * $499.999. Las palabras son las mismas; el producto no.
+ *
+ * Ese caso es el que rompe el analisis del usuario free: tiene UN credito, pone
+ * su costo real, y el margen le sale calculado contra la mediana de otra gama.
+ *
+ * POR QUE NO CONTRADICE EL TAB 3
+ *
+ * La regla del 20/9 es que el modelo no produce el numero. Sigue sin
+ * producirlo: acá decide **pertenencia**, que es un juicio semantico y es
+ * exactamente para lo que sirve. El score lo sigue calculando `lib/score.ts`
+ * sobre las publicaciones que sobreviven, en codigo y de forma reproducible.
+ *
+ * COMO FALLA
+ *
+ * Hacia adelante y en silencio. Si la llamada se cae, devuelve lista vacia y el
+ * pipeline se queda con lo que dejo el filtro deterministico — el
+ * comportamiento del 23/9 a la mañana. Nunca puede empeorar el resultado
+ * respecto de no haberla llamado.
+ *
+ * COSTO: una llamada de texto corto (30 titulos) por analisis. Apify es el
+ * 90-97% del costo de un analisis; esto no mueve la aguja.
+ */
+export async function verificarPertenencia(args: {
+  producto: string;
+  /** La ficha que salio de la foto, si hubo. Es lo que mas precision aporta. */
+  ficha?: string | null;
+  titulos: string[];
+}): Promise<number[]> {
+  const { producto, ficha, titulos } = args;
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || titulos.length === 0) return [];
+
+  // SIN FICHA NO SE CORRE. Medido el 23/9 contra los fixtures: pidiendole al
+  // modelo que juzgue "gama" con el solo texto del usuario, "auriculares
+  // bluetooth" descartaba los JBL, los Anker y los Aiwa — la competencia real,
+  // 8 de 29 publicaciones, y la mediana caia 26%. Sin una referencia de que es
+  // el producto, "otra gama" se vuelve una opinion y el modelo la usa para
+  // sacar todo lo que no se parece al promedio.
+  //
+  // La ficha sale de la foto, y la foto es obligatoria desde el 21/9. O sea
+  // que en produccion esto corre siempre; el que se abstiene es el caso raro
+  // (la foto no se pudo leer), que es justo cuando no hay que arriesgar.
+  if (!ficha || ficha.trim().length < 15) return [];
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+
+  const lista = titulos.map((t, i) => `${i}: ${t}`).join("\n");
+  const prompt = `Alguien quiere vender este producto y está midiendo su competencia en Mercado Libre.
+
+PRODUCTO: "${producto}"
+QUÉ ES EXACTAMENTE: ${ficha}
+
+Abajo hay publicaciones reales numeradas. Devolvé solo las que NO sirven para medir el precio de mercado de ese producto, cada una con su motivo.
+
+MOTIVOS VÁLIDOS (son los únicos tres):
+- "accesorio": es un repuesto, una parte, un complemento o un consumible del producto, no el producto.
+- "otro_producto": es otra cosa que casualmente comparte palabras en el título.
+- "otra_gama": está declaradamente en otro mercado — profesional, industrial, médico o mayorista cuando el producto es hogareño, o al revés. Tiene que estar DICHO en el título, no deducido del precio.
+
+NUNCA marques por estas razones. Son competencia y tienen que quedar:
+- Otra MARCA del mismo producto. JBL, Anker, Redragon y un genérico compiten entre sí.
+- Otro color, otro tamaño o mejores prestaciones.
+- Que se venda por pack o de a varias unidades. Eso se corrige después, aparte.
+- Que sea más caro o más barato que el resto. El precio NO es un motivo.
+
+Ante la duda, dejala. Descartar competencia real arruina el análisis de la persona: le calcula el margen contra un mercado que no existe.
+
+PUBLICACIONES:
+${lista}
+
+Devolvé SOLO este JSON: {"descartar":[{"i":0,"motivo":"accesorio"}]}
+Si todas sirven: {"descartar":[]}`;
+
+  for (const modelName of MODELS) {
+    try {
+      const model = genAI.getGenerativeModel(
+        // temperature 0: la pertenencia de un titulo a un producto no es una
+        // pregunta creativa, y dos corridas identicas tienen que dar lo mismo o
+        // volvemos al problema que el TAB 3 fue a arreglar.
+        { model: modelName, generationConfig: { temperature: 0 } },
+        { apiVersion: "v1" }
+      );
+      const result = await model.generateContent(prompt);
+      const parsed = extractJson(result.response.text().trim()) as
+        | { descartar?: unknown }
+        | null;
+      const crudos = Array.isArray(parsed?.descartar) ? parsed!.descartar : [];
+
+      // Se exige el motivo y se valida contra la lista cerrada. No es
+      // decoracion: obligarlo a nombrar por que descarta es lo que evita el
+      // descarte por "me parece", y un motivo que no esta en la lista
+      // (tipicamente "marca_distinta" o "mas caro") se ignora en vez de
+      // aceptarse. El modelo puede opinar; el criterio lo ponemos nosotros.
+      const MOTIVOS_OK = new Set(["accesorio", "otro_producto", "otra_gama"]);
+      const indices: number[] = [];
+      for (const item of crudos) {
+        if (typeof item !== "object" || item === null) continue;
+        const { i, motivo } = item as { i?: unknown; motivo?: unknown };
+        const idx = typeof i === "number" ? i : Number.parseInt(String(i), 10);
+        if (!Number.isInteger(idx) || idx < 0 || idx >= titulos.length) continue;
+        if (typeof motivo !== "string" || !MOTIVOS_OK.has(motivo.trim().toLowerCase())) continue;
+        indices.push(idx);
+      }
+      return Array.from(new Set(indices));
+    } catch (err: unknown) {
+      const e = err as { message?: string; status?: number };
+      const is503 = e?.message?.includes("503") || e?.status === 503;
+      const isLast = modelName === MODELS[MODELS.length - 1];
+      if (is503 && !isLast) continue;
+      // Cualquier otro error: seguimos sin verificacion semantica. El filtro
+      // deterministico ya hizo su parte y el analisis sale igual.
+      return [];
+    }
+  }
+  return [];
 }
 
 export async function analizarConGemini(
