@@ -106,13 +106,21 @@ function LoginContent() {
   }, []);
 
   // Si ya pidio un codigo hace poco, volver directo al paso de ingresarlo.
+  // El ?email= lo pone el link del mail y cubre el caso que el localStorage
+  // no puede cubrir: abrir el mail en OTRO navegador (el de Gmail, por
+  // ejemplo), donde el storage de la pestana original no existe.
+  const emailParam = searchParams.get("email");
   useEffect(() => {
     const pendiente = leerPendiente();
-    if (pendiente) {
-      setEmail(pendiente);
+    // Supabase no url-encodea {{ .Email }} en la plantilla: un "+" viaja
+    // como espacio. Ningun email tiene espacios, asi que revertirlo es seguro.
+    const desdeMail = emailParam ? emailParam.replace(/ /g, "+").trim() : null;
+    const restaurado = pendiente ?? desdeMail;
+    if (restaurado) {
+      setEmail(restaurado);
       setMagicSent(true);
     }
-  }, []);
+  }, [emailParam]);
 
   async function sendCode() {
     if (!email.trim()) return;
