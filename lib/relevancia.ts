@@ -122,6 +122,49 @@ const COBERTURA_MINIMA = 0.5;
  */
 const MAXIMO_DESCARTABLE = 0.4;
 
+/**
+ * Techo propio de la pasada semantica, mas estricto que el general.
+ *
+ * Estaba escrito a mano como `0.25` adentro de `aplicarPertenencia`. Un umbral
+ * que hace que el sistema se abstenga tiene que tener nombre: es lo primero que
+ * se va a querer mover cuando haya datos, y un literal suelto no se encuentra
+ * buscando por "umbral".
+ */
+const MAXIMO_SEMANTICO = 0.25;
+
+/**
+ * Deja rastro de cada abstencion.
+ *
+ * POR QUE. Las guardas de este archivo son la parte del sistema que decide NO
+ * actuar, y hasta hoy no dejaban registro de nada: cuando se activaban, el
+ * analisis salia sin filtrar y era indistinguible de uno donde no habia nada
+ * que filtrar. El dia que haya que calibrar `MAXIMO_SEMANTICO` o
+ * `MAXIMO_DESCARTABLE` — que es el dia que se sepa si son conservadores o
+ * flojos — no habria con que. Mismo agujero que el `catch {}` mudo de
+ * `extractKeywordsFromImage` que se cerro en `8d73f42`.
+ *
+ * Es `warn` y no `error`: abstenerse es el comportamiento correcto de la
+ * guarda, no una falla. Y es una sola linea greppeable por `[relevancia]`
+ * porque el consumidor es una consulta sobre los logs de Inngest, no un humano
+ * leyendo la corrida.
+ */
+function registrarAbstencion(args: {
+  guarda: string;
+  producto?: string;
+  nEvaluados: number;
+  nDescartables: number;
+  sobreviven: number;
+  muestra: string[];
+}): void {
+  const { guarda, producto, nEvaluados, nDescartables, sobreviven, muestra } = args;
+  const ratio = nEvaluados > 0 ? Math.round((nDescartables / nEvaluados) * 100) / 100 : 0;
+  console.warn(
+    `[relevancia] abstencion guarda=${guarda} producto=${JSON.stringify(producto ?? "")} ` +
+      `n_evaluados=${nEvaluados} n_descartables=${nDescartables} ratio=${ratio} ` +
+      `sobreviven=${sobreviven} muestra=${JSON.stringify(muestra.slice(0, 3))}`
+  );
+}
+
 /** Normaliza para comparar: sin tildes, sin puntuacion, en minuscula. */
 function normalizar(texto: string): string {
   return texto
@@ -266,15 +309,37 @@ export function filtrarRelevantes(args: {
     ...sinFiltrar,
     n_descartables: descartados.length,
   };
-  if (sobreviven.length < MUESTRA_MEDIA) return abstenerse;
-  if (descartados.length / listings.length > MAXIMO_DESCARTABLE) return abstenerse;
+  const muestraDescartada = descartados.slice(0, 3).map((l) => l.title).filter(Boolean) as string[];
+
+  if (sobreviven.length < MUESTRA_MEDIA) {
+    registrarAbstencion({
+      guarda: "muestra_minima",
+      producto,
+      nEvaluados: listings.length,
+      nDescartables: descartados.length,
+      sobreviven: sobreviven.length,
+      muestra: muestraDescartada,
+    });
+    return abstenerse;
+  }
+  if (descartados.length / listings.length > MAXIMO_DESCARTABLE) {
+    registrarAbstencion({
+      guarda: "techo_general",
+      producto,
+      nEvaluados: listings.length,
+      nDescartables: descartados.length,
+      sobreviven: sobreviven.length,
+      muestra: muestraDescartada,
+    });
+    return abstenerse;
+  }
 
   return {
     listings: sobreviven,
     n_descartados: descartados.length,
     n_descartables: descartados.length,
     aplicado: true,
-    muestra_descartada: descartados.slice(0, 3).map((l) => l.title).filter(Boolean),
+    muestra_descartada: muestraDescartada,
   };
 }
 
@@ -313,6 +378,8 @@ export function aplicarPertenencia(args: {
    * pasada semantica que no marca nada (los fixtures limpios dan 0 descartes).
    */
   muestraPrevia?: string[];
+  /** Solo para el log de abstencion: sin el termino no se puede calibrar nada. */
+  producto?: string;
 }): ResultadoRelevancia {
   const {
     listings,
@@ -321,6 +388,7 @@ export function aplicarPertenencia(args: {
     descartadosPrevios,
     descartablesPrevios,
     muestraPrevia,
+    producto,
   } = args;
 
   const previos = muestraPrevia ?? [];
@@ -342,17 +410,42 @@ export function aplicarPertenencia(args: {
 
   if (descartados.length === 0) return sinCambios;
 
-  // Techo propio de la pasada semantica, mas estricto que el general. El
-  // modelo es la parte del sistema que puede equivocarse de forma masiva y
-  // coherente — cuando se convence de un criterio equivocado lo aplica a todo
-  // el scrape, que es lo que paso el 23/9 con "auriculares bluetooth" antes de
-  // exigirle el motivo. Si marca mas de un cuarto de lo que recibe, se ignora
-  // entero y queda lo que decidio el filtro de palabras.
-  if (listings.length > 0 && descartados.length / listings.length > 0.25) return sinCambios;
+  const muestraSemantica = descartados.map((l) => l.title).filter(Boolean) as string[];
+  const abstenerse = (guarda: string, sobrevivientes: number) => {
+    registrarAbstencion({
+      guarda,
+      producto,
+      nEvaluados: listings.length,
+      nDescartables: descartados.length,
+      sobreviven: sobrevivientes,
+      muestra: muestraSemantica,
+    });
+    return sinCambios;
+  };
+
+  // Techo propio de la pasada semantica, mas estricto que el general
+  // (`MAXIMO_SEMANTICO`). El modelo es la parte del sistema que puede
+  // equivocarse de forma masiva y coherente — cuando se convence de un criterio
+  // equivocado lo aplica a todo el scrape, que es lo que paso el 23/9 con
+  // "auriculares bluetooth" antes de exigirle el motivo. Si marca mas de un
+  // cuarto de lo que recibe, se ignora entero y queda lo que decidio el filtro
+  // de palabras.
+  //
+  // El numero se eligio contra un caso, no contra una distribucion. El log es
+  // lo unico que va a decir si 0,25 corta demasiado pronto: cada abstencion
+  // reporta el ratio real, asi que se puede ver la forma de lo que se esta
+  // rechazando antes de mover el umbral.
+  if (listings.length > 0 && descartados.length / listings.length > MAXIMO_SEMANTICO) {
+    return abstenerse("techo_semantico", sobreviven.length);
+  }
 
   const totalDescartado = descartadosPrevios + descartados.length;
-  if (sobreviven.length < MUESTRA_MEDIA) return sinCambios;
-  if (nOriginal > 0 && totalDescartado / nOriginal > MAXIMO_DESCARTABLE) return sinCambios;
+  if (sobreviven.length < MUESTRA_MEDIA) {
+    return abstenerse("muestra_minima_semantica", sobreviven.length);
+  }
+  if (nOriginal > 0 && totalDescartado / nOriginal > MAXIMO_DESCARTABLE) {
+    return abstenerse("techo_general_semantico", sobreviven.length);
+  }
 
   return {
     listings: sobreviven,

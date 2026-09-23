@@ -234,6 +234,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             descartadosPrevios: relevancia.n_descartados,
             descartablesPrevios: relevancia.n_descartables,
             muestraPrevia: relevancia.muestra_descartada,
+            producto,
           });
 
           const { normalizarUnidadDeVenta } = await import("./unidad");
@@ -258,6 +259,29 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
             n_evaluados: finalScrape.listings.length,
           });
           const precioStats = calculado?.stats ?? null;
+
+          // PRIMER `mezcla_de_productos` EN PRODUCCION (pendiente del 23/9).
+          //
+          // El motivo quedo alcanzable recien con `d23d1d4` y el umbral que lo
+          // levanta (0,4 sobre `n_descartables/n_evaluados` en `confianza.ts`)
+          // se eligio en el editor, sin un solo caso real detras. Este log es
+          // para poder mirar el primero que salte: si el ratio viene apenas
+          // arriba de 0,4 el umbral esta flojo y va a etiquetar busquedas
+          // sanas; si viene en 0,8 esta bien puesto y sobra margen.
+          //
+          // Va aca y no en `confianza.ts` porque el termino de busqueda — el
+          // dato que hace accionable el reporte, ya que el diagnostico es
+          // "buscaste mal" — no llega hasta alla.
+          if (calculado?.confianza.motivos.includes("mezcla_de_productos")) {
+            const nEval = finalScrape.listings.length;
+            console.warn(
+              `[confianza] mezcla_de_productos producto=${JSON.stringify(producto)} ` +
+                `keyword=${JSON.stringify(search_keyword ?? "")} n_evaluados=${nEval} ` +
+                `n_descartables=${relevanciaFinal.n_descartables} ` +
+                `ratio=${nEval > 0 ? Math.round((relevanciaFinal.n_descartables / nEval) * 100) / 100 : 0} ` +
+                `nivel=${calculado.confianza.nivel} ratio_p90_p10=${calculado.confianza.ratio_p90_p10}`
+            );
+          }
 
           // EL SCORE SE CALCULA ACA, ANTES DE HABLAR CON GEMINI (TAB 3, 20/9).
           // El orden importa: el modelo recibe el veredicto ya hecho y su
