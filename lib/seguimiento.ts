@@ -22,6 +22,7 @@ import { calcularPrecioStats } from "./confianza";
 import { calcularScore, calcularMetricas } from "./score";
 import { normalizarUnidadDeVenta } from "./unidad";
 import { PLAN_CONFIG } from "./plans";
+import { notificarSiCorresponde } from "./notificar-seguimiento";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -196,7 +197,17 @@ export const rechequearNicho = inngest.createFunction(
           .eq("id", watchlist_id);
       });
 
-      return { ok: true };
+      // TAB 5.1 (23/9) — el aviso. Va en su propio paso y NO puede lanzar:
+      // la medicion ya esta guardada y el primer paso de esta funcion es un
+      // scrape pago. Un mail caido no puede ensuciar el estado de una funcion
+      // que cuesta $119 ARS arrancar. `notificarSiCorresponde` decide sola si
+      // corresponde mandarlo (solo corridas del cron, solo con cambios
+      // materiales o resumen mensual) y atrapa sus propios errores.
+      const aviso = await step.run("notificar", async () => {
+        return await notificarSiCorresponde(run_id);
+      });
+
+      return { ok: true, aviso };
     } catch (err) {
       const mensaje = err instanceof Error ? err.message : "Error desconocido";
       await actualizarRun(run_id, { status: "error", error_message: mensaje });

@@ -1,3 +1,4 @@
+import { formatearValor } from "@/lib/delta";
 import type { Delta, CambioNumerico } from "@/lib/delta";
 
 /**
@@ -14,19 +15,9 @@ import type { Delta, CambioNumerico } from "@/lib/delta";
  * 2. NO VA GATEADO POR PLAN. Que se vende con esto lo decide el TAB 6.
  */
 
-function fmt(valor: number | null, formato: CambioNumerico["formato"]): string {
-  if (valor === null) return "—";
-  switch (formato) {
-    case "moneda":
-      return "$" + Math.round(valor).toLocaleString("es-AR");
-    case "porcentaje":
-      return Math.round(valor * 100) + "%";
-    case "ratio":
-      return valor.toFixed(2) + "×";
-    default:
-      return Math.round(valor).toLocaleString("es-AR");
-  }
-}
+// El formateo se mudo a lib/delta.ts en el TAB 5.1: el mail semanal escribe los
+// mismos numeros y no pueden divergir de los de esta pantalla.
+const fmt = formatearValor;
 
 /** Verde si el cambio favorece al que quiere vender, rojo si lo perjudica.
  *  El color sale de `bueno_si`, no del signo: mas vendedores es un numero que

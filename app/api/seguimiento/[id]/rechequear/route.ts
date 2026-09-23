@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { inngest } from "@/lib/inngest";
-import { PLAN_CONFIG } from "@/lib/plans";
+import { cupoDeRechequeos } from "@/lib/cupo-seguimiento";
 import type { Plan } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -56,19 +56,13 @@ export async function POST(
     .maybeSingle();
 
   const plan = (perfilUsuario?.plan ?? "free") as Plan;
-  const topeMensual = PLAN_CONFIG[plan].rechequeosPorMes;
 
-  const inicioDeMes = new Date();
-  inicioDeMes.setUTCDate(1);
-  inicioDeMes.setUTCHours(0, 0, 0, 0);
+  // El conteo se mudo a lib/cupo-seguimiento.ts en el TAB 5.1: el cron semanal
+  // gasta del MISMO cupo que este boton. Con dos conteos separados, un usuario
+  // podia gastar su mes a mano el lunes y el cron regalarle un scrape el martes.
+  const { tope: topeMensual, restante } = await cupoDeRechequeos(supabase, user.id, plan);
 
-  const { count: usados } = await supabase
-    .from("watch_runs")
-    .select("id, watchlist!inner(user_id)", { count: "exact", head: true })
-    .eq("watchlist.user_id", user.id)
-    .gte("fetched_at", inicioDeMes.toISOString());
-
-  if ((usados ?? 0) >= topeMensual) {
+  if (restante <= 0) {
     return NextResponse.json(
       {
         error:

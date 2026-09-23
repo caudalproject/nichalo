@@ -343,3 +343,26 @@ function armarTitular(
 
   return `Sin cambios relevantes ${ventana}.`;
 }
+
+/**
+ * Como se escribe un numero del delta.
+ *
+ * Vive aca desde el TAB 5.1 (23/9) y no dentro del componente, porque ahora hay
+ * dos consumidores: la pantalla de `/vigilancia` y el mail semanal. Si el mail
+ * dice "$62.980" y la pantalla "$62.980,45" sobre la misma medicion, el usuario
+ * no sabe cual de los dos creer — y lo unico que vende este producto es que el
+ * numero sea confiable.
+ */
+export function formatearValor(valor: number | null, formato: Formato): string {
+  if (valor === null) return "—";
+  switch (formato) {
+    case "moneda":
+      return "$" + Math.round(valor).toLocaleString("es-AR");
+    case "porcentaje":
+      return Math.round(valor * 100) + "%";
+    case "ratio":
+      return valor.toFixed(2) + "×";
+    default:
+      return Math.round(valor).toLocaleString("es-AR");
+  }
+}

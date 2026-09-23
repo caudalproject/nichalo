@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import type { FilaMail } from './regla-notificacion'
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 if (!RESEND_API_KEY) {
@@ -129,5 +130,116 @@ export async function sendUpsellEmail(email: string) {
     }
   } catch (err) {
     console.error('[Resend] Error enviando upsell:', err)
+  }
+}
+
+/**
+ * TAB 5.1 (23/9/2026) — el mail semanal del nicho vigilado.
+ *
+ * Tres decisiones que estan en el HTML y conviene no perder:
+ *
+ * 1. EL ASUNTO ES EL TITULAR, no "Novedades de Nichalo". El titular ya lo arma
+ *    `armarTitular()` en lib/delta.ts a partir del cambio mas fuerte medido, y
+ *    es una frase concreta ("Entraron 3 vendedores nuevos al nicho en 7 dias").
+ *    Un asunto generico se abre una vez; uno que dice que paso se abre siempre.
+ *
+ * 2. SOLO VAN LAS FILAS MATERIALES. El delta calcula once campos; el mail
+ *    muestra los que superaron el umbral. El resto esta en la pantalla. Un mail
+ *    con once filas donde nueve dicen "igual" es un mail que ensena a ignorar
+ *    los mails.
+ *
+ * 3. NO HAY LINK DE BAJA FALSO. El unico boton es "Ver el nicho", y la baja se
+ *    explica en texto: se desactiva el nicho en /vigilancia. `sendUpsellEmail`
+ *    linkea a `/unsubscribe`, que HOY NO EXISTE como pagina (404) — repetir ese
+ *    link aca seria prometer una baja que no funciona en el mail que mas se
+ *    repite de todos.
+ */
+
+
+const tonoColor: Record<FilaMail["tono"], string> = {
+  bueno: "#16a34a",
+  malo: "#dc2626",
+  neutro: "#374151",
+};
+
+export async function sendSeguimientoEmail(args: {
+  email: string;
+  producto: string;
+  titular: string;
+  tipo: "cambios" | "resumen";
+  dias: number;
+  mediciones?: number;
+  filas: FilaMail[];
+  vendedoresNuevos: string[];
+  nichoUrl: string;
+}) {
+  const productoSeguro = escapeHtml(args.producto);
+  const titularSeguro = escapeHtml(args.titular);
+
+  const asunto =
+    args.tipo === "resumen"
+      ? `${args.producto}: sin cambios en las últimas ${Math.max(1, Math.round(args.dias / 7))} semanas`
+      : `${args.producto}: ${args.titular}`;
+
+  const filasHtml = args.filas
+    .map(
+      (f) => `
+        <tr>
+          <td style="padding:10px 12px;font-size:14px;color:#374151;border-bottom:1px solid #f3f4f6">${escapeHtml(f.etiqueta)}</td>
+          <td style="padding:10px 12px;font-size:13px;color:#9ca3af;border-bottom:1px solid #f3f4f6;text-align:right;white-space:nowrap">${escapeHtml(f.antes)}</td>
+          <td style="padding:10px 12px;font-size:14px;font-weight:600;color:${tonoColor[f.tono]};border-bottom:1px solid #f3f4f6;text-align:right;white-space:nowrap">${escapeHtml(f.ahora)}</td>
+        </tr>`
+    )
+    .join("");
+
+  const tablaHtml = args.filas.length
+    ? `<table style="border-collapse:collapse;width:100%;margin-top:24px">
+         <tr>
+           <th style="padding:0 12px 8px;font-size:11px;font-weight:600;color:#9ca3af;text-align:left;text-transform:uppercase;letter-spacing:.04em">Qué cambió</th>
+           <th style="padding:0 12px 8px;font-size:11px;font-weight:600;color:#9ca3af;text-align:right;text-transform:uppercase;letter-spacing:.04em">Antes</th>
+           <th style="padding:0 12px 8px;font-size:11px;font-weight:600;color:#9ca3af;text-align:right;text-transform:uppercase;letter-spacing:.04em">Ahora</th>
+         </tr>
+         ${filasHtml}
+       </table>`
+    : "";
+
+  const vendedoresHtml = args.vendedoresNuevos.length
+    ? `<p style="font-size:14px;color:#374151;line-height:1.6;margin:24px 0 0"><strong>Vendedores nuevos:</strong> ${args.vendedoresNuevos
+        .slice(0, 6)
+        .map((v) => escapeHtml(v))
+        .join(", ")}${args.vendedoresNuevos.length > 6 ? ` y ${args.vendedoresNuevos.length - 6} más` : ""}.</p>`
+    : "";
+
+  const cuerpoResumen = `
+    <p style="font-size:15px;color:#374151;line-height:1.6;margin:0">Medimos <strong>${productoSeguro}</strong>${
+      args.mediciones ? ` ${args.mediciones} ${args.mediciones === 1 ? "vez" : "veces"}` : ""
+    } en el último mes y el nicho no se movió lo suficiente como para escribirte.</p>
+    <p style="font-size:14px;color:#6b7280;line-height:1.6;margin:16px 0 0">Te mandamos este resumen una vez por mes para que sepas que la vigilancia sigue corriendo. Los demás mails solo salen cuando algo cambia de verdad.</p>`;
+
+  const cuerpoCambios = `
+    <p style="font-size:15px;color:#374151;line-height:1.6;margin:0">Esto es lo que se movió en <strong>${productoSeguro}</strong> desde la medición anterior. Todo medido sobre las publicaciones reales de Mercado Libre, sin inteligencia artificial de por medio.</p>
+    ${tablaHtml}
+    ${vendedoresHtml}`;
+
+  try {
+    const { error: resendError } = await resend.emails.send({
+      from: 'Nichalo <hola@nichalo.com>',
+      to: args.email,
+      subject: asunto.length > 120 ? asunto.slice(0, 117) + "…" : asunto,
+      html: wrap(`
+        <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 16px;line-height:1.35">${titularSeguro}</h1>
+        ${args.tipo === "resumen" ? cuerpoResumen : cuerpoCambios}
+        ${btnHtml(args.nichoUrl, 'Ver el nicho')}
+        <p style="font-size:11px;color:#9ca3af;margin-top:28px;line-height:1.6">Recibís este mail porque estás vigilando este nicho en Nichalo. Para dejar de recibirlo, desactivá el nicho desde <a href="${BASE_URL}/vigilancia" style="color:#9ca3af">tu lista de vigilancia</a>.</p>
+      `),
+    })
+    if (resendError) {
+      console.error("[resend] error enviando mail de seguimiento:", resendError);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('[Resend] Error enviando seguimiento:', err)
+    return false;
   }
 }
