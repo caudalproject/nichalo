@@ -22,7 +22,24 @@ export default async function AnalizarPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login?redirect=/analizar");
+    // El destino conserva los parametros, no solo la ruta (24/9, TAB 7).
+    //
+    // Antes era `/login?redirect=/analizar` fijo, y eso rompia el unico camino
+    // al pago que tiene el area de tendencias: el visitante que llega de Google
+    // a /tendencias/<nicho>, clickea un termino y cae en /analizar?producto=X
+    // **sin sesion** — que es el caso normal ahi, no el raro. Se registraba y
+    // aterrizaba en un formulario vacio, teniendo que volver a tipear lo que ya
+    // habia elegido.
+    //
+    // `/login`, `/api/auth/post-login` y `/auth/callback` ya propagaban el
+    // query string (`safeNext` solo exige que empiece con "/"), asi que la
+    // cadena entera funcionaba salvo este eslabon.
+    const params = new URLSearchParams();
+    if (productoPrefill) params.set("producto", productoPrefill);
+    if (paisPrefill) params.set("pais", paisPrefill);
+    if (reintentoDe) params.set("reintento_de", reintentoDe);
+    const query = params.toString();
+    redirect(`/login?redirect=${encodeURIComponent(`/analizar${query ? `?${query}` : ""}`)}`);
   }
 
   const { data: profile } = await supabase

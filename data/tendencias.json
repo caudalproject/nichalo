@@ -1,0 +1,6414 @@
+{
+  "generado": "2026-09-24T21:08:28.983Z",
+  "ventanaDias": 365,
+  "geo": "AR",
+  "nichos": [
+    {
+      "slug": "tecnologia-y-audio",
+      "nombre": "Tecnología y audio",
+      "descripcion": "Auriculares, parlantes, relojes inteligentes y accesorios de celular.",
+      "productos": [
+        {
+          "producto": "auriculares",
+          "subiendo": [
+            {
+              "termino": "auriculares traductores",
+              "variacion": "+60%",
+              "valor": 60
+            },
+            {
+              "termino": "auriculares xiaomi redmi buds 6 play",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "auriculares oseos",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "auriculares de cable",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "auriculares tipo c",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "auriculares con cable",
+              "variacion": "+40%",
+              "valor": 40
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "auriculares inalambricos",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "auriculares bluetooth",
+              "variacion": "81",
+              "valor": 81
+            },
+            {
+              "termino": "auriculares jbl",
+              "variacion": "61",
+              "valor": 61
+            },
+            {
+              "termino": "jbl",
+              "variacion": "57",
+              "valor": 57
+            },
+            {
+              "termino": "auriculares inalámbricos",
+              "variacion": "44",
+              "valor": 44
+            },
+            {
+              "termino": "auriculares cable",
+              "variacion": "38",
+              "valor": 38
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 75
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 74
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 78
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 79
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 72
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 67
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 83
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 76
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 75
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 70
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 77
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 73
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 92
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 88
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 85
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 85
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 83
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 78
+            }
+          ],
+          "variacionAnual": 5
+        },
+        {
+          "producto": "parlante bluetooth",
+          "subiendo": [
+            {
+              "termino": "jbl flip 7",
+              "variacion": "+350%",
+              "valor": 350
+            },
+            {
+              "termino": "jbl boombox 3",
+              "variacion": "+110%",
+              "valor": 110
+            },
+            {
+              "termino": "mejor parlante bluetooth",
+              "variacion": "+100%",
+              "valor": 100
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "parlante con bluetooth",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "jbl",
+              "variacion": "57",
+              "valor": 57
+            },
+            {
+              "termino": "parlante jbl",
+              "variacion": "57",
+              "valor": 57
+            },
+            {
+              "termino": "parlante bluetooth portátil",
+              "variacion": "48",
+              "valor": 48
+            },
+            {
+              "termino": "parlante portatil",
+              "variacion": "34",
+              "valor": 34
+            },
+            {
+              "termino": "parlante portatil bluetooth",
+              "variacion": "33",
+              "valor": 33
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 39
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 35
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 48
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 45
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 44
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 38
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 54
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 45
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 39
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 50
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 60
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 58
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 69
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 82
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 39
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 32
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 42
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 43
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 31
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 32
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 35
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 34
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 29
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 28
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 29
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 34
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 33
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 32
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 37
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 32
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 28
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 32
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 32
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 31
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 37
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 43
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 36
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 35
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 39
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 39
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 41
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 41
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 40
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 38
+            }
+          ],
+          "variacionAnual": -8
+        },
+        {
+          "producto": "smartwatch",
+          "subiendo": [
+            {
+              "termino": "fitbit versa 4 fitness smartwatch",
+              "variacion": "Breakout",
+              "valor": 43500
+            },
+            {
+              "termino": "smartwatch huawei band 10",
+              "variacion": "+350%",
+              "valor": 350
+            },
+            {
+              "termino": "smartwatch fitness",
+              "variacion": "+300%",
+              "valor": 300
+            },
+            {
+              "termino": "smartwatch samsung 8",
+              "variacion": "+300%",
+              "valor": 300
+            },
+            {
+              "termino": "amazfit active 2",
+              "variacion": "+250%",
+              "valor": 250
+            },
+            {
+              "termino": "huawei watch fit 4",
+              "variacion": "+180%",
+              "valor": 180
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "reloj smartwatch",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "reloj",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "smartwatch xiaomi",
+              "variacion": "38",
+              "valor": 38
+            },
+            {
+              "termino": "xiaomi",
+              "variacion": "38",
+              "valor": 38
+            },
+            {
+              "termino": "samsung",
+              "variacion": "36",
+              "valor": 36
+            },
+            {
+              "termino": "samsung smartwatch",
+              "variacion": "36",
+              "valor": 36
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 56
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 67
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 72
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 66
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 52
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 70
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 60
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 58
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 66
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 77
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 44
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 42
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 36
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 44
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 44
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 38
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 37
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 37
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 44
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 56
+            }
+          ],
+          "variacionAnual": -11
+        },
+        {
+          "producto": "cargador portatil",
+          "subiendo": [
+            {
+              "termino": "cargador portatil xiaomi 20000",
+              "variacion": "+130%",
+              "valor": 130
+            },
+            {
+              "termino": "cargador portatil xiaomi",
+              "variacion": "+40%",
+              "valor": 40
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "cargador portatil iphone",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "cargador iphone",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "cargador portatil celular",
+              "variacion": "45",
+              "valor": 45
+            },
+            {
+              "termino": "bateria portatil",
+              "variacion": "36",
+              "valor": 36
+            },
+            {
+              "termino": "cargador portatil para celular",
+              "variacion": "31",
+              "valor": 31
+            },
+            {
+              "termino": "cargador portatil power bank",
+              "variacion": "29",
+              "valor": 29
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 56
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 55
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 60
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 70
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 64
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 92
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 88
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 65
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 69
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 48
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 52
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 63
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 60
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 76
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 76
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 80
+            }
+          ],
+          "variacionAnual": 1
+        }
+      ]
+    },
+    {
+      "slug": "running-y-fitness",
+      "nombre": "Running y fitness",
+      "descripcion": "Zapatillas, equipamiento para entrenar en casa y suplementos deportivos.",
+      "productos": [
+        {
+          "producto": "zapatillas running",
+          "subiendo": [
+            {
+              "termino": "asics novablast 5",
+              "variacion": "+80%",
+              "valor": 80
+            },
+            {
+              "termino": "nike pegasus 41",
+              "variacion": "+70%",
+              "valor": 70
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "zapatillas mujer",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "adidas zapatillas running",
+              "variacion": "98",
+              "valor": 98
+            },
+            {
+              "termino": "adidas zapatillas",
+              "variacion": "97",
+              "valor": 97
+            },
+            {
+              "termino": "zapatillas running mujer",
+              "variacion": "96",
+              "valor": 96
+            },
+            {
+              "termino": "adidas",
+              "variacion": "92",
+              "valor": 92
+            },
+            {
+              "termino": "adidas running",
+              "variacion": "90",
+              "valor": 90
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 55
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 52
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 57
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 50
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 49
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 44
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 50
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 44
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 51
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 45
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 33
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 47
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 39
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 27
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 45
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 45
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 45
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 96
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 41
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 66
+            }
+          ],
+          "variacionAnual": 10
+        },
+        {
+          "producto": "bicicleta fija",
+          "subiendo": [
+            {
+              "termino": "bicicleta fija de spinning",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "asiento para bicicleta fija",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "pedales para bicicleta fija",
+              "variacion": "+50%",
+              "valor": 50
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "hacer bicicleta fija",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "bicicleta fija precio",
+              "variacion": "71",
+              "valor": 71
+            },
+            {
+              "termino": "bicicleta fija spinning",
+              "variacion": "51",
+              "valor": 51
+            },
+            {
+              "termino": "bicicleta randers",
+              "variacion": "47",
+              "valor": 47
+            },
+            {
+              "termino": "bici fija",
+              "variacion": "34",
+              "valor": 34
+            },
+            {
+              "termino": "precio de bicicleta fija",
+              "variacion": "27",
+              "valor": 27
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 66
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 67
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 81
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 77
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 58
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 73
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 83
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 52
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 83
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 87
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 60
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 69
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 73
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 56
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 86
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 88
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 90
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 84
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 95
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 92
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 89
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 89
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 82
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 86
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 89
+            }
+          ],
+          "variacionAnual": 22
+        },
+        {
+          "producto": "cinta de correr",
+          "subiendo": [
+            {
+              "termino": "cinta de correr plegable",
+              "variacion": "+120%",
+              "valor": 120
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "cinta para correr",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "cinta de correr randers",
+              "variacion": "32",
+              "valor": 32
+            },
+            {
+              "termino": "cinta de caminar",
+              "variacion": "26",
+              "valor": 26
+            },
+            {
+              "termino": "cinta de correr electrica",
+              "variacion": "23",
+              "valor": 23
+            },
+            {
+              "termino": "cinta de correr plegable",
+              "variacion": "16",
+              "valor": 16
+            },
+            {
+              "termino": "cinta de correr profesional",
+              "variacion": "12",
+              "valor": 12
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 36
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 52
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 55
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 42
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 44
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 65
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 45
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 51
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 51
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 34
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 50
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 34
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 40
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 44
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 41
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 87
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 97
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 36
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 83
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 99
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 86
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 77
+            }
+          ],
+          "variacionAnual": 56
+        },
+        {
+          "producto": "proteina whey",
+          "subiendo": [
+            {
+              "termino": "proteina sin sabor",
+              "variacion": "+300%",
+              "valor": 300
+            },
+            {
+              "termino": "isopure zero carb",
+              "variacion": "+160%",
+              "valor": 160
+            },
+            {
+              "termino": "precio proteina whey",
+              "variacion": "+110%",
+              "valor": 110
+            },
+            {
+              "termino": "proteina whey isolate",
+              "variacion": "+110%",
+              "valor": 110
+            },
+            {
+              "termino": "optimum nutrition",
+              "variacion": "+110%",
+              "valor": 110
+            },
+            {
+              "termino": "proteina whey vainilla",
+              "variacion": "+90%",
+              "valor": 90
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "proteina whey protein",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "whey protein",
+              "variacion": "99",
+              "valor": 99
+            },
+            {
+              "termino": "ena proteina",
+              "variacion": "36",
+              "valor": 36
+            },
+            {
+              "termino": "creatina",
+              "variacion": "23",
+              "valor": 23
+            },
+            {
+              "termino": "proteina whey isolate",
+              "variacion": "17",
+              "valor": 17
+            },
+            {
+              "termino": "proteina en polvo",
+              "variacion": "13",
+              "valor": 13
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 77
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 68
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 86
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 84
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 74
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 74
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 82
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 80
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 54
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 40
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 41
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 41
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 84
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 76
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 83
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 43
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 38
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 38
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 42
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 38
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 38
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 93
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 86
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 76
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 86
+            }
+          ],
+          "variacionAnual": -4
+        }
+      ]
+    },
+    {
+      "slug": "mascotas",
+      "nombre": "Mascotas",
+      "descripcion": "Accesorios, comederos, juguetes y ropa para perros y gatos.",
+      "productos": [
+        {
+          "producto": "alimento para perros",
+          "subiendo": [
+            {
+              "termino": "que alimento es mejor para perros",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "venta de alimento para perros",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "alimento humedo para perros",
+              "variacion": "+40%",
+              "valor": 40
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "alimento balanceado para perros",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "mejor alimento para perros",
+              "variacion": "92",
+              "valor": 92
+            },
+            {
+              "termino": "alimentos para perros",
+              "variacion": "68",
+              "valor": 68
+            },
+            {
+              "termino": "el mejor alimento para perros",
+              "variacion": "55",
+              "valor": 55
+            },
+            {
+              "termino": "royal canin",
+              "variacion": "49",
+              "valor": 49
+            },
+            {
+              "termino": "alimento para gatos",
+              "variacion": "46",
+              "valor": 46
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 71
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 83
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 74
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 81
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 78
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 83
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 80
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 66
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 82
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 71
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 73
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 67
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 67
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 99
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 84
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 99
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 91
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 82
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 89
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 84
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 76
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 84
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 83
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 87
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 85
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 82
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 77
+            }
+          ],
+          "variacionAnual": 5
+        },
+        {
+          "producto": "arena para gatos",
+          "subiendo": [
+            {
+              "termino": "arena de tofu para gatos",
+              "variacion": "+60%",
+              "valor": 60
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "arena para gatos aglomerante",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "caja de arena para gatos",
+              "variacion": "80",
+              "valor": 80
+            },
+            {
+              "termino": "arena sanitaria para gatos",
+              "variacion": "58",
+              "valor": 58
+            },
+            {
+              "termino": "arena de tofu para gatos",
+              "variacion": "17",
+              "valor": 17
+            },
+            {
+              "termino": "cajas de arena para gatos",
+              "variacion": "9",
+              "valor": 9
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 74
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 56
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 53
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 83
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 86
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 87
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 15
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 40
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 30
+            }
+          ],
+          "variacionAnual": 250
+        },
+        {
+          "producto": "correa para perros",
+          "subiendo": [
+            {
+              "termino": "correa doble para perros",
+              "variacion": "+90%",
+              "valor": 90
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "correa para perros extensible",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "correa doble para perros",
+              "variacion": "77",
+              "valor": 77
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 88
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 98
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 87
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 21
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 31
+            }
+          ],
+          "variacionAnual": 22
+        },
+        {
+          "producto": "cucha para perros",
+          "subiendo": [],
+          "masBuscado": [
+            {
+              "termino": "cucha para perros grandes",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "cucha para perros de madera",
+              "variacion": "67",
+              "valor": 67
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 97
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 97
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 95
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 76
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 16
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 38
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 31
+            }
+          ],
+          "variacionAnual": null
+        }
+      ]
+    },
+    {
+      "slug": "cocina-y-electro",
+      "nombre": "Cocina y electro chico",
+      "descripcion": "Freidoras de aire, cafeteras, licuadoras y electrodomésticos de mesada.",
+      "productos": [
+        {
+          "producto": "freidora de aire",
+          "subiendo": [
+            {
+              "termino": "freidora de aire doble canasta",
+              "variacion": "+90%",
+              "valor": 90
+            },
+            {
+              "termino": "freidora de aire atma 8 litros",
+              "variacion": "+70%",
+              "valor": 70
+            },
+            {
+              "termino": "freidora de aire ninja",
+              "variacion": "+60%",
+              "valor": 60
+            },
+            {
+              "termino": "freidora de aire hisense",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "microondas",
+              "variacion": "+40%",
+              "valor": 40
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "atma freidora de aire",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "atma",
+              "variacion": "97",
+              "valor": 97
+            },
+            {
+              "termino": "horno freidora de aire",
+              "variacion": "58",
+              "valor": 58
+            },
+            {
+              "termino": "peabody freidora de aire",
+              "variacion": "31",
+              "valor": 31
+            },
+            {
+              "termino": "freidora de aire philips",
+              "variacion": "26",
+              "valor": 26
+            },
+            {
+              "termino": "precio freidora de aire",
+              "variacion": "25",
+              "valor": 25
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 57
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 51
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 83
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 86
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 70
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 61
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 61
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 56
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 54
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 58
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 60
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 43
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 42
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 43
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 42
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 48
+            }
+          ],
+          "variacionAnual": -25
+        },
+        {
+          "producto": "licuadora",
+          "subiendo": [
+            {
+              "termino": "ninja licuadora",
+              "variacion": "+130%",
+              "valor": 130
+            },
+            {
+              "termino": "licuadora raf",
+              "variacion": "+60%",
+              "valor": 60
+            },
+            {
+              "termino": "licuadora para hielo",
+              "variacion": "+60%",
+              "valor": 60
+            },
+            {
+              "termino": "licuadora kitchenaid",
+              "variacion": "+50%",
+              "valor": 50
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "la licuadora",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "vaso licuadora",
+              "variacion": "47",
+              "valor": 47
+            },
+            {
+              "termino": "licuadora philips",
+              "variacion": "41",
+              "valor": 41
+            },
+            {
+              "termino": "licuadora liliana",
+              "variacion": "39",
+              "valor": 39
+            },
+            {
+              "termino": "licuadora de mano",
+              "variacion": "35",
+              "valor": 35
+            },
+            {
+              "termino": "licuadora vidrio",
+              "variacion": "35",
+              "valor": 35
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 75
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 75
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 85
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 93
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 82
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 73
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 95
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 71
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 73
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 84
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 81
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 80
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 81
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 91
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 85
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 90
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 90
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 83
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 45
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 64
+            }
+          ],
+          "variacionAnual": -26
+        },
+        {
+          "producto": "pava electrica",
+          "subiendo": [
+            {
+              "termino": "pava electrica con regulador de temperatura",
+              "variacion": "+100%",
+              "valor": 100
+            },
+            {
+              "termino": "pava electrica plegable",
+              "variacion": "+50%",
+              "valor": 50
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "pava electrica philips",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "atma pava electrica",
+              "variacion": "89",
+              "valor": 89
+            },
+            {
+              "termino": "atma",
+              "variacion": "89",
+              "valor": 89
+            },
+            {
+              "termino": "pava electrica digital",
+              "variacion": "70",
+              "valor": 70
+            },
+            {
+              "termino": "precio pava electrica",
+              "variacion": "61",
+              "valor": 61
+            },
+            {
+              "termino": "pava electrica liliana",
+              "variacion": "48",
+              "valor": 48
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 77
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 71
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 71
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 63
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 65
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 69
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 76
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 52
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 60
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 57
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 53
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 57
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 53
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 83
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 76
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 61
+            }
+          ],
+          "variacionAnual": 3
+        },
+        {
+          "producto": "cafetera",
+          "subiendo": [
+            {
+              "termino": "usina cafetera villa urquiza",
+              "variacion": "Breakout",
+              "valor": 10450
+            },
+            {
+              "termino": "cafetera philips 5500",
+              "variacion": "+1,050%",
+              "valor": 1050
+            },
+            {
+              "termino": "cafetera cuk gadnic",
+              "variacion": "+250%",
+              "valor": 250
+            },
+            {
+              "termino": "cafetera cuk",
+              "variacion": "+250%",
+              "valor": 250
+            },
+            {
+              "termino": "gadnic",
+              "variacion": "+130%",
+              "valor": 130
+            },
+            {
+              "termino": "cafetera gadnic",
+              "variacion": "+120%",
+              "valor": 120
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "cafe",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "cafetera oster",
+              "variacion": "89",
+              "valor": 89
+            },
+            {
+              "termino": "cafetera express",
+              "variacion": "89",
+              "valor": 89
+            },
+            {
+              "termino": "oster",
+              "variacion": "83",
+              "valor": 83
+            },
+            {
+              "termino": "cafetera italiana",
+              "variacion": "83",
+              "valor": 83
+            },
+            {
+              "termino": "cafetera espresso",
+              "variacion": "65",
+              "valor": 65
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 43
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 39
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 43
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 47
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 39
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 37
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 51
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 37
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 31
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 36
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 32
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 31
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 30
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 35
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 29
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 32
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 35
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 36
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 35
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 39
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 39
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 39
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 39
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 47
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 43
+            }
+          ],
+          "variacionAnual": 17
+        }
+      ]
+    },
+    {
+      "slug": "belleza-y-cuidado-personal",
+      "nombre": "Belleza y cuidado personal",
+      "descripcion": "Perfumes, secadores, planchitas y cuidado de la piel.",
+      "productos": [
+        {
+          "producto": "perfume",
+          "subiendo": [
+            {
+              "termino": "valeria mazza perfume",
+              "variacion": "+200%",
+              "valor": 200
+            },
+            {
+              "termino": "perfume montale paris",
+              "variacion": "+160%",
+              "valor": 160
+            },
+            {
+              "termino": "perfume montale",
+              "variacion": "+110%",
+              "valor": 110
+            },
+            {
+              "termino": "perfume mandarin sky",
+              "variacion": "+110%",
+              "valor": 110
+            },
+            {
+              "termino": "caro cuore perfume",
+              "variacion": "+100%",
+              "valor": 100
+            },
+            {
+              "termino": "eclaire perfume",
+              "variacion": "+90%",
+              "valor": 90
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "perfume mujer",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "el perfume",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "perfume hombre",
+              "variacion": "91",
+              "valor": 91
+            },
+            {
+              "termino": "perfume arabe",
+              "variacion": "60",
+              "valor": 60
+            },
+            {
+              "termino": "perfume de mujer",
+              "variacion": "47",
+              "valor": 47
+            },
+            {
+              "termino": "perfume natura",
+              "variacion": "45",
+              "valor": 45
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 63
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 64
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 69
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 86
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 68
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 56
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 69
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 63
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 60
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 55
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 64
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 68
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 81
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 85
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 79
+            }
+          ],
+          "variacionAnual": 12
+        },
+        {
+          "producto": "secador de pelo",
+          "subiendo": [
+            {
+              "termino": "secador de pelo para perros",
+              "variacion": "+70%",
+              "valor": 70
+            },
+            {
+              "termino": "secador de pelo silencioso",
+              "variacion": "+70%",
+              "valor": 70
+            },
+            {
+              "termino": "secador de pelo rulos",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "plancha y secador de pelo",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "secador de pelo 5 en 1",
+              "variacion": "+50%",
+              "valor": 50
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "gama secador de pelo",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "gama",
+              "variacion": "99",
+              "valor": 99
+            },
+            {
+              "termino": "secador de pelo difusor",
+              "variacion": "38",
+              "valor": 38
+            },
+            {
+              "termino": "difusor de secador de pelo",
+              "variacion": "38",
+              "valor": 38
+            },
+            {
+              "termino": "precio de secador de pelo",
+              "variacion": "34",
+              "valor": 34
+            },
+            {
+              "termino": "precio secador de pelo",
+              "variacion": "33",
+              "valor": 33
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 57
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 55
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 61
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 71
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 44
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 40
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 61
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 39
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 44
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 50
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 49
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 39
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 42
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 44
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 38
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 41
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 36
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 38
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 39
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 33
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 40
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 40
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 40
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 54
+            }
+          ],
+          "variacionAnual": 21
+        },
+        {
+          "producto": "planchita de pelo",
+          "subiendo": [
+            {
+              "termino": "planchita de pelo a vapor",
+              "variacion": "+100%",
+              "valor": 100
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "planchita de pelo gama",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "secador de pelo",
+              "variacion": "62",
+              "valor": 62
+            },
+            {
+              "termino": "plancha de pelo",
+              "variacion": "40",
+              "valor": 40
+            },
+            {
+              "termino": "planchita de pelo profesional",
+              "variacion": "37",
+              "valor": 37
+            },
+            {
+              "termino": "babyliss",
+              "variacion": "36",
+              "valor": 36
+            },
+            {
+              "termino": "planchita de pelo babyliss",
+              "variacion": "35",
+              "valor": 35
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 85
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 53
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 90
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 61
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 52
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 82
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 59
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 53
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 67
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 66
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 71
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 82
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 98
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 42
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 74
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 90
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 85
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 95
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 90
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 89
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 88
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 76
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 72
+            }
+          ],
+          "variacionAnual": 8
+        },
+        {
+          "producto": "crema facial",
+          "subiendo": [
+            {
+              "termino": "cerave loción hidratante facial",
+              "variacion": "+200%",
+              "valor": 200
+            },
+            {
+              "termino": "isdin nutradeica gel crema facial",
+              "variacion": "+110%",
+              "valor": 110
+            },
+            {
+              "termino": "crema para la rosacea facial",
+              "variacion": "+70%",
+              "valor": 70
+            },
+            {
+              "termino": "cerave crema hidratante facial",
+              "variacion": "+50%",
+              "valor": 50
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "crema hidratante facial",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "hidratante facial",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "crema hidratante",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "dermaglos crema facial",
+              "variacion": "50",
+              "valor": 50
+            },
+            {
+              "termino": "dermaglos facial",
+              "variacion": "50",
+              "valor": 50
+            },
+            {
+              "termino": "dermaglos",
+              "variacion": "50",
+              "valor": 50
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 57
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 71
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 69
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 64
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 60
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 55
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 85
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 57
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 51
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 52
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 52
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 47
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 58
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 59
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 50
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 64
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 93
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 62
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 83
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 89
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 97
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 90
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 85
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 91
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 93
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 91
+            }
+          ],
+          "variacionAnual": 39
+        }
+      ]
+    },
+    {
+      "slug": "hogar-y-organizacion",
+      "nombre": "Hogar y organización",
+      "descripcion": "Muebles chicos, escritorios, sillas y soluciones de orden.",
+      "productos": [
+        {
+          "producto": "silla gamer",
+          "subiendo": [
+            {
+              "termino": "silla gamer tela",
+              "variacion": "+170%",
+              "valor": 170
+            },
+            {
+              "termino": "silla gamer con masajeador",
+              "variacion": "+90%",
+              "valor": 90
+            },
+            {
+              "termino": "silla gamer con luces led",
+              "variacion": "+80%",
+              "valor": 80
+            },
+            {
+              "termino": "silla gamer con luces",
+              "variacion": "+50%",
+              "valor": 50
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "silla gamer mercado libre",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "escritorio",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "escritorio gamer",
+              "variacion": "97",
+              "valor": 97
+            },
+            {
+              "termino": "silla escritorio",
+              "variacion": "97",
+              "valor": 97
+            },
+            {
+              "termino": "silla ergonomica",
+              "variacion": "96",
+              "valor": 96
+            },
+            {
+              "termino": "silla gamer ergonomica",
+              "variacion": "96",
+              "valor": 96
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 47
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 40
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 46
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 51
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 52
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 41
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 77
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 49
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 47
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 56
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 54
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 59
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 82
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 54
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 73
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 53
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 52
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 37
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 43
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 41
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 48
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 45
+            }
+          ],
+          "variacionAnual": 11
+        },
+        {
+          "producto": "escritorio gamer",
+          "subiendo": [],
+          "masBuscado": [
+            {
+              "termino": "silla escritorio",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "silla gamer",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "escritorio para pc gamer",
+              "variacion": "60",
+              "valor": 60
+            },
+            {
+              "termino": "computadora de escritorio",
+              "variacion": "27",
+              "valor": 27
+            },
+            {
+              "termino": "sillas gamer",
+              "variacion": "19",
+              "valor": 19
+            },
+            {
+              "termino": "escritorio y silla gamer",
+              "variacion": "13",
+              "valor": 13
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 42
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 44
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 55
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 54
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 44
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 40
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 68
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 55
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 51
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 61
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 71
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 47
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 100
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 82
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 93
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 87
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 76
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 51
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 70
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 57
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 93
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 37
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 39
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 79
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 81
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 37
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 49
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 46
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 58
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 56
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 37
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 59
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 55
+            }
+          ],
+          "variacionAnual": 20
+        },
+        {
+          "producto": "estanteria",
+          "subiendo": [
+            {
+              "termino": "mesa estanteria plegable",
+              "variacion": "+190%",
+              "valor": 190
+            },
+            {
+              "termino": "estanteria plegable",
+              "variacion": "+100%",
+              "valor": 100
+            },
+            {
+              "termino": "estanteria de cocina",
+              "variacion": "+60%",
+              "valor": 60
+            },
+            {
+              "termino": "estanteria minecraft",
+              "variacion": "+60%",
+              "valor": 60
+            },
+            {
+              "termino": "estanteria para cocina",
+              "variacion": "+50%",
+              "valor": 50
+            },
+            {
+              "termino": "estanteria con puertas",
+              "variacion": "+50%",
+              "valor": 50
+            }
+          ],
+          "masBuscado": [
+            {
+              "termino": "estanteria madera",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "estanteria metalica",
+              "variacion": "88",
+              "valor": 88
+            },
+            {
+              "termino": "estanteria de madera",
+              "variacion": "65",
+              "valor": 65
+            },
+            {
+              "termino": "mueble estanteria",
+              "variacion": "41",
+              "valor": 41
+            },
+            {
+              "termino": "estanteria pino",
+              "variacion": "40",
+              "valor": 40
+            },
+            {
+              "termino": "estanteria cocina",
+              "variacion": "35",
+              "valor": 35
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 65
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 61
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 71
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 78
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 62
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 72
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 61
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 58
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 69
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 76
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 50
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 56
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 53
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 54
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 69
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 85
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 99
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 85
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 90
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 72
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 71
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 84
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 88
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 65
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 68
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 82
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 88
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 75
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 67
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 55
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 61
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 66
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 63
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 77
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 82
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 86
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 78
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 92
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 89
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 80
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 80
+            }
+          ],
+          "variacionAnual": 30
+        },
+        {
+          "producto": "organizador de cables",
+          "subiendo": [],
+          "masBuscado": [
+            {
+              "termino": "organizador de cables escritorio",
+              "variacion": "100",
+              "valor": 100
+            },
+            {
+              "termino": "organizador de cables para escritorio",
+              "variacion": "29",
+              "valor": 29
+            }
+          ],
+          "interes": [
+            {
+              "fecha": "Sep 21 – 27, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Sep 28 – Oct 4, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 5 – 11, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 12 – 18, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 19 – 25, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Oct 26 – Nov 1, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 2 – 8, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 9 – 15, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 16 – 22, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 23 – 29, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Nov 30 – Dec 6, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 7 – 13, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 14 – 20, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 21 – 27, 2025",
+              "valor": 0
+            },
+            {
+              "fecha": "Dec 28, 2025 – Jan 3, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 4 – 10, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 11 – 17, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 18 – 24, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jan 25 – 31, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 1 – 7, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 8 – 14, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 15 – 21, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Feb 22 – 28, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 1 – 7, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 8 – 14, 2026",
+              "valor": 100
+            },
+            {
+              "fecha": "Mar 15 – 21, 2026",
+              "valor": 99
+            },
+            {
+              "fecha": "Mar 22 – 28, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Mar 29 – Apr 4, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Apr 5 – 11, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Apr 12 – 18, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Apr 19 – 25, 2026",
+              "valor": 94
+            },
+            {
+              "fecha": "Apr 26 – May 2, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 3 – 9, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 10 – 16, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 17 – 23, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 24 – 30, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "May 31 – Jun 6, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 7 – 13, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 14 – 20, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 21 – 27, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jun 28 – Jul 4, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 5 – 11, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 12 – 18, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 19 – 25, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Jul 26 – Aug 1, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 2 – 8, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 9 – 15, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 16 – 22, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 23 – 29, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Aug 30 – Sep 5, 2026",
+              "valor": 0
+            },
+            {
+              "fecha": "Sep 6 – 12, 2026",
+              "valor": 14
+            },
+            {
+              "fecha": "Sep 13 – 19, 2026",
+              "valor": 60
+            },
+            {
+              "fecha": "Sep 20 – 26, 2026",
+              "valor": 37
+            }
+          ],
+          "variacionAnual": null
+        }
+      ]
+    }
+  ]
+}

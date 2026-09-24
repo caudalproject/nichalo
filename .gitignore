@@ -42,3 +42,6 @@ SEGUNDO CEREBRO OBSIDIAN/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Auditoria del filtro del barrido de tendencias (TAB 7) — no es un entregable
+data/descartes-tendencias.txt

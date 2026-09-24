@@ -58,7 +58,26 @@ export async function middleware(request: NextRequest) {
   if (isProtected && !session) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirect", pathname);
+
+    // El destino incluye el query string, no solo la ruta (24/9, TAB 7).
+    //
+    // Antes era `set("redirect", pathname)` sobre un clon que **conserva los
+    // parametros originales**, con dos consecuencias: el destino guardado
+    // quedaba pelado (`redirect=/analizar`) y los parametros de la URL
+    // original se colaban como parametros del login
+    // (`/login?producto=freidora+ninja&redirect=%2Fanalizar`).
+    //
+    // Eso rompia el unico camino al pago del area de tendencias: el visitante
+    // que llega de Google a /tendencias/<nicho>, clickea un termino y no tiene
+    // sesion —el caso normal ahi— se registraba y aterrizaba en un formulario
+    // vacio, teniendo que volver a tipear lo que ya habia elegido.
+    //
+    // Se limpia el search heredado y se guarda ruta + parametros como un solo
+    // valor. `/login`, `/api/auth/post-login` y `/auth/callback` ya lo
+    // propagaban bien: `safeNext` solo exige que empiece con "/".
+    const destino = `${pathname}${request.nextUrl.search}`;
+    url.search = "";
+    url.searchParams.set("redirect", destino);
     return NextResponse.redirect(url);
   }
 
