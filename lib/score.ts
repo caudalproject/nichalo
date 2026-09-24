@@ -35,8 +35,14 @@
  *    0 de 30). Si "demanda probada" valiera 0 por falta de dato, el sistema
  *    deflacionaria a todos por algo que no es culpa del producto. Se
  *    renormaliza sobre los bloques con datos y se reporta cuales se usaron. La
- *    falta de dato ya se castiga en el lugar correcto: `confianza.ts` degrada a
- *    "media" por `sin_datos_de_venta`, y eso capea el score a 75.
+ *    falta de dato se reporta, no se puntua.
+ *
+ *    ACTUALIZADO EL 24/9: hasta hoy esta nota decia que la falta de dato "ya
+ *    se castiga en el lugar correcto" porque `confianza.ts` degradaba a
+ *    "media" y eso capeaba el score en 75. Era doble conteo y, peor, era
+ *    universal: `soldQuantity` viene en null en el 100% de las publicaciones,
+ *    asi que ningun analisis podia pasar de 75 nunca. La degradacion se saco;
+ *    el motivo se sigue informando.
  *
  * 3. EL PERFIL NO RESTA PUNTOS INVENTADOS. Antes habia una escala ad-hoc
  *    (-10/-20/maximo 50 para principiante). Ahora entra por dos lugares que ya

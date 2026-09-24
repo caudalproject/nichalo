@@ -57,9 +57,14 @@ for (const archivo of readdirSync(DIR).filter((f) => f.endsWith(".json"))) {
   if (!r.aplicado) {
     desactivados++;
     console.log(
+      // `n_descartables`, NO `n_descartados`: cuando el filtro se abstiene
+      // devuelve n_descartados=0 por definicion, asi que con el viejo campo
+      // una abstencion se imprimia como "nada que descartar". Es el mismo bug
+      // de numerador que `confianza.ts` tuvo el 23/9, y aca ocultaba el
+      // diagnostico justo en los casos que hay que mirar.
       `  filtro NO aplicado${
-        r.n_descartados > 0
-          ? ` (se abstuvo: habria descartado ${r.n_descartados} de ${listings.length})`
+        r.n_descartables > 0
+          ? ` (SE ABSTUVO: habria descartado ${r.n_descartables} de ${listings.length})`
           : " (nada que descartar)"
       }`
     );

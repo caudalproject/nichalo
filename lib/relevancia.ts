@@ -105,8 +105,132 @@ const RUIDO = [
   "miniatura", "juguete", "repuesto original",
 ];
 
-/** Debajo de esta cobertura de tokens, el titulo habla de otra cosa. */
+/** Debajo de esta cobertura de tokens, el titulo habla de otra cosa. Gobierna
+ *  la rama de consultas cortas — ver `CONSULTA_LARGA`. */
 const COBERTURA_MINIMA = 0.5;
+
+/**
+ * Un termino de RUIDO precedido por una de estas palabras es una
+ * CARACTERISTICA del producto, no el producto.
+ *
+ * "Aspiradora Portatil 8000pa **Con Filtro** Hepa" es una aspiradora que
+ * incluye filtro. "Filtro Hepa Repuesto Para Aspiradora" es un filtro. La
+ * unica diferencia entre las dos esta en la palabra de adelante, y hasta el
+ * 24/9 el filtro no la miraba: hacia `tituloNorm.includes("filtro")` y las
+ * descartaba a las dos.
+ *
+ * Medido sobre el caso del 24/9 (aspiradora inalambrica de mano): de las 4
+ * publicaciones legitimas que el filtro tiraba, las 4 morian aca y ninguna por
+ * cobertura. "filtro", "cable" y "accesorios" son partes de la descripcion de
+ * una aspiradora — es el vocabulario normal de la categoria.
+ */
+const PREFIJOS_CARACTERISTICA = new Set([
+  "con", "incluye", "incluido", "incluidos", "mas", "y", "e", "+", "&",
+]);
+
+/**
+ * Un termino de RUIDO seguido de cerca por una de estas es un accesorio
+ * declarado: "repuesto PARA", "cabezales COMPATIBLE con".
+ */
+const SUFIJOS_ACCESORIO = new Set(["para", "compatible", "compatibles"]);
+
+/**
+ * Cuantas palabras del principio del titulo cuentan como "el producto que se
+ * esta vendiendo". En Mercado Libre el sustantivo principal va adelante:
+ * "Cargador Usb Repuesto Para Aspiradora" vende un cargador, y lo dice en la
+ * primera palabra.
+ */
+const CABEZA_TITULO = 3;
+
+/**
+ * Palabras que dicen COMO es el producto, no QUE es.
+ *
+ * EL BUG QUE ESTO CIERRA (24/9). La cobertura se medía contra la UNION de los
+ * tokens del texto tipeado y los de la keyword de la foto, con un piso de 50%.
+ * Eso hacia que **ser mas especifico empeorara el analisis**, que es el reves
+ * exacto de lo que el sistema promete:
+ *
+ *   "Aspiradora inalambrica mini de alta potencia para hogar y automovil"
+ *   -> 7 tokens utiles + 2 de la keyword = 9. Una publicacion legitima como
+ *      "Aspiradora Inalambrica Portatil 120w" cubre 4 de 9 = 0,44 y se
+ *      descartaba POR NO SER EL PRODUCTO. Pasado el 40% descartable el filtro
+ *      se abstenia entero, `confianza.ts` levantaba `mezcla_de_productos` y el
+ *      score quedaba capeado en 60.
+ *
+ * El usuario habia pegado el titulo completo del listing — el input mas rico
+ * posible — y el filtro lo leyo como ruido. La causa es aritmetica: cada
+ * adjetivo que se agrega sube el denominador y ninguna publicacion real usa
+ * los siete.
+ *
+ * La separacion nucleo/modificador la arregla de raiz: "aspiradora" dice que
+ * es; "mini", "inalambrica", "alta", "potencia", "hogar" y "automovil" dicen
+ * como es. Los segundos no pueden descartar a nadie por su ausencia — ningun
+ * vendedor escribe los seis — pero suman cuando estan.
+ *
+ * Deliberadamente corta y solo con adjetivos que NUNCA son el producto. Ante
+ * la duda, afuera: una palabra de mas aca debilita el nucleo, y un nucleo
+ * debil es el bug de arriba otra vez. Por eso no estan "cable" (es el nucleo
+ * de "organizador de cables"), "escritorio" ni "bateria".
+ */
+const MODIFICADORES = new Set([
+  // Tamano y forma
+  "mini", "micro", "maxi", "chico", "chica", "grande", "pequeno", "pequena",
+  "compacto", "compacta", "portatil", "plegable", "ajustable", "regulable",
+  "liviano", "liviana", "delgado", "delgada",
+  // Alimentacion y conectividad
+  "inalambrico", "inalambrica", "recargable", "electrico", "electrica",
+  "usb", "bluetooth", "wireless", "automatico", "automatica", "digital",
+  "inteligente", "smart",
+  // Prestaciones
+  "alta", "alto", "baja", "bajo", "potencia", "velocidad", "resistente",
+  "impermeable", "silencioso", "silenciosa", "profesional", "industrial",
+  "ergonomico", "ergonomica", "gamer", "deportivo", "deportiva",
+  // Destino de uso
+  "hogar", "casa", "auto", "automovil", "coche", "carro", "oficina", "viaje",
+  // Color
+  "negro", "negra", "blanco", "blanca", "gris", "azul", "rojo", "roja",
+  "verde", "rosa", "rosado", "dorado", "plateado", "transparente",
+]);
+
+/**
+ * Cuantos tokens de la consulta tiene que tener un titulo para no ser
+ * descartado.
+ *
+ * Es un ABSOLUTO, no una proporcion, y esa es toda la diferencia: una
+ * proporcion crece con lo que el usuario escribe y castiga la especificidad.
+ * Dos coincidencias — una de ellas del nucleo — significan lo mismo en una
+ * consulta de tres palabras que en una de nueve.
+ *
+ * Con consultas cortas el comportamiento es identico al anterior: 0,5 sobre 3
+ * o 4 tokens ya exigia 2. Verificado contra los 10 fixtures del golden set.
+ */
+const MINIMO_COINCIDENCIAS = 2;
+
+/**
+ * A partir de cuantos tokens la consulta se considera larga y cambia la regla.
+ *
+ * POR QUE HAY DOS REGLAS Y NO UNA. La primera version de este fix aplicaba el
+ * umbral absoluto y el cerco de nucleo a todas las consultas, y el golden set
+ * lo rechazo en el acto: con "auriculares bluetooth" (2 tokens) exigir dos
+ * coincidencias obliga a que el titulo diga las DOS palabras, y se llevaba
+ * puestos "Auriculares inalambricos Lenovo ThinkPlus XT80" y "Auriculares Jbl
+ * Wave Beam 2" — 10 de 30, la competencia real. Es el mismo falso positivo que
+ * el comentario del token obligatorio documenta mas arriba.
+ *
+ * La proporcion NO esta rota en consultas cortas: con 3 o 4 tokens, 0,5 ya
+ * pide 2 y tolera un sinonimo. Se rompe cuando la consulta crece, porque el
+ * denominador sube y ninguna publicacion real usa las nueve palabras.
+ *
+ * Y el cerco de nucleo es mas seguro justamente ahi: una consulta larga aporta
+ * varios candidatos a nucleo, asi que fallar UNO por sinonimo (el caso
+ * "lavadora"/"lavarropa") no alcanza para descartar la publicacion. Con dos
+ * tokens, el unico nucleo que hay es un punto unico de falla.
+ *
+ * 5 es donde empieza lo que la regla vieja no sabe manejar y donde termina lo
+ * que el golden set valida. Los 10 fixtures tienen 4 tokens o menos: entran
+ * todos por la rama de siempre y su salida es identica, byte por byte.
+ */
+const CONSULTA_LARGA = 5;
 
 /**
  * Proporcion maxima del scrape que el filtro puede descartar.
@@ -121,6 +245,27 @@ const COBERTURA_MINIMA = 0.5;
  * busqueda trajo mayormente otra cosa. Se informa en vez de adivinar.
  */
 const MAXIMO_DESCARTABLE = 0.4;
+
+/**
+ * El mismo techo, pero para consultas largas.
+ *
+ * El techo general esta calibrado contra un filtro PROPORCIONAL, cuyo modo de
+ * falla es masivo: si el criterio esta mal, esta mal para todo el scrape a la
+ * vez. La rama larga no falla asi. Falla cuando el vendedor usa un sinonimo
+ * del nucleo, y una consulta larga aporta VARIOS candidatos a nucleo, asi que
+ * errarle a uno no alcanza para descartar la publicacion. Es un filtro mas
+ * confiable y se le puede dar mas cuerda.
+ *
+ * Lo que no se toca es `MUESTRA_MEDIA`: esa guarda protege el tamano de la
+ * muestra, que es lo que de verdad no se puede negociar, y sigue corriendo
+ * igual para las dos ramas.
+ *
+ * Sin esto el caso del 24/9 seguia saliendo roto por medio punto: 13 de 30
+ * publicaciones eran genuinamente otra cosa (sopladores de jardin, repuestos,
+ * un robot, una industrial) = 0,433, el filtro se abstenia por pasarse de
+ * 0,40 y el analisis salia con los sopladores adentro.
+ */
+const MAXIMO_DESCARTABLE_LARGA = 0.5;
 
 /**
  * Techo propio de la pasada semantica, mas estricto que el general.
@@ -166,7 +311,7 @@ function registrarAbstencion(args: {
 }
 
 /** Normaliza para comparar: sin tildes, sin puntuacion, en minuscula. */
-function normalizar(texto: string): string {
+export function normalizar(texto: string): string {
   return texto
     .toLowerCase()
     .normalize("NFD")
@@ -185,6 +330,37 @@ function raiz(token: string): string {
   if (token.length > 4 && token.endsWith("es")) return token.slice(0, -2);
   if (token.length > 3 && token.endsWith("s")) return token.slice(0, -1);
   return token;
+}
+
+/**
+ * Palabras con contenido del texto, SIN stemming y en el orden original.
+ *
+ * `tokenizar` no sirve para esto: aplica `raiz()`, que es lo correcto para
+ * comparar dos titulos y lo incorrecto para armar una consulta que se le manda
+ * a Mercado Libre — nadie busca "auricular inalambric". Esta devuelve las
+ * palabras como el usuario las escribio, que es el unico vocabulario con el
+ * que `lib/termino.ts` tiene permitido armar una busqueda.
+ */
+export function palabrasContenido(texto: string): string[] {
+  return normalizar(texto)
+    .split(" ")
+    .filter((t) => t.length >= 3 && !VACIAS.has(t));
+}
+
+/** Si la palabra dice COMO es el producto y no QUE es. Ver `MODIFICADORES`. */
+export function esModificador(palabra: string): boolean {
+  return MODIFICADORES.has(raiz(normalizar(palabra)));
+}
+
+/**
+ * Si dos palabras se refieren a lo mismo, con la misma tolerancia a plural y
+ * genero que usa el filtro de titulos. Exportada para que `lib/termino.ts`
+ * decida con el MISMO criterio si el modelo introdujo una palabra nueva: dos
+ * nociones distintas de "palabra nueva" en el mismo pipeline serian una
+ * fuente de bugs silenciosos.
+ */
+export function coincide(a: string, b: string): boolean {
+  return contiene([raiz(normalizar(a))], raiz(normalizar(b)));
 }
 
 function tokenizar(texto: string): string[] {
@@ -212,6 +388,48 @@ function contiene(tituloRaices: string[], token: string): boolean {
     if (minimo < 5) return false;
     return t.slice(0, minimo - 1) === token.slice(0, minimo - 1);
   });
+}
+
+/**
+ * Decide si un termino de RUIDO presente en el titulo es evidencia de que la
+ * publicacion es OTRA COSA, o solo una palabra de la descripcion.
+ *
+ * Es estrictamente mas permisivo que el `tituloNorm.includes(r)` que
+ * reemplaza: para descartar exige que el termino ademas este en posicion de
+ * producto. O sea que solo puede devolver `false` donde antes se descartaba —
+ * nunca puede sacar una publicacion que antes sobrevivia. Esa es la propiedad
+ * que hace que este cambio no pueda introducir falsos positivos nuevos.
+ *
+ * @param crudos tokens del titulo normalizado SIN sacar palabras vacias: la
+ *               decision se apoya justamente en "con" y "para".
+ */
+function ruidoEnPosicionDeProducto(crudos: string[], ruido: string): boolean {
+  const partes = normalizar(ruido).split(" ").filter(Boolean);
+  if (partes.length === 0) return false;
+
+  for (let i = 0; i + partes.length <= crudos.length; i++) {
+    let coincide = true;
+    for (let j = 0; j < partes.length; j++) {
+      if (crudos[i + j] !== partes[j]) {
+        coincide = false;
+        break;
+      }
+    }
+    if (!coincide) continue;
+
+    // "con filtro hepa" — el producto lo INCLUYE, no lo ES.
+    const anterior = crudos[i - 1];
+    if (anterior && PREFIJOS_CARACTERISTICA.has(anterior)) continue;
+
+    // Posicion de sustantivo principal: "Cargador Usb Repuesto Para...".
+    if (i < CABEZA_TITULO) return true;
+
+    // "repuesto para", "cabezales compatible con".
+    const siguientes = crudos.slice(i + partes.length, i + partes.length + 3);
+    if (siguientes.some((t) => SUFIJOS_ACCESORIO.has(t))) return true;
+  }
+
+  return false;
 }
 
 /**
@@ -260,6 +478,17 @@ export function filtrarRelevantes(args: {
   const tokensKeyword = searchKeyword ? tokenizar(searchKeyword) : [];
   const tokens = Array.from(new Set([...tokensProducto, ...tokensKeyword]));
 
+  // QUE es el producto, separado de COMO es. Ver el comentario de
+  // `MODIFICADORES`: sin esta separacion, cada adjetivo que el usuario agrega
+  // sube el denominador de la cobertura y hace que sus propias publicaciones
+  // legitimas dejen de calificar.
+  const nucleo = tokens.filter((t) => !MODIFICADORES.has(t));
+
+  // Una consulta corta sigue por la regla proporcional de siempre. Larga, por
+  // la nueva. Ver `CONSULTA_LARGA`.
+  const esLarga = tokens.length >= CONSULTA_LARGA;
+  const umbral = Math.min(MINIMO_COINCIDENCIAS, tokens.length);
+
   // El ruido solo es ruido si el usuario no lo esta buscando.
   const consultaNormalizada = normalizar(`${producto} ${searchKeyword ?? ""}`);
   const ruidoActivo = RUIDO.filter((r) => !consultaNormalizada.includes(r));
@@ -276,16 +505,37 @@ export function filtrarRelevantes(args: {
       continue;
     }
 
-    const tituloNorm = normalizar(titulo);
+    const tituloCrudos = normalizar(titulo).split(" ").filter(Boolean);
     const tituloRaices = tokenizar(titulo);
 
     const presentes = tokens.filter((t) => contiene(tituloRaices, t)).length;
+    const presentesNucleo = nucleo.filter((t) => contiene(tituloRaices, t)).length;
     const cobertura = tokens.length > 0 ? presentes / tokens.length : 1;
-    const tieneRuido = ruidoActivo.some((r) => tituloNorm.includes(r));
+    const tieneRuido = ruidoActivo.some((r) =>
+      ruidoEnPosicionDeProducto(tituloCrudos, r)
+    );
 
-    // Cobertura total gana sobre el ruido: "almohadilla electrica cervical con
-    // funda lavable" ES el producto, y la funda es una caracteristica.
-    const esRelevante = cobertura >= COBERTURA_MINIMA && (!tieneRuido || cobertura === 1);
+    // Dos condiciones, y las dos tienen que dar.
+    //
+    // 1. COINCIDENCIAS SUFICIENTES. Absoluto, no proporcional: agregar
+    //    adjetivos ya no sube la vara.
+    // 2. AL MENOS UNA ES DEL NUCLEO. Sin esto, "Mini Ventilador Portatil
+    //    Hogar" pasaria un pedido de aspiradora con solo "mini" + "hogar":
+    //    dos coincidencias, cero producto. El nucleo es lo que impide que un
+    //    titulo entre por los adjetivos.
+    //
+    // Si la consulta es toda modificadores (`nucleo` vacio) no se exige el
+    // segundo cerco: no hay contra que exigirlo y abstenerse es mas barato
+    // que inventar un nucleo.
+    //
+    // Cobertura total sigue ganandole al ruido: "almohadilla electrica
+    // cervical con funda lavable" ES el producto, y la funda es una
+    // caracteristica.
+    const cubre = esLarga
+      ? presentes >= umbral && (nucleo.length === 0 || presentesNucleo >= 1)
+      : cobertura >= COBERTURA_MINIMA;
+
+    const esRelevante = cubre && (!tieneRuido || cobertura === 1);
 
     if (esRelevante) sobreviven.push(listing);
     else descartados.push(listing);
@@ -322,7 +572,8 @@ export function filtrarRelevantes(args: {
     });
     return abstenerse;
   }
-  if (descartados.length / listings.length > MAXIMO_DESCARTABLE) {
+  const techoDescartable = esLarga ? MAXIMO_DESCARTABLE_LARGA : MAXIMO_DESCARTABLE;
+  if (descartados.length / listings.length > techoDescartable) {
     registrarAbstencion({
       guarda: "techo_general",
       producto,

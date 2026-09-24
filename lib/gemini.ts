@@ -84,6 +84,7 @@ export async function extractKeywordsFromImage(
 Devolvé un JSON con dos campos:
 
 "termino_busqueda": el término con el que buscarías ESTE producto en Mercado Libre para que no traiga su categoría entera. Entre 2 y 5 palabras. Incluí lo que lo hace único y se ve en la foto (tipo exacto, formato, tamaño o potencia si está impresa, marca si es legible). Sin palabras de marketing ni colores, salvo que el color defina al producto.
+REGLA DURA: si la persona ya describió el producto, usá SUS palabras. Podés elegir cuáles conservar y podés agregar un adjetivo que se vea en la foto, pero NO cambies el sustantivo por otro ni agregues un tipo de producto que ella no nombró. Si ella escribió "aspiradora", el término no puede decir "soplador": es otra categoría de Mercado Libre y la búsqueda se va a otro mercado.
 
 "ficha": una frase de hasta 25 palabras que describa este producto de forma que se lo pueda distinguir de otros parecidos. Tiene que dejar claro QUÉ ES y EN QUÉ GAMA O VARIANTE está, porque se va a usar para descartar publicaciones de productos distintos. Si de la foto surge que es una versión simple o genérica, decilo; si es premium o de marca, también.
 

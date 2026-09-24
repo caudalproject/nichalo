@@ -243,12 +243,34 @@ export function calcularPrecioStats(
     nivel = peor(nivel, "media");
   }
 
-  // La ausencia de datos de venta no vuelve el precio poco confiable, pero si
-  // debilita el veredicto de demanda. Degrada a media como maximo, nunca a baja
-  // por si sola (misma logica que la nota del prompt sobre soldQuantity null).
+  // LA AUSENCIA DE DATOS DE VENTA YA NO DEGRADA LA CONFIANZA (24/9).
+  //
+  // Degradaba a "media", y "media" capea el score en 75. El problema es
+  // cuantas veces pasa: Mercado Libre no publica `soldQuantity` NUNCA. Esta
+  // medido y documentado en `lib/apify.ts` — 300 publicaciones, 100% en null —
+  // y se ve en los 11 fixtures del golden set: los 11 levantan este motivo,
+  // sin excepcion.
+  //
+  // Un castigo que se aplica al 100% de los casos no es un castigo: es una
+  // constante. Lo que producia era que NINGUN analisis pudiera pasar de 75
+  // jamas, por una propiedad de la fuente de datos que no tiene nada que ver
+  // con el producto que la persona esta validando. Y de paso vaciaba de
+  // significado al nivel de confianza, que es la senal con la que el usuario
+  // decide si confiar en el numero: si "media" es el piso permanente, no
+  // distingue nada.
+  //
+  // El dato faltante YA se trata en el lugar correcto, y por eso esto era
+  // doble conteo: `lib/score.ts` saca "demanda probada" del denominador
+  // (punto 2 de su cabecera) en vez de puntuarlo en cero. El bloque se omite,
+  // se informa que se omitio, y el score se renormaliza sobre lo que si se
+  // pudo medir. Restarle ademas 25 puntos de techo es castigar la misma
+  // ausencia dos veces.
+  //
+  // El motivo SE SIGUE REPORTANDO: viaja en `motivos` y la UI lo muestra. Lo
+  // unico que se saco es el `peor(nivel, "media")`. Informar que no hay datos
+  // de venta es correcto; capear el veredicto por eso, no.
   if (totalConVentas === 0) {
     motivos.push("sin_datos_de_venta");
-    nivel = peor(nivel, "media");
   }
 
   // Costo implausible. Independiente de la dispersion: un scrape puede estar

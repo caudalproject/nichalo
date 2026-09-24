@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { inngest } from "@/lib/inngest";
 import { extractKeywordsFromImage } from "@/lib/gemini";
+import { resolverTerminoBusqueda } from "@/lib/termino";
 import { sendUpsellEmail } from "@/lib/resend";
 import type { Plan, AnalysisResult } from "@/lib/supabase";
 
@@ -218,7 +219,7 @@ export async function POST(request: Request) {
     // proposito: la rama muerta es como nacio el bug del cache — un lookup
     // adentro de un `if (!imagenBase64)` que dejo de cumplirse el 21/9 y
     // quedo dos dias cobrando sin poder pegar nunca.
-    let searchKeyword = producto;
+    let terminoModelo: string | null = null;
     let fichaProducto = "";
     try {
       // El producto tipeado viaja como ancla (23/9): la foto precisa el
@@ -234,7 +235,7 @@ export async function POST(request: Request) {
         imagenMimeType ?? "image/jpeg",
         producto
       );
-      if (identificado?.termino_busqueda) searchKeyword = identificado.termino_busqueda;
+      if (identificado?.termino_busqueda) terminoModelo = identificado.termino_busqueda;
       if (identificado?.ficha) fichaProducto = identificado.ficha;
     } catch (err) {
       // Se sigue con el texto del usuario, que es lo correcto — pero YA NO EN
@@ -243,6 +244,34 @@ export async function POST(request: Request) {
       console.error(
         "[analizar] extractKeywordsFromImage fallo, se busca con el texto tipeado:",
         err instanceof Error ? err.message : String(err)
+      );
+    }
+
+    // EL TERMINO DEL MODELO SE VALIDA CONTRA EL TEXTO DEL USUARIO (24/9).
+    //
+    // Antes esto era `searchKeyword = identificado.termino_busqueda`, una
+    // asignacion sin ninguna validacion: lo que salia de la foto reemplazaba
+    // lo que el usuario habia escrito aunque hablara de otra categoria. Ver
+    // `lib/termino.ts` para el caso que lo rompio — la foto agrego "soplador"
+    // a una aspiradora de mano y el scrape se fue a sopladores de jardin.
+    //
+    // Corre TAMBIEN cuando el modelo fallo (`terminoModelo` en null): ahi la
+    // funcion recorta el texto del usuario, que es trabajo necesario por su
+    // cuenta. Un titulo de listing pegado entero son nueve palabras, y
+    // Mercado Libre devuelve peores resultados con una consulta larga que con
+    // una de tres.
+    const resuelto = resolverTerminoBusqueda({ producto, terminoModelo });
+    const searchKeyword = resuelto.termino || producto;
+
+    // Cada rechazo se loguea: es la unica forma de saber cuantas veces la foto
+    // estaba mandando el scrape a otro lado, que es un numero que hasta hoy no
+    // existia en ningun lado.
+    if (resuelto.origen.startsWith("modelo_rechazado")) {
+      console.warn(
+        `[analizar] termino_rechazado origen=${resuelto.origen} ` +
+          `producto=${JSON.stringify(producto)} modelo=${JSON.stringify(terminoModelo)} ` +
+          `intrusa=${JSON.stringify(resuelto.palabra_intrusa ?? "")} ` +
+          `se_busca=${JSON.stringify(searchKeyword)}`
       );
     }
 
