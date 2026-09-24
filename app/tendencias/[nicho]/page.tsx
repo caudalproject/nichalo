@@ -12,6 +12,7 @@ import {
   type TerminoTendencia,
 } from "@/lib/tendencias";
 import { TENDENCIAS as tendencias } from "@/lib/tendencias-datos";
+import { SITIO } from "@/lib/sitio";
 
 export function generateStaticParams() {
   return NICHOS.map((n) => ({ nicho: n.slug }));
@@ -31,11 +32,11 @@ export function generateMetadata({
   return {
     title: titulo,
     description: descripcion,
-    alternates: { canonical: `https://nichalo.com/tendencias/${def.slug}` },
+    alternates: { canonical: `${SITIO}/tendencias/${def.slug}` },
     openGraph: {
       title: titulo,
       description: descripcion,
-      url: `https://nichalo.com/tendencias/${def.slug}`,
+      url: `${SITIO}/tendencias/${def.slug}`,
       type: "article",
     },
   };

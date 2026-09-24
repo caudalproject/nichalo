@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { NICHOS } from "@/lib/tendencias";
+import { SITIO } from "@/lib/sitio";
 
 /**
  * Sitemap del sitio (24/9/2026, TAB 7).
@@ -13,7 +14,7 @@ import { NICHOS } from "@/lib/tendencias";
  * `/seguimiento`, `/login`) y `/resultado/[id]`: un analisis es de quien lo
  * corrio y se comparte por link, no por buscador.
  */
-const BASE = "https://nichalo.com";
+const BASE = SITIO;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const ahora = new Date();

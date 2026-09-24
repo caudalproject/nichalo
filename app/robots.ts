@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITIO } from "@/lib/sitio";
 
 /**
  * robots.txt (24/9/2026, TAB 7).
@@ -19,6 +20,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/api/", "/auth/", "/dashboard", "/seguimiento", "/login", "/resultado/"],
     },
-    sitemap: "https://nichalo.com/sitemap.xml",
+    sitemap: `${SITIO}/sitemap.xml`,
   };
 }

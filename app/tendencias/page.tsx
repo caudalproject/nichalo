@@ -2,18 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { NICHOS } from "@/lib/tendencias";
+import { SITIO } from "@/lib/sitio";
 import { TENDENCIAS as tendencias } from "@/lib/tendencias-datos";
 
 export const metadata: Metadata = {
   title: "Qué se está buscando en Argentina — Tendencias | Nichalo",
   description:
     "Qué productos están subiendo en búsquedas en Argentina, por categoría. Datos de Google Trends, actualizados y gratis. Sin registro.",
-  alternates: { canonical: "https://nichalo.com/tendencias" },
+  alternates: { canonical: `${SITIO}/tendencias` },
   openGraph: {
     title: "Qué se está buscando en Argentina — Tendencias",
     description:
       "Qué productos están subiendo en búsquedas en Argentina, por categoría. Gratis y sin registro.",
-    url: "https://nichalo.com/tendencias",
+    url: `${SITIO}/tendencias`,
     type: "website",
   },
 };
