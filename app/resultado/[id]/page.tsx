@@ -16,7 +16,7 @@ import { AnalisisAvanzado } from "@/components/AnalisisAvanzado";
 import { confianzaHeredada } from "@/lib/confianza";
 import { PacksOffer } from "@/components/PacksOffer";
 import { DesgloseScore } from "@/components/DesgloseScore";
-import { BotonVigilar } from "@/components/BotonVigilar";
+import { BotonSeguir } from "@/components/BotonSeguir";
 import { Acto, Plegable } from "@/components/Acto";
 import { QueHacer } from "@/components/QueHacer";
 
@@ -948,14 +948,14 @@ export default async function ResultadoPage({ params }: Params) {
             )}
 
             {/* Seguimiento (TAB 5). Hasta el 4.1 vivia pegado al desglose del
-                score. Se muda al acto 3 porque vigilar un nicho es una ACCION,
-                y el acto 3 es donde estan las acciones: el argumento viejo
-                ("justo despues de entender por que dio lo que dio") competia
-                con el numero de arriba, que es la accion principal. Solo para
-                el dueno: el link compartido lo abre cualquiera, pero vigilar es
-                de la cuenta. */}
+                score. Se muda al acto 3 porque seguir un producto es una
+                ACCION, y el acto 3 es donde estan las acciones: el argumento
+                viejo ("justo despues de entender por que dio lo que dio")
+                competia con el numero de arriba, que es la accion principal.
+                Solo para el dueno: el link compartido lo abre cualquiera, pero
+                seguir es de la cuenta. */}
             {user && analysis.user_id === user.id && (
-              <BotonVigilar analysisId={analysis.id} />
+              <BotonSeguir analysisId={analysis.id} />
             )}
 
             {/* INTUICION, no dato para los riesgos (TAB 4.1): se pliegan porque

@@ -58,20 +58,20 @@ const ok1 = await sendSeguimientoEmail({
   dias: delta.dias,
   filas: filasDelMail(delta),
   vendedoresNuevos: delta.vendedores?.nuevos ?? [],
-  nichoUrl: (process.env.SITE_URL ?? "https://nichalo.com") + "/vigilancia",
+  productoUrl: (process.env.SITE_URL ?? "https://nichalo.com") + "/seguimiento",
 });
 console.log(ok1 ? "✓ mail de CAMBIOS enviado" : "✗ fallo el mail de cambios");
 
 const ok2 = await sendSeguimientoEmail({
   email: destino,
   producto: "almohadilla eléctrica cervical",
-  titular: "Tu nicho sigue tranquilo",
+  titular: "Tu producto sigue tranquilo",
   tipo: "resumen",
   dias: 28,
   mediciones: 4,
   filas: [],
   vendedoresNuevos: [],
-  nichoUrl: (process.env.SITE_URL ?? "https://nichalo.com") + "/vigilancia",
+  productoUrl: (process.env.SITE_URL ?? "https://nichalo.com") + "/seguimiento",
 });
 console.log(ok2 ? "✓ mail de RESUMEN enviado" : "✗ fallo el mail de resumen");
 

@@ -68,7 +68,7 @@ export async function POST(
         error:
           plan === "pro"
             ? `Llegaste a los ${topeMensual} re-chequeos de este mes. Se renuevan el 1.`
-            : `Tu plan incluye ${topeMensual} re-chequeo${topeMensual === 1 ? "" : "s"} por mes. Pasate a Pro para vigilar 5 nichos con re-chequeo semanal.`,
+            : `Tu plan incluye ${topeMensual} re-chequeo${topeMensual === 1 ? "" : "s"} por mes. Pasate a Pro para seguir 5 productos con re-chequeo semanal.`,
         motivo: "tope_rechequeos",
         tope: topeMensual,
       },
@@ -89,7 +89,7 @@ export async function POST(
   if (error || !run) {
     if (error?.code === "23505") {
       return NextResponse.json(
-        { error: "Ya hay un re-chequeo en curso para este nicho." },
+        { error: "Ya hay un re-chequeo en curso para este producto." },
         { status: 409 }
       );
     }

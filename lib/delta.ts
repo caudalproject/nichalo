@@ -348,7 +348,7 @@ function armarTitular(
  * Como se escribe un numero del delta.
  *
  * Vive aca desde el TAB 5.1 (23/9) y no dentro del componente, porque ahora hay
- * dos consumidores: la pantalla de `/vigilancia` y el mail semanal. Si el mail
+ * dos consumidores: la pantalla de `/seguimiento` y el mail semanal. Si el mail
  * dice "$62.980" y la pantalla "$62.980,45" sobre la misma medicion, el usuario
  * no sabe cual de los dos creer — y lo unico que vende este producto es que el
  * numero sea confiable.

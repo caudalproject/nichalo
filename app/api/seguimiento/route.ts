@@ -83,8 +83,8 @@ export async function POST(req: Request) {
         {
           error:
             topeNichos === 1
-              ? "Tu plan permite vigilar 1 nicho. Dejá de vigilar el actual o pasate a Pro para vigilar 5."
-              : `Tu plan permite vigilar ${topeNichos} nichos a la vez.`,
+              ? "Tu plan permite seguir 1 producto. Dejá de seguir el actual o pasate a Pro para seguir 5."
+              : `Tu plan permite seguir ${topeNichos} productos a la vez.`,
           motivo: "tope_nichos",
           tope: topeNichos,
         },

@@ -97,7 +97,7 @@ export async function notificarSiCorresponde(
       producto: nicho.producto,
       titular:
         decision.tipo === "resumen"
-          ? `Tu nicho sigue tranquilo`
+          ? `Tu producto sigue tranquilo`
           : delta.titular,
       tipo: decision.tipo,
       dias: delta.dias,
@@ -106,7 +106,7 @@ export async function notificarSiCorresponde(
         decision.tipo === "cambios" && delta.vendedores?.material
           ? delta.vendedores.nuevos
           : [],
-      nichoUrl: `${BASE_URL}/vigilancia`,
+      productoUrl: `${BASE_URL}/seguimiento`,
     });
 
     // `notificado_at` se marca solo si Resend acepto el mail. Marcarlo igual

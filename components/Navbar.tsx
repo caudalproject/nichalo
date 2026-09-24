@@ -128,10 +128,10 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
                   Dashboard
                 </Link>
                 <Link
-                  href="/vigilancia"
+                  href="/seguimiento"
                   className="hidden md:inline text-[#6B7280] hover:text-[#0A0A0A] transition-colors"
                 >
-                  Vigilancia
+                  Seguimiento
                 </Link>
                 <Link
                   href="/analizar"
@@ -275,11 +275,11 @@ export function Navbar({ email, analisisRestantes, plan }: NavbarProps) {
                 Dashboard
               </Link>
               <Link
-                href="/vigilancia"
+                href="/seguimiento"
                 className="block px-5 py-4 text-sm text-[#6B7280] hover:text-[#0A0A0A] hover:bg-gray-50 border-b border-gray-100 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Vigilancia
+                Seguimiento
               </Link>
               <Link
                 href="/analizar"

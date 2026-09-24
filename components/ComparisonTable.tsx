@@ -16,15 +16,23 @@ const ROWS: { label: string; free: Valor; packs: Valor; pro: Valor }[] = [
   { label: "Publicaciones", free: "30", packs: "30", pro: "30" },
   { label: "Imagen del producto", free: "yes", packs: "yes", pro: "yes" },
   // TAB 6 (21/9): la fila que de verdad separa suscripcion de pack. Un pack
-  // compra analisis; solo el Pro sigue mirando el nicho cuando el usuario no
-  // esta. Los numeros salen de PLAN_CONFIG en lib/plans.ts — si cambian alla,
-  // cambian aca. `sub` mantiene la celda angosta en mobile (ver comentario de
-  // arriba: es lo que empujaba la columna Pro fuera de pantalla a 393px).
+  // compra analisis; solo el Pro sigue midiendo el producto cuando el usuario
+  // no esta. Los numeros salen de PLAN_CONFIG en lib/plans.ts — si cambian
+  // alla, cambian aca. `sub` mantiene la celda angosta en mobile (ver
+  // comentario de arriba: es lo que empujaba la columna Pro fuera de pantalla
+  // a 393px).
+  //
+  // TAB 5.2 (24/9): "nicho" paso a significar categoria, no producto (ver
+  // CLAUDE.md de Nichalo). "v" se achico a solo el numero porque "producto"/
+  // "productos" no entraban sin superar el largo del texto viejo — la regla
+  // dura de este cambio es no alargar la celda. El label de la fila ya dice
+  // "producto", asi que el numero solo (con el "1"/"5" grande) sigue siendo
+  // legible sin repetir la palabra.
   {
-    label: "Seguimiento del nicho",
-    free: { v: "1 nicho", sub: "1 medición" },
-    packs: { v: "1 nicho", sub: "1 medición" },
-    pro: { v: "5 nichos", sub: "semanal" },
+    label: "Seguimiento del producto",
+    free: { v: "1", sub: "1 medición" },
+    packs: { v: "1", sub: "1 medición" },
+    pro: { v: "5", sub: "semanal" },
   },
   { label: "Análisis avanzado", free: "no", packs: "no", pro: "yes" },
   { label: "Precio sugerido", free: "yes", packs: "yes", pro: "yes" },

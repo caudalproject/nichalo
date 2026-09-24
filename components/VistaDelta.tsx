@@ -119,7 +119,7 @@ export function VistaDelta({ delta }: { delta: Delta }) {
       <div className="px-4 sm:px-6 py-3.5 border-t border-gray-50 bg-gray-50/50">
         {delta.score.comparable ? (
           <div className="flex items-baseline justify-between gap-3">
-            <span className="text-sm text-gray-700">Score del nicho</span>
+            <span className="text-sm text-gray-700">Score del producto</span>
             <span className="font-mono text-xs tabular-nums">
               <span className="text-gray-400">{delta.score.antes}</span>{" "}
               <span

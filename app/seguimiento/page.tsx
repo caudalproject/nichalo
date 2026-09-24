@@ -2,17 +2,17 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { Navbar } from "@/components/Navbar";
-import { NichoVigilado, type NichoProps } from "@/components/NichoVigilado";
+import { ProductoSeguido, type ProductoSeguidoProps } from "@/components/ProductoSeguido";
 import { calcularDelta, type CorridaComparable } from "@/lib/delta";
 
 export const dynamic = "force-dynamic";
 
-export default async function VigilanciaPage() {
+export default async function SeguimientoPage() {
   const supabase = createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login?redirect=/vigilancia");
+  if (!user) redirect("/login?redirect=/seguimiento");
 
   const { data: nichos } = await supabase
     .from("watchlist")
@@ -44,7 +44,7 @@ export default async function VigilanciaPage() {
     porNicho.set(c.watchlist_id, lista);
   }
 
-  const preparados: NichoProps[] = (nichos ?? []).map((n) => {
+  const preparados: ProductoSeguidoProps[] = (nichos ?? []).map((n) => {
     const todas = porNicho.get(n.id) ?? [];
     const hechas = todas.filter((c) => c.status === "done");
     const corriendo = todas.some(
@@ -81,21 +81,21 @@ export default async function VigilanciaPage() {
       <main className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
         <header className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900">
-            Nichos que estás vigilando
+            Productos que estás siguiendo
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Un análisis es una foto. Esto es la película: qué cambió en el nicho
-            desde la última vez que lo miraste.
+            Los productos que seguís se vuelven a medir y te avisamos por mail
+            solo si cambió algo que importa.
           </p>
         </header>
 
         {preparados.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-12 text-center">
             <p className="text-sm font-medium text-gray-700">
-              Todavía no estás vigilando ningún nicho.
+              Todavía no estás siguiendo ningún producto.
             </p>
             <p className="mt-1 text-xs text-gray-500">
-              Abrí cualquier análisis tuyo y tocá “Vigilar este nicho”.
+              Analizá un producto y tocá “Seguir este producto” para empezar.
             </p>
             <Link
               href="/dashboard"
@@ -107,7 +107,7 @@ export default async function VigilanciaPage() {
         ) : (
           <div className="space-y-10">
             {preparados.map((n) => (
-              <NichoVigilado key={n.id} nicho={n} />
+              <ProductoSeguido key={n.id} producto={n} />
             ))}
           </div>
         )}

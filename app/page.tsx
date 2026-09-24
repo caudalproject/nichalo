@@ -86,7 +86,7 @@ const PRICING_CARDS = [
       // TAB 6 (21/9): la probada del seguimiento. Sin esta linea el free no se
       // entera de que la feature existe y nunca llega a chocar el tope, que es
       // justo donde el Pro tiene algo para ofrecer. Tope real en lib/plans.ts.
-      { label: "Vigilá 1 nicho y medilo una vez", included: true, subItems: null as string[] | null },
+      { label: "Seguí 1 producto y medilo una vez", included: true, subItems: null as string[] | null },
     ],
     cta: "Empezar gratis",
     href: "/login",
@@ -117,12 +117,12 @@ const PRICING_CARDS = [
       // commit c1bf7c7). Los topes viven en lib/plans.ts y los aplican
       // app/api/seguimiento/route.ts y .../rechequear/route.ts.
       {
-        label: "Seguimiento de hasta 5 nichos",
+        label: "Seguimiento de hasta 5 productos",
         included: true,
         subItems: [
-          "Un re-chequeo por semana de cada nicho que vigiles",
+          "Un re-chequeo por semana de cada producto que sigas",
           "Cuántos vendedores nuevos entraron desde la última medición",
-          "Cuánto se movió el precio mediano y la dispersión del nicho",
+          "Cuánto se movió el precio mediano y la dispersión del producto",
           "Comparación contra tu corrida anterior, no contra un promedio",
         ] as string[] | null,
       },

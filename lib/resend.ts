@@ -148,11 +148,12 @@ export async function sendUpsellEmail(email: string) {
  *    con once filas donde nueve dicen "igual" es un mail que ensena a ignorar
  *    los mails.
  *
- * 3. NO HAY LINK DE BAJA FALSO. El unico boton es "Ver el nicho", y la baja se
- *    explica en texto: se desactiva el nicho en /vigilancia. `sendUpsellEmail`
- *    linkea a `/unsubscribe`, que HOY NO EXISTE como pagina (404) — repetir ese
- *    link aca seria prometer una baja que no funciona en el mail que mas se
- *    repite de todos.
+ * 3. NO HAY LINK DE BAJA FALSO. El unico boton es "Ver el producto", y la baja
+ *    se explica en texto: se deja de seguir el producto en /seguimiento (TAB
+ *    5.2, 24/9: renombre de /vigilancia — ver redirect permanente en
+ *    next.config.mjs). `sendUpsellEmail` linkea a `/unsubscribe`, que HOY NO
+ *    EXISTE como pagina (404) — repetir ese link aca seria prometer una baja
+ *    que no funciona en el mail que mas se repite de todos.
  */
 
 
@@ -171,7 +172,7 @@ export async function sendSeguimientoEmail(args: {
   mediciones?: number;
   filas: FilaMail[];
   vendedoresNuevos: string[];
-  nichoUrl: string;
+  productoUrl: string;
 }) {
   const productoSeguro = escapeHtml(args.producto);
   const titularSeguro = escapeHtml(args.titular);
@@ -214,7 +215,7 @@ export async function sendSeguimientoEmail(args: {
     <p style="font-size:15px;color:#374151;line-height:1.6;margin:0">Medimos <strong>${productoSeguro}</strong>${
       args.mediciones ? ` ${args.mediciones} ${args.mediciones === 1 ? "vez" : "veces"}` : ""
     } en el último mes y el nicho no se movió lo suficiente como para escribirte.</p>
-    <p style="font-size:14px;color:#6b7280;line-height:1.6;margin:16px 0 0">Te mandamos este resumen una vez por mes para que sepas que la vigilancia sigue corriendo. Los demás mails solo salen cuando algo cambia de verdad.</p>`;
+    <p style="font-size:14px;color:#6b7280;line-height:1.6;margin:16px 0 0">Te mandamos este resumen una vez por mes para que sepas que el seguimiento sigue corriendo. Los demás mails solo salen cuando algo cambia de verdad.</p>`;
 
   const cuerpoCambios = `
     <p style="font-size:15px;color:#374151;line-height:1.6;margin:0">Esto es lo que se movió en <strong>${productoSeguro}</strong> desde la medición anterior. Todo medido sobre las publicaciones reales de Mercado Libre, sin inteligencia artificial de por medio.</p>
@@ -229,8 +230,8 @@ export async function sendSeguimientoEmail(args: {
       html: wrap(`
         <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 16px;line-height:1.35">${titularSeguro}</h1>
         ${args.tipo === "resumen" ? cuerpoResumen : cuerpoCambios}
-        ${btnHtml(args.nichoUrl, 'Ver el nicho')}
-        <p style="font-size:11px;color:#9ca3af;margin-top:28px;line-height:1.6">Recibís este mail porque estás vigilando este nicho en Nichalo. Para dejar de recibirlo, desactivá el nicho desde <a href="${BASE_URL}/vigilancia" style="color:#9ca3af">tu lista de vigilancia</a>.</p>
+        ${btnHtml(args.productoUrl, 'Ver el producto')}
+        <p style="font-size:11px;color:#9ca3af;margin-top:28px;line-height:1.6">Recibís este mail porque estás siguiendo este producto en Nichalo. Para dejar de recibirlo, dejá de seguirlo desde <a href="${BASE_URL}/seguimiento" style="color:#9ca3af">tu lista de seguimiento</a>.</p>
       `),
     })
     if (resendError) {
