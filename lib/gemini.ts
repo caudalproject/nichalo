@@ -370,6 +370,7 @@ REGLAS OBLIGATORIAS CON CONFIANZA ${confianza.nivel.toUpperCase()}:
 - Usá el precio MEDIANO como referencia de mercado, nunca el promedio.
 - El campo "resumen" TIENE QUE arrancar diciendo que los datos son poco confiables y por qué, ANTES de cualquier conclusión sobre el producto.
 ${confianza.motivos.includes("dispersion_precios") ? `- La búsqueda "${producto}" probablemente mezcló categorías (accesorios, repuestos o lotes junto al producto). Sugerí en la recomendación un término de búsqueda más específico, entre comillas, como PRIMER bullet.` : ''}
+${confianza.motivos.includes("mercado_segmentado") ? `- El scrape está limpio pero el mercado tiene segmentos de precio muy distintos: conviven genéricos baratos con marcas reconocidas caras. NO digas que los datos están mezclados ni sugieras cambiar el término de búsqueda. Explicá en qué segmento cae este producto y qué significa el segmento de arriba: es el techo de lo que alguien paga por esta categoría, no competencia directa.` : ''}
 - No afirmes márgenes ni ROI como si fueran precisos. Usá rangos y lenguaje condicional.
 ` : '';
 

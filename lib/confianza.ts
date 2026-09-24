@@ -41,7 +41,8 @@ export type MotivoConfianza =
   | "muestra_chica"
   | "sin_datos_de_venta"
   | "costo_fuera_de_rango"
-  | "mezcla_de_productos";
+  | "mezcla_de_productos"
+  | "mercado_segmentado";
 
 /**
  * Version corta y legible de cada motivo. `explicarConfianza` de mas abajo da
@@ -56,6 +57,7 @@ export const ETIQUETA_MOTIVO: Record<MotivoConfianza, string> = {
   sin_datos_de_venta: "ninguna publicación expone unidades vendidas",
   costo_fuera_de_rango: "el costo ingresado no cierra con los precios del mercado",
   mezcla_de_productos: "la búsqueda trajo más de un producto distinto",
+  mercado_segmentado: "el mercado tiene segmentos de precio muy distintos",
 };
 
 export interface Confianza {
@@ -136,6 +138,41 @@ function percentil(ordenados: number[], q: number): number {
 function promedio(xs: number[]): number {
   if (xs.length === 0) return 0;
   return Math.round(xs.reduce((a, b) => a + b, 0) / xs.length);
+}
+
+/**
+ * Proporcion del scrape identificada como no-producto a partir de la cual la
+ * dispersion se atribuye a mezcla y no a segmentacion.
+ *
+ * Bien por debajo del 0,4 con el que el filtro se abstiene: aca no se trata de
+ * decidir si filtrar, sino de decidir si lo que quedo DESPUES de filtrar se
+ * puede creer. Un scrape del que hubo que sacar un cuarto es un scrape sobre
+ * el que conviene no afirmar de mas.
+ */
+const MEZCLA_PARA_DESCONFIAR = 0.25;
+
+/**
+ * Si hay evidencia independiente de que el scrape mezclo productos.
+ *
+ * "Independiente" quiere decir: que NO salga del ratio de precios. Usar el
+ * spread como evidencia de mezcla y despues usar la mezcla para explicar el
+ * spread es circular, y es exactamente lo que el sistema venia haciendo.
+ *
+ * Ante la ausencia de informacion se responde que SI hay evidencia. Que
+ * `relevancia` venga null significa que el filtro no corrio (`lib/seguimiento.ts`,
+ * tests viejos), y ahi no se sabe nada sobre la limpieza del scrape: el
+ * comportamiento conservador es el de antes de este cambio.
+ */
+function hayEvidenciaDeMezcla(
+  relevancia: Parameters<typeof calcularPrecioStats>[3],
+  nConPrecio: number
+): boolean {
+  if (relevancia == null) return true;
+  if (!relevancia.aplicado) return true;
+  if (nConPrecio < MUESTRA_MEDIA) return true;
+  if (relevancia.n_evaluados <= 0) return true;
+  const vistos = relevancia.n_descartables ?? relevancia.n_descartados;
+  return vistos / relevancia.n_evaluados > MEZCLA_PARA_DESCONFIAR;
 }
 
 /** El peor de dos niveles gana — la confianza nunca sube por acumular senales. */
@@ -226,12 +263,44 @@ export function calcularPrecioStats(
   const motivos: MotivoConfianza[] = [];
   let nivel: NivelConfianza = "alta";
 
+  // DISPERSION: DOS COSAS DISTINTAS QUE HASTA HOY ERAN UNA (24/9).
+  //
+  // Un p90/p10 alto puede significar dos cosas opuestas:
+  //
+  //   (a) el scrape mezclo productos     -> los datos no sirven
+  //   (b) el mercado tiene segmentos     -> los datos sirven y ADEMAS dicen algo
+  //
+  // Hasta hoy las dos caian en `dispersion_precios` -> confianza baja -> techo
+  // 60, y el sistema se contradecia solo: el MISMO spread puntuaba 15/15 en
+  // `techo_diferenciacion` ("hay un segmento que paga bastante mas que la
+  // mediana: se puede diferenciar hacia arriba") mientras capeaba el score por
+  // datos poco confiables. El mismo numero, leido con signos opuestos, en la
+  // misma pantalla.
+  //
+  // Caso 212485c5: filtro aplicado, 4 descartes sobre 30 (13%), titulos todos
+  // coherentes (aspiradora/inalambrica/mini/portatil/mano/auto), y los caros
+  // con nombre — AIWA $119.999, Voltra $144.491. Otra marca del mismo producto
+  // es competencia por regla explicita del proyecto. Ahi no hay mezcla: hay un
+  // mercado que va del generico a la marca. Score bruto 82, capeado a 60.
+  //
+  // El desempate no puede salir del ratio, porque el ratio es identico en los
+  // dos casos. Sale de si el filtro de relevancia encontro evidencia de mezcla.
   const ratio = p10 > 0 ? p90 / p10 : Infinity;
+  const evidenciaDeMezcla = hayEvidenciaDeMezcla(relevancia, validos.length);
+
   if (ratio > DISPERSION_BAJA) {
-    motivos.push("dispersion_precios");
-    nivel = peor(nivel, "baja");
+    if (evidenciaDeMezcla) {
+      motivos.push("dispersion_precios");
+      nivel = peor(nivel, "baja");
+    } else {
+      // El spread es real y es informacion. Degrada a "media" y no mas: la
+      // muestra sigue siendo heterogenea y un solo numero la describe peor
+      // que a un mercado plano, pero eso no vuelve falsos los datos.
+      motivos.push("mercado_segmentado");
+      nivel = peor(nivel, "media");
+    }
   } else if (ratio > DISPERSION_MEDIA) {
-    motivos.push("dispersion_precios");
+    motivos.push(evidenciaDeMezcla ? "dispersion_precios" : "mercado_segmentado");
     nivel = peor(nivel, "media");
   }
 
@@ -394,6 +463,13 @@ export function explicarConfianza(
       `los precios encontrados van de ${formatear(stats.precio_minimo)} a ${formatear(
         stats.precio_maximo
       )} — es muy probable que la búsqueda haya mezclado categorías (accesorios, repuestos o lotes junto al producto)`
+    );
+  }
+  if (confianza.motivos.includes("mercado_segmentado")) {
+    partes.push(
+      `los precios van de ${formatear(stats.precio_minimo)} a ${formatear(
+        stats.precio_maximo
+      )}, y no es ruido: son segmentos distintos del mismo mercado (genéricos abajo, marcas reconocidas arriba). Un solo precio promedio no describe bien a ninguno de los dos, así que los números de abajo están calculados sobre la mediana`
     );
   }
   if (confianza.motivos.includes("muestra_chica")) {
