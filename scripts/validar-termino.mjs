@@ -42,6 +42,19 @@ const CASOS = [
     espera: { origen: "usuario_recortado", termino: "silla gamer ergonomica reclinable apoyapies" },
   },
   {
+    nombre: "24/9 — reintento: la foto ya fallo, no puede cambiar el sustantivo",
+    producto: "aspiradora de mano",
+    terminoModelo: "mini aspiradora soplador portátil",
+    estricto: true,
+    espera: { origen: "modelo_rechazado_sustantivo_nuevo", termino: "aspiradora mano" },
+  },
+  {
+    nombre: "mismo caso SIN reintento: la foto todavia puede precisar",
+    producto: "aspiradora de mano",
+    terminoModelo: "mini aspiradora soplador portátil",
+    espera: { origen: "modelo", termino: "mini aspiradora soplador portátil" },
+  },
+  {
     nombre: "consulta corta — se deja intacta",
     producto: "mini lavadora portatil",
     terminoModelo: null,
@@ -51,7 +64,7 @@ const CASOS = [
 
 let fallos = 0;
 for (const c of CASOS) {
-  const r = resolverTerminoBusqueda({ producto: c.producto, terminoModelo: c.terminoModelo });
+  const r = resolverTerminoBusqueda({ producto: c.producto, terminoModelo: c.terminoModelo, estricto: c.estricto });
   const okOrigen = r.origen === c.espera.origen;
   const okTermino = r.termino === c.espera.termino;
   const ok = okOrigen && okTermino;

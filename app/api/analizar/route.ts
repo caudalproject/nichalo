@@ -260,7 +260,13 @@ export async function POST(request: Request) {
     // cuenta. Un titulo de listing pegado entero son nueve palabras, y
     // Mercado Libre devuelve peores resultados con una consulta larga que con
     // una de tres.
-    const resuelto = resolverTerminoBusqueda({ producto, terminoModelo });
+    const resuelto = resolverTerminoBusqueda({
+      producto,
+      terminoModelo,
+      // En un reintento la foto ya fallo una vez con este producto. Ver
+      // `estricto` en lib/termino.ts.
+      estricto: Boolean(reintento_de),
+    });
     const searchKeyword = resuelto.termino || producto;
 
     // Cada rechazo se loguea: es la unica forma de saber cuantas veces la foto

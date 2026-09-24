@@ -113,8 +113,21 @@ function recortar(palabras: string[]): string {
 export function resolverTerminoBusqueda(args: {
   producto: string;
   terminoModelo?: string | null;
+  /**
+   * Reintento por confianza baja. Baja `CONSULTA_ESPECIFICA` a 1, o sea: la
+   * foto no puede introducir un sustantivo nuevo por corto que sea el texto
+   * del usuario.
+   *
+   * POR QUE. Un reintento existe porque el analisis anterior no sirvio, y en
+   * el camino que nos interesa lo que no sirvio fue el termino. La foto ya
+   * tuvo su oportunidad con este producto y la desaprovecho; darle otra vez
+   * permiso para cambiar el sustantivo es apostar a que la segunda lectura de
+   * la MISMA foto salga distinta. Los modificadores se siguen aceptando: no
+   * pueden mover la busqueda de categoria.
+   */
+  estricto?: boolean;
 }): TerminoResuelto {
-  const { producto, terminoModelo } = args;
+  const { producto, terminoModelo, estricto } = args;
 
   const palabrasUsuario = palabrasContenido(producto);
   const nucleoUsuario = palabrasUsuario.filter((p) => !esModificador(p));
@@ -155,7 +168,8 @@ export function resolverTerminoBusqueda(args: {
   // Es el que hubiera frenado "soplador". Solo mira sustantivos: que la foto
   // aporte "inalambrica" o "portatil" es precision y se acepta, porque un
   // modificador no puede mudar la busqueda de categoria.
-  if (palabrasUsuario.length >= CONSULTA_ESPECIFICA) {
+  const umbralEspecifico = estricto ? 1 : CONSULTA_ESPECIFICA;
+  if (palabrasUsuario.length >= umbralEspecifico) {
     const intrusa = palabrasModelo.find(
       (m) => !esModificador(m) && !palabrasUsuario.some((u) => coincide(u, m))
     );

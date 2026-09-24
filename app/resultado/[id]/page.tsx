@@ -414,15 +414,43 @@ export default async function ResultadoPage({ params }: Params) {
                       // costo_fuera_de_rango, que lo vuelva a tipear es
                       // exactamente lo que queremos que revise.
                       //
-                      // El PRODUCTO si se prefillea, y desde el 23/9 con el
-                      // termino que de verdad se uso (`search_keyword`) y no con
-                      // el que el usuario habia tipeado. Antes el boton
-                      // reintentaba con el mismo texto que ya habia fallado:
-                      // mismo scrape, mismo veredicto, y el "una sola vez por
-                      // analisis" gastado en nada — nos costaba ~$102 ARS y al
-                      // usuario su unica chance.
+                      // EL PRODUCTO SE PREFILLEA CON EL TEXTO DEL USUARIO
+                      // (24/9). Del 23/9 al 24/9 se prefilleaba con
+                      // `search_keyword` — el termino que de verdad se habia
+                      // usado — para que el reintento no repitiera el mismo
+                      // scrape que ya habia fallado.
+                      //
+                      // Ese razonamiento se apoyaba en un supuesto que hoy se
+                      // cayo: que la keyword derivada de la foto SIEMPRE era
+                      // mejor que el texto tipeado. Puede ser peor, y cuando
+                      // lo es, esto era el peor lugar posible para propagarla.
+                      //
+                      // Caso 485b868a (24/9). El analisis original se hizo con
+                      // "Aspiradora inalambrica mini de alta potencia para
+                      // hogar y automovil"; la foto devolvio "mini aspiradora
+                      // soplador portatil" — otra categoria — y el scrape se
+                      // fue a sopladores de jardin. El usuario apreto
+                      // Reintentar y el boton le puso "mini aspiradora
+                      // soplador portatil" EN EL CAMPO PRODUCTO. Su titulo
+                      // original desaparecio de la fila: el termino malo se
+                      // promovio a "lo que el usuario escribio", con lo cual
+                      // el anclaje de `lib/termino.ts` pasa a defenderlo en
+                      // vez de rechazarlo. El reintento salio identico al
+                      // original, hasta el ultimo decimal.
+                      //
+                      // La salida de emergencia de un termino malo no puede
+                      // ser el lugar donde ese termino se vuelve permanente.
+                      //
+                      // El motivo original del cambio ya no aplica: desde el
+                      // 24/9 reintentar con el mismo texto NO da el mismo
+                      // scrape, porque `resolverTerminoBusqueda` rechaza el
+                      // sustantivo intruso y busca con las palabras del
+                      // usuario. El campo ademas es editable — es la unica
+                      // parte del sistema que puede corregir una foto mal
+                      // leida, y para eso tiene que mostrar lo que la persona
+                      // escribio, no lo que la maquina entendio.
                       href: `/analizar?reintento_de=${analysis.id}&producto=${encodeURIComponent(
-                        result.search_keyword || analysis.producto
+                        analysis.producto
                       )}&pais=${analysis.pais}`,
                     }
                   : null
