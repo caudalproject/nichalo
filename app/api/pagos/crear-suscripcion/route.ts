@@ -3,6 +3,7 @@ import { MercadoPagoConfig, PreApproval } from "mercadopago";
 import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { PLANES } from "@/lib/mercadopago";
+import { SITIO } from "@/lib/sitio";
 
 const adminSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
           transaction_amount: planConfig.precio,
           currency_id: "ARS",
         },
-        back_url: `${process.env.SITE_URL}/dashboard?pago=exitoso`,
+        back_url: `${SITIO}/dashboard?pago=exitoso`,
         payer_email: user.email,
         external_reference: externalRef,
       },

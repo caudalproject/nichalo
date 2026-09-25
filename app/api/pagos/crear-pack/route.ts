@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Preference } from "mercadopago";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { mp, PACKS } from "@/lib/mercadopago";
+import { SITIO } from "@/lib/sitio";
 
 export async function POST(req: Request) {
   const supabase = createSupabaseServerClient();
@@ -27,10 +28,18 @@ export async function POST(req: Request) {
   try {
     const preference = new Preference(mp);
     const externalRef = `${user.id}|${packConfig.pack}`;
-    const siteUrl = process.env.SITE_URL ?? "";
-    // auto_return requiere back_urls https — en local (sandbox sin túnel)
-    // se omite para no romper la creación de la preferencia.
+    // 25/9/2026: esto leia `process.env.SITE_URL`, que valia el apex
+    // `https://nichalo.com`. El apex redirige 307 a `www` y MP NO sigue
+    // redirects en las notificaciones, asi que el `notification_url` de abajo
+    // apuntaba a una redireccion y el webhook nunca corria: la primera compra
+    // organica (Pack 3, $4.500) se cobro sin acreditar un solo credito.
+    // Ahora sale de lib/sitio.ts, que es la unica definicion de la URL
+    // canonica y no se puede desconfigurar desde un panel.
+    const siteUrl = process.env.SITE_URL ?? SITIO;
     const isLocalUrl = siteUrl.startsWith("http://localhost");
+    // auto_return requiere back_urls https — en local (sandbox sin tunel) se
+    // omite para no romper la creacion de la preferencia.
+    const urlBase = isLocalUrl ? siteUrl : SITIO;
 
     const pref = await preference.create({
       body: {
@@ -47,15 +56,14 @@ export async function POST(req: Request) {
         external_reference: externalRef,
         metadata: { user_id: user.id, pack: packConfig.pack },
         back_urls: {
-          success: `${siteUrl}/dashboard?compra=exitosa`,
-          pending: `${siteUrl}/dashboard?compra=pendiente`,
-          failure: `${siteUrl}/dashboard?compra=fallida`,
+          success: `${urlBase}/dashboard?compra=exitosa`,
+          pending: `${urlBase}/dashboard?compra=pendiente`,
+          failure: `${urlBase}/dashboard?compra=fallida`,
         },
-        // Explícito y no solo confiado al tópico "Pagos" tildado a mano en
+        // Explicito y no solo confiado al topico "Pagos" tildado a mano en
         // el panel de MP (Webhooks) — si alguien lo destilda, esta compra
-        // igual notifica. Debe apuntar a la URL con www. (nichalo.com sin
-        // www. redirige 307 y MP no sigue redirects en las notificaciones).
-        ...(isLocalUrl ? {} : { notification_url: `${siteUrl}/api/pagos/webhook` }),
+        // igual notifica. Usa SITIO (con www) por lo explicado arriba.
+        ...(isLocalUrl ? {} : { notification_url: `${SITIO}/api/pagos/webhook` }),
         ...(isLocalUrl ? {} : { auto_return: "approved" as const }),
       },
     });
