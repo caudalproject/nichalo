@@ -107,5 +107,57 @@ console.log("\nNO-OP (sin packs devuelve el array original por identidad)");
   console.log(`  ${ok ? "ok  " : "FALLA"}  identidad preservada: ${r.listings === listings}`);
 }
 
+console.log("\nEL CASO DEL 24/9 (consulta por peso: el conteo de envases no es su unidad)");
+{
+  // Reproduce 52e064c2 con numeros reales: el mercado verdadero de la frambuesa
+  // liofilizada de 20 g esta entre $11.700 y $12.959, y una caja de 27 sobres
+  // a $3.775 se dividia por 27 y entraba a la muestra valiendo $139,81. Seis
+  // de treinta asi alcanzaban para que p90/p10 diera 66 y la pagina dijera
+  // "Los datos de este analisis no son confiables" sobre un scrape sano.
+  const listings = [
+    { title: "Fruta Frambuesa Liofilizada 20g Premium Pomona Foods Snack", price: 11700 },
+    { title: "Frambuesa Liofilizada Fruta Deshidratada 20g", price: 11900 },
+    { title: "Frambuesa Liofilizada Fruta Deshidratada 20 G", price: 12959 },
+    { title: "Frambuesa Liofilizada Caja X 27 Sobres", price: 3775 },
+  ];
+  const r = normalizarUnidadDeVenta({
+    producto: "Frambuesa liofilizada 20gr",
+    costoLocal: 9000,
+    listings,
+  });
+  const intacto = r.listings.every((l, i) => l.price === listings[i].price);
+  const ok =
+    intacto &&
+    r.unidad.base_por_contenido === true &&
+    r.unidad.listings_ajustados === 0 &&
+    r.costoUnitario === 9000;
+  if (!ok) fallas++;
+  console.log(
+    `  ${ok ? "ok  " : "FALLA"}  la caja de 27 sobres sigue valiendo ${r.listings[3].price} y no ${Math.round(3775 / 27)}`
+  );
+
+  // La contracara: sin peso en la consulta, el pack se sigue dividiendo. Es el
+  // organizador de cables del golden set, que tiene que quedar como estaba.
+  const s = normalizarUnidadDeVenta({
+    producto: "organizador de cables escritorio",
+    costoLocal: 2000,
+    listings: [{ title: "Organizador De Cables Soporte Guardacables X4", price: 8000 }],
+  });
+  const ok2 = s.listings[0].price === 2000 && s.unidad.listings_ajustados === 1 && !s.unidad.base_por_contenido;
+  if (!ok2) fallas++;
+  console.log(`  ${ok2 ? "ok  " : "FALLA"}  sin peso en la consulta el pack x4 se sigue dividiendo: 8000 -> ${s.listings[0].price}`);
+
+  // Y si la consulta declara conteo, el peso del titulo no la desactiva: es el
+  // caso del 21/9, "pack de 3 rollos de cable de 100 m".
+  const t = normalizarUnidadDeVenta({
+    producto: "pack de 3 rollos de cable de 100 m",
+    costoLocal: 150000,
+    listings: [{ title: "Rollo cable 100 m", price: 62980 }],
+  });
+  const ok3 = t.costoUnitario === 50000 && !t.unidad.base_por_contenido;
+  if (!ok3) fallas++;
+  console.log(`  ${ok3 ? "ok  " : "FALLA"}  "100 m" en la consulta no desactiva un pack x3 declarado: costo -> ${t.costoUnitario}`);
+}
+
 console.log(fallas === 0 ? "\nTODO OK\n" : `\n${fallas} FALLAS\n`);
 process.exit(fallas === 0 ? 0 : 1);

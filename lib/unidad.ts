@@ -48,6 +48,34 @@ const MEDIDAS =
   "m|mt|mts|metro|metros|cm|mm|km|kg|g|gr|grs|gramo|gramos|mg|l|lt|lts|litro|litros|ml|cc|v|w|kw|hz|mah|ah|gb|tb|mb|rpm|psi|bar|pulg|pulgada|pulgadas|k|mp|mpx|px|hp|nm|c|°c|f|°f|años|ano|anos|meses|dias|usd|ars|hs|h|min|seg";
 
 /**
+ * Medidas de CONTENIDO — masa y volumen. Subconjunto de `MEDIDAS`, separado
+ * porque responde una pregunta distinta (fix del 24/9, caso 52e064c2).
+ *
+ * El resto de `MEDIDAS` describe una caracteristica del articulo: "monitor 24
+ * pulgadas", "bateria 5000 mah", "cable 100 m". Masa y volumen no: cuando un
+ * producto dice "20gr", eso ES lo que se vende. La unidad de venta viene fijada
+ * por el contenido, no por la cantidad de envases.
+ *
+ * La distincion importa por lo que se explica en `normalizarUnidadDeVenta`.
+ */
+const MEDIDAS_DE_CONTENIDO =
+  "kg|kilo|kilos|kilogramo|kilogramos|g|gr|grs|gramo|gramos|mg|l|lt|lts|litro|litros|ml|cc";
+
+const RE_CONTENIDO = new RegExp(
+  `\\b\\d+(?:[.,]\\d+)?\\s*(?:${MEDIDAS_DE_CONTENIDO})\\b`,
+  "i"
+);
+
+/**
+ * `true` si el texto fija su unidad de venta por peso o volumen: "frambuesa
+ * liofilizada 20gr", "aceite de coco 500 ml", "proteina 1 kg".
+ */
+export function declaraContenido(texto: string | null | undefined): boolean {
+  if (!texto) return false;
+  return RE_CONTENIDO.test(texto.toLowerCase());
+}
+
+/**
  * Sustantivos que SI cuentan unidades de producto. Deliberadamente corta: cada
  * palabra que se agregue aca es una oportunidad de falso positivo, y un falso
  * positivo divide el costo del usuario por un numero inventado.
@@ -136,6 +164,12 @@ export interface UnidadDeVenta {
    * los numeros son bit a bit los de antes.
    */
   aplicada: boolean;
+  /**
+   * `true` si se OMITIO dividir publicaciones por pack porque la consulta fija
+   * su unidad por contenido (peso/volumen). Opcional: los analisis anteriores
+   * al 24/9 no lo traen. Ver `normalizarUnidadDeVenta`.
+   */
+  base_por_contenido?: boolean;
 }
 
 export interface NormalizacionUnidad {
@@ -164,12 +198,49 @@ export function normalizarUnidadDeVenta(args: {
 
   const multiplicadorConsulta = detectarUnidades(producto);
 
+  // LA PROPIEDAD DE SEGURIDAD NO SE CUMPLIA SOLA (fix del 24/9).
+  //
+  // La cabecera de este modulo dice que es seguro porque "se aplica a los dos
+  // lados". Eso es cierto SOLO cuando la consulta declara un conteo. Cuando
+  // `multiplicadorConsulta` es 1 el costo no se toca y las publicaciones si:
+  // la division queda de un lado solo, y eso no normaliza nada — parte la
+  // muestra en dos escalas de precio que despues se promedian juntas.
+  //
+  // Caso real 52e064c2 (24/9, usuario real): "Frambuesa liofilizada 20gr".
+  // 6 de 30 publicaciones decian un conteo en el titulo y se dividieron por el
+  // ("x 27 sobres" -> precio/27 = $139,81); las otras 24 quedaron enteras. El
+  // mercado verdadero es angosto y coherente — las tres publicaciones
+  // comparables valen $11.700, $11.900 y $12.959 — pero el scrape ya tenia
+  // precios de $139 al lado de precios de $193.400. p90/p10 = 66,1 contra un
+  // umbral de 8, asi que `lib/confianza.ts` levantaba `dispersion_precios`,
+  // bajaba la confianza a "baja" y la pagina mostraba "Los datos de este
+  // analisis no son confiables" sobre un scrape que estaba sano. Los outliers
+  // que denunciaba el cartel los habiamos fabricado nosotros.
+  //
+  // POR QUE NO ES COMPARABLE, aunque suene a que deberia serlo. Dividir una
+  // caja de 27 sobres por 27 da el precio POR SOBRE. El usuario no vende
+  // sobres: vende 20 gramos. Un sobre pesa lo que quiera el fabricante. Las
+  // dos cifras no comparten base, y ninguna cantidad de aritmetica arregla
+  // eso — es una division entre cosas distintas.
+  //
+  // Por eso el desempate es si la consulta fija su unidad por CONTENIDO. Si
+  // dice "20gr", el conteo de envases no es su unidad y no se toca nada. Si no
+  // lo dice ("organizador de cables escritorio"), la unidad natural es el
+  // articulo y el comportamiento es el de siempre: el pack x4 se divide por 4.
+  //
+  // Y si la consulta SI declara conteo (`multiplicadorConsulta > 1`), esto no
+  // se activa: ahi la division si va a los dos lados y es el caso del 21/9
+  // ("pack de 3 rollos de cable de 100 m"), que se sigue corrigiendo igual
+  // aunque el titulo tenga un "100 m" adentro.
+  const basePorContenido = multiplicadorConsulta === 1 && declaraContenido(producto);
+
   let ajustados = 0;
   let evaluados = 0;
 
   const normalizados = listings.map(l => {
     if (l.price === null || !(l.price > 0)) return l;
     evaluados++;
+    if (basePorContenido) return l;
     const n = detectarUnidades(l.title);
     if (n <= 1) return l;
     ajustados++;
@@ -191,6 +262,7 @@ export function normalizarUnidadDeVenta(args: {
       listings_ajustados: ajustados,
       listings_evaluados: evaluados,
       aplicada,
+      base_por_contenido: basePorContenido,
     },
   };
 }
