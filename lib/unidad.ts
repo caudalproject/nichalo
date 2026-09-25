@@ -75,6 +75,84 @@ export function declaraContenido(texto: string | null | undefined): boolean {
   return RE_CONTENIDO.test(texto.toLowerCase());
 }
 
+/** Factores a la unidad base de cada dimension: gramos y mililitros. */
+const FACTOR: Record<string, { dim: "masa" | "volumen"; factor: number }> = {
+  mg: { dim: "masa", factor: 0.001 },
+  g: { dim: "masa", factor: 1 },
+  gr: { dim: "masa", factor: 1 },
+  grs: { dim: "masa", factor: 1 },
+  gramo: { dim: "masa", factor: 1 },
+  gramos: { dim: "masa", factor: 1 },
+  kg: { dim: "masa", factor: 1000 },
+  kilo: { dim: "masa", factor: 1000 },
+  kilos: { dim: "masa", factor: 1000 },
+  kilogramo: { dim: "masa", factor: 1000 },
+  kilogramos: { dim: "masa", factor: 1000 },
+  ml: { dim: "volumen", factor: 1 },
+  cc: { dim: "volumen", factor: 1 },
+  l: { dim: "volumen", factor: 1000 },
+  lt: { dim: "volumen", factor: 1000 },
+  lts: { dim: "volumen", factor: 1000 },
+  litro: { dim: "volumen", factor: 1000 },
+  litros: { dim: "volumen", factor: 1000 },
+};
+
+// Alternativas ordenadas de mas larga a mas corta para que "kg" gane sobre "g".
+const UNIDADES_ORDENADAS = Object.keys(FACTOR).sort((a, b) => b.length - a.length);
+
+const RE_CONTENIDO_CAPTURA = new RegExp(
+  `\\b(\\d+(?:[.,]\\d+)?)\\s*(${UNIDADES_ORDENADAS.join("|")})\\b`,
+  "gi"
+);
+
+/**
+ * Cuanto producto declara el texto, en gramos o mililitros.
+ *
+ * Se queda con el valor MAS GRANDE cuando hay varios, por el mismo motivo que
+ * `detectarUnidades`: los titulos de ML encadenan numeros ("Frambuesa 20g x 12
+ * sobres 240 g total") y el contenido de venta es el total, no el primero que
+ * escribio el vendedor.
+ */
+export function extraerContenido(
+  texto: string | null | undefined
+): { valor: number; dim: "masa" | "volumen" } | null {
+  if (!texto) return null;
+  const t = texto.toLowerCase();
+  RE_CONTENIDO_CAPTURA.lastIndex = 0;
+
+  let mejor: { valor: number; dim: "masa" | "volumen" } | null = null;
+  let m: RegExpExecArray | null;
+  while ((m = RE_CONTENIDO_CAPTURA.exec(t)) !== null) {
+    const n = Number.parseFloat(m[1].replace(",", "."));
+    const u = FACTOR[m[2]];
+    if (!u || !Number.isFinite(n) || n <= 0) continue;
+    const valor = n * u.factor;
+    if (!mejor || valor > mejor.valor) mejor = { valor, dim: u.dim };
+  }
+  return mejor;
+}
+
+/**
+ * Diferencia de contenido a partir de la cual dos publicaciones son formatos de
+ * venta distintos y no variantes del mismo articulo.
+ *
+ * ES LA GUARDA QUE EVITA EL FALSO POSITIVO CARO. Sin ella, "mancuernas
+ * ajustables 20kg" contra una publicacion de 12,5 kg daria un factor de 1,6 y
+ * le dividiriamos el precio por eso — pero una mancuerna de 12,5 kg no es
+ * 0,625 de una de 20 kg: es otro articulo del mismo catalogo, y su precio no
+ * escala con el peso.
+ *
+ * La diferencia entre los dos casos es de orden de magnitud, no de matiz. Un
+ * formato de venta distinto del mismo consumible salta por 10x, 50x, 100x — el
+ * lote de 1 kg contra el paquete de 20 g son 50x. Una variante de spec se
+ * mueve en factores chicos. 3x separa las dos poblaciones con margen de sobra
+ * para los dos lados.
+ */
+const FACTOR_MINIMO_DE_FORMATO = 3;
+
+/** Arriba de esto el titulo se parseo mal; no se toca nada. */
+const FACTOR_MAXIMO_DE_FORMATO = 200;
+
 /**
  * Sustantivos que SI cuentan unidades de producto. Deliberadamente corta: cada
  * palabra que se agregue aca es una oportunidad de falso positivo, y un falso
@@ -237,10 +315,47 @@ export function normalizarUnidadDeVenta(args: {
   let ajustados = 0;
   let evaluados = 0;
 
+  // NORMALIZAR POR CONTENIDO, NO DESCARTAR (24/9, segunda mitad del caso).
+  //
+  // Sacar el conteo de envases de la ecuacion arreglo el piso de la
+  // distribucion pero no el techo. Medido con un scrape real de "frambuesa
+  // liofilizada 20gr": mediana $42.738 sobre un mercado que de verdad esta en
+  // $11.700-$13.000, porque adentro de la muestra seguia habiendo lotes por
+  // kilo de hasta $207.650. El margen y el ROI salian de un precio que no era
+  // el precio de nada.
+  //
+  // POR QUE NO SE DESCARTAN. Un lote de 1 kg SI es el producto — es el mismo
+  // consumible vendido en otro formato — y `lib/relevancia.ts` tiene una regla
+  // explicita de no tirar lo que es el producto. Ademas seria contraproducente:
+  // marcarlos como descartables empuja la proporcion contra el techo de 0,4 de
+  // ese modulo y lo hace ABSTENERSE, que deja la muestra entera adentro. El
+  // arreglo por descarte produce el sintoma que queria arreglar.
+  //
+  // Convertir, en cambio, no toca esa matematica y ademas dice algo verdadero:
+  // el kilo a $207.650 son $4.153 por cada 20 g, y que el formato grande salga
+  // mucho mas barato por gramo es exactamente lo que alguien que quiere revender
+  // necesita ver.
+  //
+  // Es la misma operacion que este modulo ya hacia para los packs por conteo.
+  // Para un consumible el contenido ES el pack, y al hacerlo por contenido la
+  // division queda expresada en la unidad del usuario — los dos lados en la
+  // misma base, que es la propiedad que el modulo promete.
+  const contenidoConsulta = basePorContenido ? extraerContenido(producto) : null;
+
   const normalizados = listings.map(l => {
     if (l.price === null || !(l.price > 0)) return l;
     evaluados++;
-    if (basePorContenido) return l;
+
+    if (basePorContenido) {
+      if (!contenidoConsulta) return l;
+      const c = extraerContenido(l.title);
+      if (!c || c.dim !== contenidoConsulta.dim) return l;
+      const factor = c.valor / contenidoConsulta.valor;
+      if (factor < FACTOR_MINIMO_DE_FORMATO || factor > FACTOR_MAXIMO_DE_FORMATO) return l;
+      ajustados++;
+      return { ...l, price: l.price / factor };
+    }
+
     const n = detectarUnidades(l.title);
     if (n <= 1) return l;
     ajustados++;

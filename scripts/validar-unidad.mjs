@@ -159,5 +159,55 @@ console.log("\nEL CASO DEL 24/9 (consulta por peso: el conteo de envases no es s
   console.log(`  ${ok3 ? "ok  " : "FALLA"}  "100 m" en la consulta no desactiva un pack x3 declarado: costo -> ${t.costoUnitario}`);
 }
 
+console.log("\nNORMALIZACION POR CONTENIDO (el lote de 1 kg no se descarta: se convierte)");
+{
+  // Scrape real de "frambuesa liofilizada 20gr" medido el 24/9: la mediana
+  // daba $42.703 sobre un mercado que de verdad esta en $11.700-$13.000,
+  // porque adentro habia lotes por kilo de hasta $207.650.
+  const r = normalizarUnidadDeVenta({
+    producto: "Frambuesa liofilizada 20gr",
+    costoLocal: 9000,
+    listings: [
+      { title: "Frambuesa Liofilizada 20g Premium", price: 11700 },
+      { title: "Frambuesa Liofilizada Fruta Deshidratada 1 Kg", price: 200000 },
+    ],
+  });
+  // 1 kg / 20 g = 50x  ->  $200.000 / 50 = $4.000 por cada 20 g
+  const ok = r.listings[0].price === 11700 && r.listings[1].price === 4000;
+  if (!ok) fallas++;
+  console.log(`  ${ok ? "ok  " : "FALLA"}  el kilo a $200.000 entra valiendo ${r.listings[1].price} por 20 g, y el de 20 g no se toca`);
+
+  // LA GUARDA QUE EVITA EL FALSO POSITIVO CARO: una mancuerna de 12,5 kg no es
+  // 0,625 de una de 20 kg. Factor 1,6 < 3, no se toca.
+  const m = normalizarUnidadDeVenta({
+    producto: "Mancuernas ajustables 20kg",
+    costoLocal: 50000,
+    listings: [{ title: "Par De Mancuernas Hexagonal Engomadas 12.5 Kg", price: 80000 }],
+  });
+  const ok2 = m.listings[0].price === 80000 && m.unidad.listings_ajustados === 0;
+  if (!ok2) fallas++;
+  console.log(`  ${ok2 ? "ok  " : "FALLA"}  la mancuerna de 12,5 kg sigue valiendo ${m.listings[0].price}: es otra variante, no otro formato`);
+
+  // Mismo contenido declarado de los dos lados: factor 1, no-op.
+  const t = normalizarUnidadDeVenta({
+    producto: "Termo Stanley 473ml",
+    costoLocal: 30000,
+    listings: [{ title: "Botella Termica Stanley 473 Ml", price: 70000 }],
+  });
+  const ok3 = t.listings[0].price === 70000;
+  if (!ok3) fallas++;
+  console.log(`  ${ok3 ? "ok  " : "FALLA"}  473 ml contra 473 ml no mueve nada: ${t.listings[0].price}`);
+
+  // Dimensiones distintas no se cruzan: gramos contra mililitros no comparan.
+  const d = normalizarUnidadDeVenta({
+    producto: "Proteina en polvo 500 g",
+    costoLocal: 10000,
+    listings: [{ title: "Shaker Proteina 600 Ml", price: 12000 }],
+  });
+  const ok4 = d.listings[0].price === 12000;
+  if (!ok4) fallas++;
+  console.log(`  ${ok4 ? "ok  " : "FALLA"}  masa contra volumen no se cruzan: ${d.listings[0].price}`);
+}
+
 console.log(fallas === 0 ? "\nTODO OK\n" : `\n${fallas} FALLAS\n`);
 process.exit(fallas === 0 ? 0 : 1);
