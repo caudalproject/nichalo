@@ -27,11 +27,17 @@
  *    El recorte solo se aplica con muestra suficiente (>= 20): por debajo de eso
  *    tirar el 10% destruye mas informacion de la que limpia.
  *
- * Los umbrales de abajo son tentativos y estan para calibrarse. Antes de esto
- * no se persistian percentiles, asi que la pregunta "cuan disperso es el scrape
- * tipico" no se puede responder retroactivamente — los listings crudos no se
- * guardan en ningun lado (ni en `analyses` ni en `analysis_cache`). Empiezan a
- * medirse desde este commit.
+ * Los umbrales de abajo ya NO son tentativos (24/9). Nacieron elegidos en el
+ * editor, con la nota de que la pregunta "cuan disperso es el scrape tipico" no
+ * se podia responder retroactivamente porque no se persistian percentiles. Se
+ * persistieron, se junto muestra, y la respuesta resulto ser **7,2** — contra
+ * un umbral medio puesto en 4. El detalle de la recalibracion y de lo que se
+ * asume a cambio esta en el bloque de `DISPERSION_MEDIA`.
+ *
+ * La leccion, que aplica a cualquier umbral futuro de este archivo: un numero
+ * inventado en el editor se vuelve invisible apenas se mergea, y sigue
+ * decidiendo lo que ve el usuario hasta que alguien mide. Si se agrega un
+ * umbral nuevo, dejarlo anotado como pendiente de calibrar Y volver a mirarlo.
  */
 
 export type NivelConfianza = "alta" | "media" | "baja";
@@ -99,9 +105,58 @@ export interface PrecioStats {
   total_descartados: number;
 }
 
-/** Umbrales de dispersion sobre p90/p10 (set recortado). */
-const DISPERSION_MEDIA = 4;
-const DISPERSION_BAJA = 8;
+/**
+ * Umbrales de dispersion sobre p90/p10 (set recortado).
+ *
+ * CALIBRADOS CON DATOS REALES EL 24/9. Antes valian 4 y 8, elegidos en el
+ * editor — la cabecera de este archivo decia que eran tentativos y que la
+ * pregunta "cuan disperso es el scrape tipico" no se podia responder porque no
+ * habia percentiles guardados. Ya hay.
+ *
+ * Los 9 analisis limpios de los ultimos 14 dias dan estos p90/p10:
+ *
+ *   11,8 · 10,0 · 8,4 · 8,4 · 7,2 · 7,2 · 6,5 · 6,2 · 4,7     mediana 7,2
+ *
+ * Con el umbral medio en 4 — por DEBAJO de la mediana del mercado — el
+ * resultado era que 11 de 11 analisis salian degradados y NINGUNO en "alta".
+ * `dispersion_precios` se levantaba en 10 de los 11. Es literalmente el mismo
+ * defecto que se corrigio mas abajo para `sin_datos_de_venta` unas horas antes,
+ * y el argumento se copia tal cual: un castigo que se aplica al 100% de los
+ * casos no es un castigo, es una constante, y vacia de significado a la senal
+ * con la que el usuario decide si creerle al numero.
+ *
+ * Los dos analisis que quedaron fuera de la muestra daban 87,8 y 66,1, un orden
+ * de magnitud arriba del resto. No eran mercados raros: era el bug de
+ * `lib/unidad.ts` (fix `714e5ac`) fabricando precios fantasma. Sirven igual
+ * como referencia de que aspecto tiene la patologia de verdad, y es lo que
+ * fija el umbral bajo en 16 y no en 12.
+ *
+ * QUEDA ASUMIDO A PROPOSITO: con el umbral medio en 8, "almohadilla electrica
+ * cervical" (6,5) pasa a mostrarse en "alta". Ese caso esta documentado en
+ * `lib/relevancia.ts` como un analisis que no servia — pero el 6,5 es el ratio
+ * DESPUES de que el filtro de relevancia del 23/9 hiciera su trabajo, no el
+ * $10.787-a-$499.999 crudo que motivo aquel fix. Decision de JP del 24/9:
+ * preferimos ese riesgo antes que un cartel que aparece siempre y que, por
+ * aparecer siempre, no informa nada. Si reaparece un falso verde, el numero a
+ * mover es este y hay que anotarlo.
+ */
+const DISPERSION_MEDIA = 8;
+const DISPERSION_BAJA = 16;
+
+/**
+ * Gatillo del recorte [p05,p95], SEPARADO de los umbrales de confianza.
+ *
+ * Hasta el 24/9 reusaba `DISPERSION_MEDIA` y los dos numeros subian juntos por
+ * accidente de escritura, no por diseño. Son decisiones distintas: una dice
+ * "cuando vale la pena limpiar las colas" y la otra "cuando dejo de creerle a
+ * la muestra". Atar la limpieza al umbral recalibrado habria hecho que se
+ * recortara MENOS justo cuando se empezo a tolerar mas dispersion — o sea,
+ * mas outliers adentro y mas ratios altos. Exactamente al reves de lo buscado.
+ *
+ * Se queda en el 4 original: el recorte se sigue disparando igual de seguido
+ * que antes de esta calibracion.
+ */
+const RECORTE_DESDE = 4;
 
 /** Debajo de esto la muestra no alcanza para un veredicto firme. */
 export const MUESTRA_MEDIA = 15;
@@ -226,7 +281,7 @@ export function calcularPrecioStats(
   const ratioCrudo =
     percentil(validos, 0.1) > 0 ? percentil(validos, 0.9) / percentil(validos, 0.1) : Infinity;
 
-  if (validos.length >= MINIMO_PARA_RECORTAR && ratioCrudo > DISPERSION_MEDIA) {
+  if (validos.length >= MINIMO_PARA_RECORTAR && ratioCrudo > RECORTE_DESDE) {
     const lo = percentil(validos, 0.05);
     const hi = percentil(validos, 0.95);
     const recortado = validos.filter((p) => p >= lo && p <= hi);
