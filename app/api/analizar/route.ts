@@ -6,6 +6,12 @@ import { extractKeywordsFromImage } from "@/lib/gemini";
 import { resolverTerminoBusqueda } from "@/lib/termino";
 import { sendUpsellEmail } from "@/lib/resend";
 import type { Plan, AnalysisResult } from "@/lib/supabase";
+import {
+  costoImplausiblementeBajo,
+  normalizarProducto,
+  sugerirCostoEnMiles,
+  MENSAJE_LINK_SIN_TITULO,
+} from "@/lib/entrada";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,9 +26,14 @@ const DatosProSchema = z.object({
 }).nullable().optional();
 
 const BodySchema = z.object({
-  producto: z.string().min(2).max(120),
+  // Max holgado a proposito (TAB 3.3): un link de ML pegado pasa de 120
+  // caracteres, y rechazarlo aca con `invalid_input` impedia mostrarle el
+  // mensaje util. El tope de 120 se aplica despues de normalizar.
+  producto: z.string().min(2).max(2000),
   pais: z.enum(["AR", "MX", "CO"]),
   costoEstimado: z.number().positive().max(1_000_000),
+  // El usuario ya vio "Quisiste decir...?" y confirmo que el costo es ese.
+  costoConfirmado: z.boolean().optional(),
   // OBLIGATORIA DEL LADO DEL SERVIDOR (23/9). Lo era desde el 21/9, pero solo
   // en `AnalizarForm.tsx`: el schema la seguia aceptando ausente.
   //
@@ -121,7 +132,38 @@ export async function POST(request: Request) {
       { status: 422 }
     );
   }
-  const { producto, pais, costoEstimado, imagenBase64, imagenMimeType, perfilVendedor, datos_pro, reintento_de } = parsed.data;
+  const { producto: productoCrudo, pais, costoEstimado, costoConfirmado, imagenBase64, imagenMimeType, perfilVendedor, datos_pro, reintento_de } = parsed.data;
+
+  // --- Validacion de entrada (TAB 3.3) — ANTES de auth, creditos y Gemini ---
+  //
+  // Un link de ML nunca llega literal a la busqueda: se reemplaza por el titulo
+  // del slug, o se le pide el nombre al usuario.
+  const entrada = normalizarProducto(productoCrudo);
+  if (entrada.tipo === "link_sin_titulo") {
+    return NextResponse.json(
+      { error: "producto_es_link", detail: MENSAJE_LINK_SIN_TITULO },
+      { status: 422 }
+    );
+  }
+  const producto = entrada.producto.slice(0, 120);
+  if (producto.length < 2) {
+    return NextResponse.json({ error: "invalid_input" }, { status: 422 });
+  }
+
+  // Un costo implausiblemente bajo no corre sin confirmacion. Va antes de
+  // cualquier descuento: no se gasta ni un credito ni una llamada a Gemini. El
+  // cliente lo pregunta en la UI; esto es el cerco del lado del servidor para
+  // el que saltea el formulario. Umbral y calibracion: lib/entrada.ts.
+  if (!costoConfirmado && costoImplausiblementeBajo(costoEstimado)) {
+    return NextResponse.json(
+      {
+        error: "costo_sospechoso",
+        detail: `El costo ($${costoEstimado}) parece muy bajo. ¿Quisiste decir $${sugerirCostoEnMiles(costoEstimado).toLocaleString("es-AR")}?`,
+        costo_sugerido: sugerirCostoEnMiles(costoEstimado),
+      },
+      { status: 422 }
+    );
+  }
 
   const supabase = createSupabaseServerClient();
 

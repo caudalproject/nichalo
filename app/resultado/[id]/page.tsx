@@ -186,6 +186,11 @@ export default async function ResultadoPage({ params }: Params) {
     });
   const confiable = confianza?.nivel === "alta";
   const bajaConfianza = confianza?.nivel === "baja";
+  // TAB 3.3 (b). Con `costo_fuera_de_rango` el margen y el ROI no son "poco
+  // precisos": son falsos, porque salen de un costo que no corresponde al
+  // producto (85 en vez de 85.000 daba "75-87%"). "~75%" seguia siendo un
+  // numero que alguien se lleva; aca directamente no se muestra.
+  const costoFuera = confianza?.motivos.includes("costo_fuera_de_rango") ?? false;
 
   // Oferta de reintento gratis (Capa 4). Solo si es el analisis del propio
   // usuario, salio con confianza baja MEDIDA (no heredada — de los viejos no
@@ -336,6 +341,33 @@ export default async function ResultadoPage({ params }: Params) {
               justo donde el scroll esta haciendo el trabajo.
               ───────────────────────────────────────────────────────────── */}
           <Acto numero={1} titulo="Veredicto" pregunta="¿Va o no va?">
+            {/* TAB 3.3 (b): lo primero que se lee, antes del score. */}
+            {costoFuera && (
+              <div
+                role="alert"
+                className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3.5"
+              >
+                <p className="text-sm font-semibold text-amber-900">
+                  Revisá el costo: este margen no es firme
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-amber-800">
+                  Cargaste {formatLocal(costo)} por unidad y eso no cierra con los precios
+                  del mercado. Puede ser un costo en otra unidad (dólares o miles
+                  abreviados, por ejemplo 85 en vez de 85.000). Por eso no te mostramos
+                  margen ni ROI: saldrían de un costo que no corresponde.
+                </p>
+                {reintentoDisponible && (
+                  <Link
+                    href={`/analizar?reintento_de=${analysis.id}&producto=${encodeURIComponent(
+                      analysis.producto
+                    )}&pais=${analysis.pais}`}
+                    className="mt-3 inline-block rounded-lg bg-amber-900 px-4 py-2 text-sm font-medium text-white"
+                  >
+                    Recalcular con el costo corregido — sin cargo
+                  </Link>
+                )}
+              </div>
+            )}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               <div className={`h-1.5 w-full ${
                 analysis.veredicto === 'VIABLE' ? 'bg-green-500' :
@@ -530,11 +562,11 @@ export default async function ResultadoPage({ params }: Params) {
                   {/* Sin decimal cuando la confianza es baja: "92.8%" afirma una
                       precision que los datos no sostienen. El decimal hace mas
                       dano que el numero. */}
-                  {bajaConfianza ? `~${Math.round(margenBruto)}%` : `${margenBruto.toFixed(1)}%`}
+                  {costoFuera ? "—" : bajaConfianza ? `~${Math.round(margenBruto)}%` : `${margenBruto.toFixed(1)}%`}
                 </div>
                 {bajaConfianza && (
                   <div className="mt-1 text-[10px] font-medium uppercase tracking-wide text-amber-700">
-                    baja confianza
+                    {costoFuera ? "revisá el costo" : "baja confianza"}
                   </div>
                 )}
               </div>
@@ -658,7 +690,9 @@ export default async function ResultadoPage({ params }: Params) {
                       pintar de rojo tambien seria afirmar algo sobre datos que no
                       sostienen ninguna afirmacion. Neutro y dicho con palabras. */}
                   <Row label="Margen bruto">
-                    {bajaConfianza ? (
+                    {costoFuera ? (
+                      <span className="text-xs text-[#6B7280]">No calculable: revisá el costo</span>
+                    ) : bajaConfianza ? (
                       <Badge variant="outline" className="border-[#E5E7EB] text-[#6B7280]">
                         ~{Math.round(margenBruto)}% · baja confianza
                       </Badge>

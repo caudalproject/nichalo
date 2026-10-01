@@ -16,6 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getCurrencyForCountry, getExchangeRate } from "@/lib/currency";
+import {
+  costoImplausiblementeBajo,
+  normalizarProducto,
+  parsearMontoAR,
+  sugerirCostoEnMiles,
+  MENSAJE_LINK_SIN_TITULO,
+} from "@/lib/entrada";
 
 interface Props {
   creditsLeft: number;
@@ -81,6 +88,9 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
   const [stepMessage, setStepMessage] = useState("Iniciando análisis...");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  // TAB 3.3: costo implausiblemente bajo que espera confirmacion. Guarda el
+  // numero tipeado para el cartel; null = no hay nada que confirmar.
+  const [costoPorConfirmar, setCostoPorConfirmar] = useState<number | null>(null);
 
   // Un reintento gratis tiene que poder correr con 0 créditos: el caso más
   // común es justamente el usuario free, que tiene UN análisis, lo gasta, y le
@@ -185,23 +195,44 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
     }, 3000);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(
+    e: React.FormEvent | null,
+    opts: { costo?: string; costoConfirmado?: boolean } = {}
+  ) {
+    e?.preventDefault();
     setError(null);
+    setCostoPorConfirmar(null);
 
     if (noCredits) {
       setError("No te quedan análisis. Comprá un pack o pasate a Pro para continuar.");
       return;
     }
 
-    const costoLocalParsed = parseFloat(costo.replace(",", "."));
+    // "85.000" es 85 mil, no 85: ver `parsearMontoAR` (causa probable de los
+    // costos 85/31/15 del 24/9).
+    const costoLocalParsed = parsearMontoAR(opts.costo ?? costo);
     const costoUSDSubmit = exchangeRate ? costoLocalParsed / exchangeRate : costoLocalParsed;
-    if (!producto.trim() || producto.trim().length < 2) {
+    // TAB 3.3 (c): un link de ML nunca viaja como nombre. Se saca el titulo del
+    // slug y se muestra en el campo; si no se puede, se pide el nombre.
+    const entrada = normalizarProducto(producto);
+    if (entrada.tipo === "link_sin_titulo") {
+      setError(MENSAJE_LINK_SIN_TITULO);
+      return;
+    }
+    const productoLimpio = entrada.producto;
+    if (entrada.tipo === "link_ml") setProducto(productoLimpio);
+    if (!productoLimpio || productoLimpio.length < 2) {
       setError("Ingresá un producto válido (mínimo 2 caracteres).");
       return;
     }
     if (!Number.isFinite(costoLocalParsed) || costoLocalParsed <= 0) {
       setError("Ingresá un costo estimado mayor a 0.");
+      return;
+    }
+    // TAB 3.3 (a): ANTES de gastar el analisis. Umbral y calibracion en
+    // lib/entrada.ts.
+    if (!opts.costoConfirmado && costoImplausiblementeBajo(costoLocalParsed)) {
+      setCostoPorConfirmar(costoLocalParsed);
       return;
     }
     // La foto pasa a ser obligatoria (21/9). Sin imagen, Apify busca por el
@@ -220,14 +251,15 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
 
     try {
       const body: Record<string, unknown> = {
-        producto: producto.trim(),
+        producto: productoLimpio,
         pais,
         costoEstimado: costoUSDSubmit,
+        ...(opts.costoConfirmado ? { costoConfirmado: true } : {}),
         perfilVendedor,
         ...(reintentoDe ? { reintento_de: reintentoDe } : {}),
         datos_pro: plan === 'pro' ? {
           origen_producto: origenProducto || null,
-          presupuesto_inicial: presupuesto ? parseFloat(presupuesto.replace(',', '.')) / (exchangeRate ?? 1) : null,
+          presupuesto_inicial: presupuesto ? parsearMontoAR(presupuesto) / (exchangeRate ?? 1) : null,
           tiene_variantes: tieneVariantes || null,
           detalle_variantes: tieneVariantes === 'si' ? detalleVariantes : null,
           canal_distribucion: canalDistribucion || null,
@@ -247,7 +279,10 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
       const data = await res.json();
 
       if (!res.ok) {
-        if (res.status === 402) {
+        if (data?.error === "costo_sospechoso") {
+          // El cerco del servidor se disparo (p. ej. cliente desactualizado).
+          setCostoPorConfirmar(costoLocalParsed);
+        } else if (res.status === 402) {
           setError("No te quedan análisis. Actualizá tu plan para seguir.");
         } else if (res.status === 401) {
           setError("Tu sesión expiró. Volvé a ingresar.");
@@ -283,7 +318,7 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
   return (
     <Card>
       <CardContent className="p-6">
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form className="space-y-5" onSubmit={(e) => handleSubmit(e)}>
           <div className="space-y-2">
             <Label htmlFor="producto">Producto a validar</Label>
             <Input
@@ -293,7 +328,7 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
               onChange={(e) => setProducto(e.target.value)}
               required
               minLength={2}
-              maxLength={120}
+              maxLength={2000}
             />
             <p className="text-xs text-muted-foreground">
               Cuanto más específico, mejor el análisis.
@@ -570,6 +605,54 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
                   Mirá el plan Pro →
                 </a>
               </p>
+            </div>
+          )}
+
+          {costoPorConfirmar !== null && (
+            <div
+              role="alert"
+              className="space-y-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3.5"
+            >
+              <p className="text-sm font-semibold text-amber-900">
+                ¿Quisiste decir ${sugerirCostoEnMiles(costoPorConfirmar).toLocaleString("es-AR")} o USD {costoPorConfirmar.toLocaleString("es-AR")}?
+              </p>
+              <p className="text-sm leading-relaxed text-amber-800">
+                Cargaste ${costoPorConfirmar.toLocaleString("es-AR")} pesos por unidad. Con un
+                costo tan bajo el margen sale inflado y el veredicto no sirve. Si el valor es en
+                dólares, convertilo a pesos antes de seguir.
+              </p>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={loading}
+                  onClick={() => {
+                    const corregido = String(sugerirCostoEnMiles(costoPorConfirmar));
+                    setCosto(corregido);
+                    handleSubmit(null, { costo: corregido, costoConfirmado: true });
+                  }}
+                >
+                  Son ${sugerirCostoEnMiles(costoPorConfirmar).toLocaleString("es-AR")}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={loading}
+                  onClick={() => handleSubmit(null, { costoConfirmado: true })}
+                >
+                  No, son ${costoPorConfirmar.toLocaleString("es-AR")}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  disabled={loading}
+                  onClick={() => setCostoPorConfirmar(null)}
+                >
+                  Corregir el costo
+                </Button>
+              </div>
             </div>
           )}
 
