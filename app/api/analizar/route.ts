@@ -46,6 +46,10 @@ const BodySchema = z.object({
   imagenBase64: z.string().min(1),
   imagenMimeType: z.string().optional(),
   perfilVendedor: z.enum(["principiante", "intermedio", "experto"]).default("principiante"),
+  // TAB 3.4 (1/10). Opcionales: sin ellos el score usa el tipo por perfil y el
+  // default de otros costos de `lib/comisiones.ts`.
+  tipoPublicacion: z.enum(["clasica", "premium"]).optional(),
+  otrosCostosPct: z.number().min(0).max(50).optional(),
   datos_pro: DatosProSchema,
   // Id del analisis de confianza baja que origina este reintento. Ver
   // `resolverReintentoGratis` mas abajo.
@@ -132,7 +136,7 @@ export async function POST(request: Request) {
       { status: 422 }
     );
   }
-  const { producto: productoCrudo, pais, costoEstimado, costoConfirmado, imagenBase64, imagenMimeType, perfilVendedor, datos_pro, reintento_de } = parsed.data;
+  const { producto: productoCrudo, pais, costoEstimado, costoConfirmado, imagenBase64, imagenMimeType, perfilVendedor, datos_pro, reintento_de, tipoPublicacion, otrosCostosPct } = parsed.data;
 
   // --- Validacion de entrada (TAB 3.3) — ANTES de auth, creditos y Gemini ---
   //
@@ -371,6 +375,8 @@ export async function POST(request: Request) {
       // Ya validado arriba contra la base. El worker NO lo revalida: confia en
       // que la route decidio, porque el evento solo lo puede emitir la route.
       reintento_de: reintentoGratis ? reintento_de : null,
+      tipo_publicacion: tipoPublicacion ?? null,
+      otros_costos_pct: otrosCostosPct ?? null,
     };
     if (searchKeyword !== producto) {
       eventData.search_keyword = searchKeyword;

@@ -385,6 +385,8 @@ VEREDICTO YA CALCULADO — NO LO RECALCULES, NO LO DISCUTAS, NO LO CONTRADIGAS
 Score: ${score.score}/100 → ${score.veredicto}
 Precio de entrada para un vendedor ${perfil}: ${score.precio_sugerido} ${currencyCode}
 Comisión de Mercado Libre (${score.comision.tipo_publicacion}, ${score.comision.categoria}): ${score.comision.porcentaje}% + ${score.comision.cargo_fijo} fijo = ${score.comision.monto_total} ${currencyCode}
+Otros costos de venta (envío y retenciones, estimado): ${score.costos_venta.otros_pct}% = ${score.costos_venta.otros_monto} ${currencyCode}
+Total de costos de venta: ${score.costos_venta.monto_total} ${currencyCode} (${score.costos_venta.total_pct}% del precio)
 Margen neto a ese precio: ${score.margen_neto_pct}%${
     score.precio_equilibrio != null
       ? `
@@ -610,9 +612,11 @@ function normalizeAnalysis(raw: unknown, args: AnalyzeArgs): AnalysisResult {
     margen: {
       precio_sugerido_venta: args.score.precio_sugerido,
       comision_ml_estimada: args.score.comision.monto_total,
+      // TAB 3.4: resta el total de costos de venta (comision + otros), no
+      // solo la comision. Si no, la ganancia de la pagina contradice el margen.
       ganancia_estimada: Math.round(
         args.score.precio_sugerido -
-          args.score.comision.monto_total -
+          args.score.costos_venta.monto_total -
           args.costoEstimadoUsd * (args.exchangeRate ?? 1)
       ),
       margen_porcentaje: args.score.margen_neto_pct,

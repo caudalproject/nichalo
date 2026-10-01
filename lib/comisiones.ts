@@ -19,6 +19,26 @@
  * (intermedio/experto), donde va de 12,40% a 16,57%. Ante la duda cae en
  * "Resto", que en PREMIUM AR es 15,40% — el lado conservador: sobreestimar la
  * comision baja el margen y baja el score. Nunca infla una oportunidad.
+ *
+ * ---------------------------------------------------------------------------
+ * VERIFICACION DE TASAS (TAB 3.4, 1/10/2026): **NO VERIFICADAS CONTRA FUENTE
+ * OFICIAL.**
+ *
+ * Se intento contra la pagina oficial de costos de vender de ML Argentina
+ * (mercadolibre.com.ar/ayuda/costos-de-vender-un-producto_870 y
+ * vendedores.mercadolibre.com.ar): las dos devuelven 403 a un fetch
+ * automatico. Las fuentes de terceros consultadas ese dia se contradicen
+ * entre si y con esta tabla:
+ *   - Comision: 11,8% a 17,14% segun categoria y provincia (Tienda Neolo,
+ *     Algoritmo Digital). Clasica 12,4% plano queda adentro del rango.
+ *   - CARGO FIJO — DISCREPANCIA ABIERTA: Algoritmo Digital (act. 1/9/2026)
+ *     da ~$1.115 a ~$2.810 por unidad hasta ~$33.000 y $0 arriba. Esta tabla
+ *     cobra $2.500 bajo $33.000 y $4.000 entre $33.000 y $60.000. Si los
+ *     terceros tienen razon, hoy SOBREESTIMAMOS el cargo fijo en tickets
+ *     bajos y en el tramo 33k-60k (error del lado conservador: baja el margen).
+ * No se cambio ningun numero con datos no oficiales. Pendiente: JP copia la
+ * tabla de "Costos de venta" de su cuenta de vendedor y se actualiza aca con
+ * la fecha.
  */
 
 export type PaisML = "AR" | "MX" | "CO";
@@ -123,6 +143,50 @@ export const COMISIONES: Record<PaisML, TablaPais> = {
   },
 };
 
+/**
+ * OTROS COSTOS DE VENTA — default 10% del precio (TAB 3.4, OK de JP 1/10/2026).
+ *
+ * La comision + cargo fijo no es todo lo que ML le saca al vendedor. Un
+ * vendedor real (DM del 1/10) reporta 27% de costos totales; con solo la
+ * comision Nichalo asumia ~15% y el margen salia inflado ~12 puntos, que es
+ * justo lo que produce VIABLE falsos (el error caro: le dice a alguien que
+ * compre stock).
+ *
+ * Composicion del 10% (ESTIMACIONES, no tasas oficiales):
+ *   ~6%  envio a cargo del vendedor. Envio gratis obligatorio arriba del
+ *        umbral, con una parte bonificada que paga el vendedor. Va como %
+ *        plano: calcular por peso y CP quedo fuera del tab.
+ *   ~3%  retenciones de Ingresos Brutos (SIRCREB y similares). Van de ~1,5% a
+ *        ~5% segun provincia; para un monotributista no se recuperan.
+ *   ~1%  colchon para devoluciones y promociones.
+ *    0%  cuotas: en Premium ya estan dentro de la comision (por eso cobra mas);
+ *        Clasica no ofrece cuotas sin interes. Sumarlas seria contarlas dos
+ *        veces.
+ * Afuera a proposito: IVA y Ganancias (dependen de la situacion fiscal de
+ * cada vendedor; el perfil principiante se asume monotributista).
+ *
+ * Ancla: 27% (vendedor real) - Premium tipica 15,4% - cargo fijo ≈ 10-11.
+ * Medido en el golden set (1/10): con 10% cambian 3 veredictos, los tres
+ * hacia abajo. Si llega un desglose real, se reemplaza este numero.
+ *
+ * El usuario lo puede editar en el formulario. Se acota a [0, 50]: arriba de
+ * eso es un error de tipeo, no un costo.
+ */
+export const OTROS_COSTOS_DEFAULT_PCT = 10;
+export const OTROS_COSTOS_MAX_PCT = 50;
+
+export function normalizarOtrosCostosPct(v: unknown): number {
+  const n = Number(v);
+  if (v === null || v === undefined || v === "" || !Number.isFinite(n)) {
+    return OTROS_COSTOS_DEFAULT_PCT;
+  }
+  return Math.min(OTROS_COSTOS_MAX_PCT, Math.max(0, Math.round(n * 10) / 10));
+}
+
+export function esTipoPublicacion(v: unknown): v is TipoPublicacion {
+  return v === "clasica" || v === "premium";
+}
+
 /** El perfil define el tipo de publicacion. Ya era asi en el prompt. */
 export function tipoPublicacionPorPerfil(perfil: string): TipoPublicacion {
   return perfil === "principiante" ? "clasica" : "premium";
@@ -184,10 +248,12 @@ export function calcularComision(args: {
   perfil: string;
   producto: string;
   precio: number;
+  /** Elegido por el usuario (TAB 3.4). Sin el, sale del perfil como antes. */
+  tipo?: TipoPublicacion | null;
 }): ComisionCalculada {
   const { pais, perfil, producto, precio } = args;
   const tabla = COMISIONES[pais] ?? COMISIONES.AR;
-  const tipo = tipoPublicacionPorPerfil(perfil);
+  const tipo = esTipoPublicacion(args.tipo) ? args.tipo : tipoPublicacionPorPerfil(perfil);
   const bloque = tipo === "clasica" ? tabla.clasica : tabla.premium;
   const categoria = categoriaDesdeProducto(producto);
   const porcentaje = bloque.categorias[categoria];
@@ -200,5 +266,43 @@ export function calcularComision(args: {
     porcentaje,
     cargo_fijo: cargoFijo,
     monto_total: monto,
+  };
+}
+
+/**
+ * Todo lo que se descuenta del precio antes del costo del producto (TAB 3.4):
+ * comision + cargo fijo + otros costos de venta. Es lo que el margen tiene que
+ * restar y lo que la pagina de resultado desglosa.
+ */
+export interface CostosDeVenta {
+  comision: ComisionCalculada;
+  /** "usuario" si lo eligio en el formulario; "perfil" si se asumio. */
+  tipo_elegido_por: "usuario" | "perfil";
+  otros_pct: number;
+  otros_monto: number;
+  /** comision.monto_total + otros_monto, en moneda local. */
+  monto_total: number;
+  /** monto_total sobre el precio, en %. */
+  total_pct: number;
+}
+
+export function calcularCostosDeVenta(args: {
+  pais: PaisML;
+  perfil: string;
+  producto: string;
+  precio: number;
+  tipo?: TipoPublicacion | null;
+  otrosPct: number;
+}): CostosDeVenta {
+  const comision = calcularComision(args);
+  const otrosMonto = args.precio > 0 ? Math.round((args.precio * args.otrosPct) / 100) : 0;
+  const total = comision.monto_total + otrosMonto;
+  return {
+    comision,
+    tipo_elegido_por: esTipoPublicacion(args.tipo) ? "usuario" : "perfil",
+    otros_pct: args.otrosPct,
+    otros_monto: otrosMonto,
+    monto_total: total,
+    total_pct: args.precio > 0 ? Math.round((total / args.precio) * 1000) / 10 : 0,
   };
 }

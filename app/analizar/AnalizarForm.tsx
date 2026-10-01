@@ -17,6 +17,12 @@ import {
 } from "@/components/ui/select";
 import { getCurrencyForCountry, getExchangeRate } from "@/lib/currency";
 import {
+  OTROS_COSTOS_DEFAULT_PCT,
+  OTROS_COSTOS_MAX_PCT,
+  tipoPublicacionPorPerfil,
+  type TipoPublicacion,
+} from "@/lib/comisiones";
+import {
   costoImplausiblementeBajo,
   normalizarProducto,
   parsearMontoAR,
@@ -74,6 +80,10 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
   const [pais, setPais] = useState<"AR" | "MX" | "CO">(paisPrefill ?? "AR");
   const [perfilVendedor, setPerfilVendedor] = useState<PerfilVendedor>("principiante");
   const [costo, setCosto] = useState("");
+  // TAB 3.4. `null` = no la eligio: se usa la del perfil y el resultado lo
+  // declara como asumida. Solo viaja a la API si el usuario la toco.
+  const [tipoPublicacion, setTipoPublicacion] = useState<TipoPublicacion | null>(null);
+  const [otrosCostos, setOtrosCostos] = useState(String(OTROS_COSTOS_DEFAULT_PCT));
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imageMimeType, setImageMimeType] = useState<string>("image/jpeg");
@@ -229,6 +239,17 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
       setError("Ingresá un costo estimado mayor a 0.");
       return;
     }
+    // TAB 3.4: vacio = default; fuera de [0, 50] es un error de tipeo.
+    const otrosCostosParsed = otrosCostos.trim() === "" ? null : Number(otrosCostos.replace(",", "."));
+    if (
+      otrosCostosParsed !== null &&
+      (!Number.isFinite(otrosCostosParsed) ||
+        otrosCostosParsed < 0 ||
+        otrosCostosParsed > OTROS_COSTOS_MAX_PCT)
+    ) {
+      setError(`Otros costos de venta tiene que ser un porcentaje entre 0 y ${OTROS_COSTOS_MAX_PCT}.`);
+      return;
+    }
     // TAB 3.3 (a): ANTES de gastar el analisis. Umbral y calibracion en
     // lib/entrada.ts.
     if (!opts.costoConfirmado && costoImplausiblementeBajo(costoLocalParsed)) {
@@ -256,6 +277,8 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
         costoEstimado: costoUSDSubmit,
         ...(opts.costoConfirmado ? { costoConfirmado: true } : {}),
         perfilVendedor,
+        ...(tipoPublicacion ? { tipoPublicacion } : {}),
+        ...(otrosCostosParsed !== null ? { otrosCostosPct: otrosCostosParsed } : {}),
         ...(reintentoDe ? { reintento_de: reintentoDe } : {}),
         datos_pro: plan === 'pro' ? {
           origen_producto: origenProducto || null,
@@ -401,6 +424,55 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
                 </>
               );
             })()}
+          </div>
+
+          {/* TAB 3.4 (1/10): la comision sola no es todo lo que cobra ML. */}
+          <div className="space-y-2">
+            <Label>Tipo de publicación</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {(["clasica", "premium"] as const).map((t) => {
+                const activo = (tipoPublicacion ?? tipoPublicacionPorPerfil(perfilVendedor)) === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setTipoPublicacion(t)}
+                    className={`text-left p-3 rounded-lg border transition-colors ${
+                      activo
+                        ? "border-[#16A34A] bg-[#DCFCE7]"
+                        : "border-[#E5E7EB] bg-[#F9FAFB] hover:border-[#D1D5DB]"
+                    }`}
+                  >
+                    <span className="block text-sm font-medium text-[#0A0A0A]">
+                      {t === "clasica" ? "Clásica" : "Premium"}
+                    </span>
+                    <span className="block text-xs text-[#6B7280] mt-0.5">
+                      {t === "clasica" ? "Comisión menor, sin cuotas sin interés" : "Comisión mayor, incluye cuotas sin interés"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {tipoPublicacion === null && (
+              <p className="text-xs text-muted-foreground">
+                Por tu perfil asumimos {tipoPublicacionPorPerfil(perfilVendedor) === "clasica" ? "Clásica" : "Premium"}. Tocá la otra si vas a publicar distinto.
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="otros-costos">Otros costos de venta (%)</Label>
+            <Input
+              id="otros-costos"
+              type="text"
+              inputMode="decimal"
+              value={otrosCostos}
+              onChange={(e) => setOtrosCostos(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Envío a tu cargo y retenciones de Ingresos Brutos, sobre el precio de venta. Por defecto{" "}
+              {OTROS_COSTOS_DEFAULT_PCT}%. Si ya sabés cuánto te cuesta, cambialo.
+            </p>
           </div>
 
           {/* Image upload */}

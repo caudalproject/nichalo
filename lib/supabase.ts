@@ -164,6 +164,12 @@ export interface AnalysisResult {
      * justamente esa diferencia para elegir entre informar y advertir.
      */
     unidad?: import("./unidad").UnidadDeVenta | null;
+    /**
+     * Comision + cargo fijo + otros costos de venta, y que tipo de
+     * publicacion se uso (TAB 3.4, 1/10). `undefined` en todo analisis
+     * anterior: esos margenes solo descontaban la comision.
+     */
+    costos_venta?: import("./comisiones").CostosDeVenta | null;
   } | null;
   /** Metricas crudas del scrape. Es la serie que consume el seguimiento del TAB 5. */
   metricas?: import("./score").MetricasScrape | null;

@@ -57,7 +57,14 @@
 
 import type { MLListing } from "./apify";
 import { ETIQUETA_MOTIVO, type Confianza, type PrecioStats } from "./confianza";
-import { calcularComision, type ComisionCalculada, type PaisML } from "./comisiones";
+import {
+  calcularCostosDeVenta,
+  normalizarOtrosCostosPct,
+  type ComisionCalculada,
+  type CostosDeVenta,
+  type PaisML,
+  type TipoPublicacion,
+} from "./comisiones";
 import type { UnidadDeVenta } from "./unidad";
 
 export type IdComponente =
@@ -125,6 +132,13 @@ export interface ScoreCalculado {
    *  aplica: perder en el percentil de entrada no es perder en el mercado. */
   margen_mediana_pct: number | null;
   comision: ComisionCalculada;
+  /**
+   * Comision + cargo fijo + otros costos de venta al precio de entrada (TAB
+   * 3.4). Es lo que el margen resta antes del costo, y lo que la pagina de
+   * resultado desglosa. `comision` de arriba es la misma pieza, se conserva
+   * porque `lib/gemini.ts` la lee.
+   */
+  costos_venta: CostosDeVenta;
   metricas: MetricasScrape;
   /**
    * Que hizo la normalizacion de unidad de venta del TAB 3.2 antes de que este
@@ -146,8 +160,14 @@ export interface ScoreCalculado {
  * peso: cambio que el costo y los precios ahora se comparan por unidad (TAB 3.2).
  * Eso mueve el numero, asi que el delta del TAB 5 tiene que decir "no comparable"
  * hasta la proxima corrida de cada nicho.
+ *
+ * v1.3 (TAB 3.4, 1/10): tampoco toca pesos ni bandas. Cambia el insumo del
+ * margen: ademas de comision + cargo fijo se resta "otros costos de venta"
+ * (envio, retenciones; default 10%, ver `lib/comisiones.ts`), y el tipo de
+ * publicacion puede venir elegido por el usuario. El margen baja ~10 puntos
+ * en todo el golden set: no comparable con v1.2.
  */
-export const FORMULA_VERSION = "score-v1.2-2026-09-22";
+export const FORMULA_VERSION = "score-v1.3-2026-10-01";
 
 /**
  * Percentil de entrada segun perfil.
@@ -204,16 +224,22 @@ export function precioDeEquilibrio(args: {
   perfil: string;
   producto: string;
   costoLocal: number;
+  tipo?: TipoPublicacion | null;
+  /** Desde la v1.3 el equilibrio tambien descuenta otros costos de venta. */
+  otrosPct?: number;
 }): number | null {
-  const { pais, perfil, producto, costoLocal } = args;
+  const { pais, perfil, producto, costoLocal, tipo } = args;
+  const otrosPct = normalizarOtrosCostosPct(args.otrosPct);
   if (!(costoLocal > 0)) return null;
 
   const ganancia = (precio: number) =>
-    precio - calcularComision({ pais, perfil, producto, precio }).monto_total - costoLocal;
+    precio -
+    calcularCostosDeVenta({ pais, perfil, producto, precio, tipo, otrosPct }).monto_total -
+    costoLocal;
 
   let lo = costoLocal;
   let hi = costoLocal * 10;
-  if (ganancia(hi) <= 0) return null; // comision >= 90%: no hay precio que cierre
+  if (ganancia(hi) <= 0) return null; // costos de venta >= 90%: no hay precio que cierre
 
   for (let i = 0; i < 60; i++) {
     const mid = (lo + hi) / 2;
@@ -350,15 +376,31 @@ export function calcularScore(args: {
   confianza: Confianza | null;
   /** Que hizo esa normalizacion. Solo se guarda; no entra a ningun calculo. */
   unidad?: UnidadDeVenta | null;
+  /** TAB 3.4. Clasica/Premium elegido por el usuario; sin el, sale del perfil. */
+  tipoPublicacion?: TipoPublicacion | null;
+  /** TAB 3.4. Otros costos de venta en % del precio; sin el, el default (10%). */
+  otrosCostosPct?: number | null;
 }): ScoreCalculado {
   const { producto, pais, costoLocal, stats, listings, confianza } = args;
   const perfil = PERCENTIL_POR_PERFIL[args.perfil] ? args.perfil : "principiante";
   const metricas = calcularMetricas(listings, stats);
 
   const precioSugerido = stats[PERCENTIL_POR_PERFIL[perfil]] ?? stats.p25 ?? stats.p50;
-  const comision = calcularComision({ pais, perfil, producto, precio: precioSugerido });
+  const tipo = args.tipoPublicacion ?? null;
+  const otrosPct = normalizarOtrosCostosPct(args.otrosCostosPct);
+  const costosVenta = calcularCostosDeVenta({
+    pais,
+    perfil,
+    producto,
+    precio: precioSugerido,
+    tipo,
+    otrosPct,
+  });
+  const comision = costosVenta.comision;
   const margenNeto =
-    precioSugerido > 0 ? (precioSugerido - comision.monto_total - costoLocal) / precioSugerido : -1;
+    precioSugerido > 0
+      ? (precioSugerido - costosVenta.monto_total - costoLocal) / precioSugerido
+      : -1;
   const margenPct = Math.round(margenNeto * 1000) / 10;
 
   // Margen a la mediana del mercado. No entra al score: decide si el techo de
@@ -369,7 +411,8 @@ export function calcularScore(args: {
     precioMediana != null && precioMediana > 0
       ? Math.round(
           ((precioMediana -
-            calcularComision({ pais, perfil, producto, precio: precioMediana }).monto_total -
+            calcularCostosDeVenta({ pais, perfil, producto, precio: precioMediana, tipo, otrosPct })
+              .monto_total -
             costoLocal) /
             precioMediana) *
             1000
@@ -377,7 +420,9 @@ export function calcularScore(args: {
       : null;
 
   const precioEquilibrio =
-    margenPct <= 0 ? precioDeEquilibrio({ pais, perfil, producto, costoLocal }) : null;
+    margenPct <= 0
+      ? precioDeEquilibrio({ pais, perfil, producto, costoLocal, tipo, otrosPct })
+      : null;
 
   const componentes: ComponenteScore[] = [];
   const omitidos: ComponenteOmitido[] = [];
@@ -405,7 +450,7 @@ export function calcularScore(args: {
       lectura:
         margenPct <= 0
           ? precioEquilibrio != null
-            ? `A ese precio se vende a perdida una vez descontada la comision. Empeza a ganar a partir de ${formatearNumero(
+            ? `A ese precio se vende a perdida una vez descontados los costos de venta. Empeza a ganar a partir de ${formatearNumero(
                 precioEquilibrio,
                 pais
               )}${
@@ -416,8 +461,10 @@ export function calcularScore(args: {
                     )} el margen es ${margenMedianaPct}%.`
                   : "."
               }`
-            : "A ese precio se vende a perdida una vez descontada la comision."
-          : `Despues de la comision de Mercado Libre (${comision.porcentaje}% + ${comision.cargo_fijo} fijo) y del costo.`,
+            : "A ese precio se vende a perdida una vez descontados los costos de venta."
+          : `Despues de la comision de Mercado Libre (${comision.tipo_publicacion} ${
+              comision.porcentaje
+            }% + ${comision.cargo_fijo} fijo), otros costos de venta (${otrosPct}%: envio y retenciones) y del costo.`,
     });
   } else {
     omitidos.push({
@@ -624,6 +671,7 @@ export function calcularScore(args: {
     precio_equilibrio: precioEquilibrio,
     margen_mediana_pct: margenMedianaPct,
     comision,
+    costos_venta: costosVenta,
     metricas,
     unidad: args.unidad ?? null,
     formula: FORMULA_VERSION,

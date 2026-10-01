@@ -168,7 +168,12 @@ export default async function ResultadoPage({ params }: Params) {
   // tambien con datos perfectamente limpios.
   const comisionUsd =
     result.comision_detalle?.monto_usd ?? result.margen.comision_ml_estimada ?? 0;
-  const gananciaUsd = precioVentaUsd - costo - comisionUsd;
+  // TAB 3.4 (1/10): otros costos de venta (envio, retenciones). Misma escala
+  // que `comision_detalle.monto_usd` (moneda local, tasa 1 desde el 13/9).
+  // `undefined` en analisis anteriores: esos se muestran como se calcularon.
+  const costosVenta = result.score_detalle?.costos_venta ?? null;
+  const otrosCostosUsd = costosVenta?.otros_monto ?? 0;
+  const gananciaUsd = precioVentaUsd - costo - comisionUsd - otrosCostosUsd;
   const margenBruto = precioVentaUsd > 0 ? (gananciaUsd / precioVentaUsd) * 100 : 0;
   const roi = costo > 0 ? (gananciaUsd / costo) * 100 : 0;
 
@@ -686,6 +691,43 @@ export default async function ResultadoPage({ params }: Params) {
                         : formatLocal(result.comision_detalle?.monto_usd ?? result.margen.comision_ml_estimada ?? 0)}
                     </span>
                   </div>
+                  {/* TAB 3.4: otros costos de venta + total, para que el
+                      desglose comision + cargo fijo + otros sume a la vista. */}
+                  {costosVenta ? (
+                    <>
+                      <div className="flex justify-between items-start py-2 border-b border-gray-50">
+                        <div>
+                          <span className="text-sm text-gray-500">Otros costos de venta</span>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {costosVenta.otros_pct}% estimado: envío y retenciones
+                          </p>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatLocalPrice(costosVenta.otros_monto, moneda ?? 'ARS')}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-start py-2 border-b border-gray-50">
+                        <div>
+                          <span className="text-sm text-gray-500">Total costos de venta</span>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {costosVenta.total_pct}% del precio · publicación{' '}
+                            {costosVenta.comision.tipo_publicacion}
+                            {costosVenta.tipo_elegido_por === 'perfil'
+                              ? ' (asumida por tu perfil)'
+                              : ' (elegida por vos)'}
+                          </p>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatLocalPrice(costosVenta.monto_total, moneda ?? 'ARS')}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-[#6B7280]">
+                      Este análisis es anterior al 1/10: el margen descuenta solo la comisión de
+                      ML, no envío ni retenciones. Puede estar inflado.
+                    </p>
+                  )}
                   <Row label="Ganancia estimada">
                     <strong>{formatLocal(result.margen.ganancia_estimada)}</strong>
                   </Row>

@@ -41,6 +41,8 @@ export const analizarProducto = inngest.createFunction(
       ficha_producto,
       datos_pro,
       reintento_de,
+      tipo_publicacion,
+      otros_costos_pct,
     } = event.data as {
       job_id: string;
       user_id: string;
@@ -60,6 +62,10 @@ export const analizarProducto = inngest.createFunction(
       } | null;
       /** Ya validado por la route; aca solo se aplica. */
       reintento_de?: string | null;
+      /** TAB 3.4. Ausentes en eventos anteriores al 1/10: el score cae al
+       *  tipo por perfil y al default de otros costos. */
+      tipo_publicacion?: "clasica" | "premium" | null;
+      otros_costos_pct?: number | null;
     };
 
     try {
@@ -299,6 +305,8 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
                 stats: precioStats,
                 confianza: calculado?.confianza ?? null,
                 unidad: normalizado.unidad,
+                tipoPublicacion: tipo_publicacion ?? null,
+                otrosCostosPct: otros_costos_pct ?? null,
               })
             : null;
 
@@ -364,6 +372,10 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
               // indistinguible en la base de uno calculado sobre el costo
               // entero, y la pagina no puede decir sobre que unidad hablo.
               unidad: scoreCalculado.unidad,
+              // TAB 3.4 (1/10): el desglose comision + cargo fijo + otros
+              // costos que la pagina muestra, y que tipo de publicacion se uso
+              // (y si lo eligio el usuario o se asumio por perfil).
+              costos_venta: scoreCalculado.costos_venta,
             },
             metricas: scoreCalculado.metricas,
           };
