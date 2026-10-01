@@ -420,7 +420,10 @@ export default async function ResultadoPage({ params }: Params) {
                       del hero saca una tarjeta entera de la pagina sin perder
                       una palabra: es el parrafo que explica el veredicto, y
                       estaba separado del veredicto. */}
-                  {result.resumen && (
+                  {/* Con costo fuera de rango el resumen de Gemini repite el margen
+                      inflado ("margen neto potencial es alto (77.2%)") justo debajo
+                      del aviso que dice que no es firme. Se oculta entero. */}
+                  {result.resumen && !costoFuera && (
                     <p className="mt-4 border-t border-gray-50 pt-4 text-sm leading-relaxed text-[#374151]">
                       {sanitizeText(result.resumen)}
                     </p>
