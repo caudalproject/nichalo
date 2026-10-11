@@ -13,6 +13,15 @@ const nextConfig = {
         destination: "/seguimiento",
         permanent: true,
       },
+      // TAB 8 (11/10) — links de bio de TikTok. /tt/c1 estaba planeado desde
+      // el 11/9 y nunca se desplego: daba 404 y en 30 dias le pegaron 6
+      // visitantes. Temporal (307) a proposito: el destino puede cambiar y un
+      // 308 queda cacheado en el navegador.
+      {
+        source: "/tt/:id",
+        destination: "/?utm_source=tiktok&utm_medium=organico&utm_content=:id",
+        permanent: false,
+      },
     ];
   },
   images: {
