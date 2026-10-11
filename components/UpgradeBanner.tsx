@@ -52,6 +52,7 @@ export function UpgradeBanner({ producto, veredicto }: Props) {
         className="border-amber-200"
         producto={producto}
         veredicto={veredicto}
+        origen="dashboard"
       />
       <div className="flex justify-end">
         <Button

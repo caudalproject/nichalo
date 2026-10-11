@@ -17,6 +17,14 @@ export function PackCheckoutButton({ pack, variant = "default", label, className
 
   async function handleClick() {
     setLoading(true);
+    // Embudo (TAB 3.8): "toco comprar" se anota antes de ir a Mercado Pago.
+    // Sin esto, si ven los packs y nadie paga, no se distingue precio de checkout.
+    fetch("/api/eventos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ evento: "click_comprar", origen: pack }),
+      keepalive: true,
+    }).catch(() => {});
     try {
       const res = await fetch("/api/pagos/crear-pack", {
         method: "POST",

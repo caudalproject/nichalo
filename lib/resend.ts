@@ -1,5 +1,7 @@
 import { Resend } from 'resend'
 import type { FilaMail } from './regla-notificacion'
+import { createSupabaseServiceClient } from './supabase-service'
+import { registrarEvento } from './eventos-embudo'
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 if (!RESEND_API_KEY) {
@@ -25,6 +27,26 @@ const footerHtml = `<div style="margin-top:48px;padding-top:24px;border-top:1px 
 
 function btnHtml(href: string, label: string) {
   return `<a href="${href}" style="display:inline-block;background:#16a34a;color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:24px">${label}</a>`
+}
+
+/**
+ * Baja de mails (TAB 3.8, 11/10/2026). El link lleva el `baja_token` del
+ * usuario: se da de baja sin iniciar sesion. Sin token (mails viejos que
+ * linkean a /unsubscribe pelado) la pagina pide sesion.
+ */
+function bajaUrl(token?: string | null) {
+  return token
+    ? `${BASE_URL}/unsubscribe?t=${encodeURIComponent(token)}`
+    : `${BASE_URL}/unsubscribe`
+}
+
+/** Encabezados de baja en un clic (RFC 8058) — los piden Gmail y Yahoo. */
+function headersBaja(token?: string | null): Record<string, string> | undefined {
+  if (!token) return undefined
+  return {
+    'List-Unsubscribe': `<${BASE_URL}/api/unsubscribe?t=${encodeURIComponent(token)}>`,
+    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+  }
 }
 
 function wrap(content: string) {
@@ -92,7 +114,35 @@ export async function sendAnalysisReadyEmail(
   }
 }
 
+/**
+ * Sale con el 402 de un segundo intento sin creditos.
+ *
+ * TAB 3.8 (11/10/2026): antes salia en CADA 402 (el que tocaba 3 veces recibia
+ * 3 mails) y linkeaba a un /unsubscribe que daba 404. Ahora: respeta la baja,
+ * sale una sola vez por usuario (candado `mail_upsell` en eventos_embudo) y
+ * el link de baja funciona. La firma no cambia: la route de analisis no se toca.
+ */
 export async function sendUpsellEmail(email: string) {
+  let bajaToken: string | null = null
+  try {
+    const sb = createSupabaseServiceClient()
+    const { data: u } = await sb
+      .from('users')
+      .select('id, baja_token, mails_baja_at')
+      .eq('email', email)
+      .limit(1)
+      .maybeSingle()
+    if (u?.mails_baja_at) return
+    if (u) {
+      // false = ya se le mando (o la base fallo: ante la duda, no se insiste)
+      if (!(await registrarEvento(u.id, 'mail_upsell'))) return
+      bajaToken = u.baja_token
+    }
+  } catch (err) {
+    console.error('[Resend] upsell: no se pudo chequear baja/duplicado:', err)
+    return
+  }
+
   try {
     const { error: resendError } = await resend.emails.send({
       from: 'Nichalo <hola@nichalo.com>',
@@ -121,15 +171,104 @@ export async function sendUpsellEmail(email: string) {
         ${btnHtml(`${BASE_URL}/#planes`, 'Ver planes')}
         <p style="text-align:center;font-size:11px;color:#9CA3AF;margin-top:24px;">
           No querés recibir estos emails?
-          <a href="${BASE_URL}/unsubscribe" style="color:#9CA3AF;">Cancelar suscripción</a>
+          <a href="${bajaUrl(bajaToken)}" style="color:#9CA3AF;">Cancelar suscripción</a>
         </p>
       `),
+      headers: headersBaja(bajaToken),
     })
     if (resendError) {
       console.error("[resend] error enviando email:", resendError);
     }
   } catch (err) {
     console.error('[Resend] Error enviando upsell:', err)
+  }
+}
+
+const VEREDICTO_MINUSCULA: Record<string, string> = {
+  VIABLE: 'viable',
+  MARGINAL: 'marginal',
+  SATURADO: 'saturado',
+}
+
+/** Desde el TAB 3.6 (score-v1.4, 11/10/2026) el analisis mide ventas de la competencia. */
+const ANALISIS_CON_VENTAS_DESDE = Date.parse('2026-10-11T03:00:00Z')
+
+/**
+ * Mail unico de seguimiento (TAB 3.8, 11/10/2026): a las 24-48 h del primer
+ * analisis, a quien quedo en 0 y no compro. Uno solo, nunca una secuencia.
+ * Lo dispara `lib/mail-seguimiento.ts`; el candado de "uno solo" vive alla.
+ *
+ * El boton pasa por /api/mail/click para medir el click (evento `mail_click`)
+ * y redirige a /analizar, que sin creditos muestra los packs con el producto
+ * del usuario.
+ */
+export async function sendSeguimiento24hEmail(args: {
+  email: string
+  producto: string
+  veredicto: string
+  score: number | null
+  analysisId: string
+  analisisAt: string
+  bajaToken: string
+}): Promise<boolean> {
+  const productoLimpio = (args.producto || 'tu producto').trim()
+  const productoTitulo =
+    productoLimpio.charAt(0).toUpperCase() + productoLimpio.slice(1)
+  const productoCorto =
+    productoTitulo.length > 60 ? productoTitulo.slice(0, 57) + '…' : productoTitulo
+  const veredicto = VEREDICTO_MINUSCULA[args.veredicto] ?? 'marginal'
+  const productoSeguro = escapeHtml(productoLimpio)
+  const color = veredictoColor[args.veredicto] ?? '#6b7280'
+  const scoreTxt = Number.isFinite(args.score) ? ` (${args.score}/100)` : ''
+
+  const analisisMs = Date.parse(args.analisisAt)
+  const horas = (Date.now() - analisisMs) / 3_600_000
+  const cuando =
+    horas < 48
+      ? 'Ayer'
+      : `El ${new Date(analisisMs).toLocaleDateString('es-AR', {
+          day: 'numeric',
+          month: 'numeric',
+          timeZone: 'America/Argentina/Buenos_Aires',
+        })}`
+
+  const parrafoVeredicto =
+    args.veredicto === 'VIABLE'
+      ? 'Antes de comprar stock conviene compararlo con dos alternativas: el que mejor da no siempre es el primero que se te ocurrió.'
+      : 'Que un producto no cierre es la mitad del trabajo: te ahorraste comprar stock que no iba a rotar. La otra mitad es encontrar el que sí.'
+
+  const parrafoNovedad =
+    analisisMs < ANALISIS_CON_VENTAS_DESDE
+      ? `<p style="font-size:15px;color:#374151;line-height:1.6;margin:16px 0 0">Desde esta semana el análisis también mide cuánto vendieron las publicaciones de la competencia en Mercado Libre, así que el próximo que hagas va a tener más datos que el de ${productoSeguro}.</p>`
+      : ''
+
+  const ctaUrl = `${BASE_URL}/api/mail/click?t=${encodeURIComponent(args.bajaToken)}&c=seguimiento_24h`
+
+  try {
+    const { error: resendError } = await resend.emails.send({
+      from: 'Nichalo <hola@nichalo.com>',
+      to: args.email,
+      subject: `${productoCorto} dio ${veredicto}. ¿Cuál probás ahora?`,
+      html: wrap(`
+        <p style="font-size:15px;color:#374151;line-height:1.6;margin:0">${cuando} analizaste <strong>${productoSeguro}</strong> en Nichalo y dio <strong style="color:${color}">${escapeHtml(args.veredicto)}${scoreTxt}</strong>.</p>
+        <p style="font-size:15px;color:#374151;line-height:1.6;margin:16px 0 0">${parrafoVeredicto}</p>
+        ${parrafoNovedad}
+        <p style="font-size:15px;color:#374151;line-height:1.6;margin:16px 0 0">Con el Pack 3 validás tres productos más por $4.500 — $1.500 cada uno, sin vencimiento.</p>
+        ${btnHtml(ctaUrl, 'Elegir mi próximo producto →')}
+        <p style="font-size:13px;margin:20px 0 0"><a href="${BASE_URL}/resultado/${encodeURIComponent(args.analysisId)}" style="color:#6b7280">Volver a ver el análisis de ${productoSeguro}</a></p>
+        <p style="font-size:14px;color:#374151;margin:28px 0 0">— Nichalo</p>
+        <p style="font-size:11px;color:#9ca3af;margin-top:28px;line-height:1.6">Es el único mail que te mandamos sobre esto. <a href="${bajaUrl(args.bajaToken)}" style="color:#9ca3af">Darme de baja</a>.</p>
+      `),
+      headers: headersBaja(args.bajaToken),
+    })
+    if (resendError) {
+      console.error('[resend] error enviando mail de seguimiento 24h:', resendError)
+      return false
+    }
+    return true
+  } catch (err) {
+    console.error('[Resend] Error enviando seguimiento 24h:', err)
+    return false
   }
 }
 
@@ -151,9 +290,9 @@ export async function sendUpsellEmail(email: string) {
  * 3. NO HAY LINK DE BAJA FALSO. El unico boton es "Ver el producto", y la baja
  *    se explica en texto: se deja de seguir el producto en /seguimiento (TAB
  *    5.2, 24/9: renombre de /vigilancia — ver redirect permanente en
- *    next.config.mjs). `sendUpsellEmail` linkea a `/unsubscribe`, que HOY NO
- *    EXISTE como pagina (404) — repetir ese link aca seria prometer una baja
- *    que no funciona en el mail que mas se repite de todos.
+ *    next.config.mjs). Cuando se escribio esto (23/9) `/unsubscribe`
+ *    daba 404. Existe desde el TAB 3.8 (11/10), pero corta los mails de
+ *    marketing, no el seguimiento: ese se corta dejando de seguir el producto.
  */
 
 

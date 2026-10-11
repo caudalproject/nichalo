@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { PackCheckoutButton } from "@/components/PackCheckoutButton";
+import { MarcaVista } from "@/components/MarcaVista";
+import type { OrigenPacks } from "@/lib/eventos-embudo";
 
 type Veredicto = "VIABLE" | "MARGINAL" | "SATURADO";
 
@@ -10,6 +12,8 @@ interface Props {
   producto?: string;
   /** Veredicto de ese análisis. Solo se usa si también viene `producto`. */
   veredicto?: Veredicto;
+  /** Pantalla donde se muestra. Si viene, se mide "vio_packs" (TAB 3.8). */
+  origen?: OrigenPacks;
 }
 
 const VEREDICTO_LABEL: Record<Veredicto, string> = {
@@ -26,13 +30,13 @@ const VEREDICTO_LABEL: Record<Veredicto, string> = {
 // se personaliza (esto es lo que reemplaza la card gris genérica): conecta
 // lo que el usuario acaba de ver con la razón concreta de comprar más de un
 // análisis, en vez de repetir el dato sin atarlo a nada.
-export function PacksOffer({ title, className, producto, veredicto }: Props) {
+export function PacksOffer({ title, className, producto, veredicto, origen }: Props) {
   const personalizado = Boolean(producto);
   const heading = title ?? (personalizado
     ? `Analizaste ${producto} — dio ${VEREDICTO_LABEL[veredicto ?? "MARGINAL"]}`
     : "Seguí validando productos");
 
-  return (
+  const card = (
     <Card className={`border-[#E5E7EB] ${className ?? ""}`}>
       <CardContent className="p-4">
         <p className="text-sm font-semibold text-[#0A0A0A]">{heading}</p>
@@ -56,4 +60,6 @@ export function PacksOffer({ title, className, producto, veredicto }: Props) {
       </CardContent>
     </Card>
   );
+
+  return origen ? <MarcaVista origen={origen}>{card}</MarcaVista> : card;
 }

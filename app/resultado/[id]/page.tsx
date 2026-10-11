@@ -133,11 +133,15 @@ export default async function ResultadoPage({ params }: Params) {
     ? (profile.creditos_ciclo ?? 0) + (profile.creditos_pack ?? 0)
     : undefined;
 
+  // Los reintentos gratis por confianza baja NO cuentan (TAB 3.8, 11/10/2026).
+  // Antes contaban: un free que hacia su analisis + el reintento quedaba con 2
+  // y el blur le tapaba los dos — incluido el gratis. Eran 4 usuarios reales.
   const totalAnalisis = user ? (
     await supabase
       .from("analyses")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
+      .is("reintento_de", null)
   ).count ?? 0 : 0;
 
   const isPrimerAnalisis = totalAnalisis <= 1 && profile?.plan === "free";
@@ -1135,14 +1139,14 @@ export default async function ResultadoPage({ params }: Params) {
           <div className="rounded-2xl border border-gray-100 bg-white p-6 text-center space-y-3">
             {isPrimerAnalisis ? (
               <div className="text-left max-w-sm mx-auto">
-                <PacksOffer producto={analysis.producto} veredicto={analysis.veredicto} />
+                <PacksOffer producto={analysis.producto} veredicto={analysis.veredicto} origen="resultado" />
               </div>
             ) : isFree ? (
               <div className="text-left max-w-sm mx-auto">
                 <p className="text-sm font-semibold text-gray-900 text-center mb-3">
                   ¿Querés ver el análisis completo?
                 </p>
-                <PacksOffer producto={analysis.producto} veredicto={analysis.veredicto} />
+                <PacksOffer producto={analysis.producto} veredicto={analysis.veredicto} origen="resultado" />
                 <p className="text-center text-xs text-[#6B7280] mt-3">
                   ¿Validás varios productos por mes?{" "}
                   <a href="/#planes" className="text-[#16A34A] hover:underline font-medium">

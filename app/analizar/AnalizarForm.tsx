@@ -670,7 +670,7 @@ export function AnalizarForm({ creditsLeft, plan, ultimoProducto, ultimoVeredict
                   Usaste tu análisis gratis. Para seguir validando productos antes de invertir en stock:
                 </p>
               )}
-              <PacksOffer producto={ultimoProducto} veredicto={ultimoVeredicto} />
+              <PacksOffer producto={ultimoProducto} veredicto={ultimoVeredicto} origen="analizar" />
               <p className="text-center text-xs text-[#6B7280]">
                 ¿Validás varios productos por mes?{" "}
                 <a href="/#planes" className="text-[#16A34A] hover:underline font-medium">
