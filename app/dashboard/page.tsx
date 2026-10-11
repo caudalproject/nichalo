@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DashboardList } from "@/components/DashboardList";
 import { UpgradeBanner } from "@/components/UpgradeBanner";
+import { AvisoSinCredito } from "@/components/AvisoSinCredito";
+import { createSupabaseServiceClient } from "@/lib/supabase-service";
 import { PixelRegistration } from "@/components/PixelRegistration";
 import type { AnalysisRow, UserRow, Plan } from "@/lib/supabase";
 
@@ -114,6 +116,32 @@ export default async function DashboardPage({
   const totalViables = viables ?? 0;
   const totalAnalisis = totalAnalisisCount ?? 0;
 
+  // El aviso no puede depender solo de ?sin_credito=1: ese parametro se pierde
+  // al recargar, y /auth/callback lo agrega a `next`, que no siempre es
+  // /dashboard. Se deriva del estado: bootstrap ya corrio, sin credito, sin
+  // analisis ni compras, y sin claims propios (quien lo recibio tiene 2 filas).
+  let mostrarAvisoSinCredito = sinCredito;
+  if (
+    !mostrarAvisoSinCredito &&
+    profile?.credit_bootstrap_done === true &&
+    analisisRestantes <= 0 &&
+    totalAnalisis === 0 &&
+    profile?.plan !== "pro"
+  ) {
+    const service = createSupabaseServiceClient();
+    const [{ count: claims }, { count: compras }] = await Promise.all([
+      service
+        .from("free_credit_claims")
+        .select("fingerprint_hash", { count: "exact", head: true })
+        .eq("user_id", user.id),
+      service
+        .from("purchases")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id),
+    ]);
+    mostrarAvisoSinCredito = (claims ?? 0) === 0 && (compras ?? 0) === 0;
+  }
+
   return (
     <>
       <Suspense fallback={null}>
@@ -161,12 +189,7 @@ export default async function DashboardPage({
           </div>
         )}
 
-        {sinCredito && (
-          <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-            Ya usamos tu análisis gratis con este dispositivo o red. Para seguir
-            validando productos, elegí un plan más abajo 👇
-          </div>
-        )}
+        {mostrarAvisoSinCredito && <AvisoSinCredito />}
 
         {analisisRestantes <= 0 && profile?.plan !== "pro" && (
           <div className="mt-6">
