@@ -15,7 +15,11 @@ export type EventoEmbudo =
   | "click_comprar"
   | "mail_seguimiento"
   | "mail_click"
-  | "mail_upsell";
+  | "mail_upsell"
+  // TAB 8 (11/10): bloque "Donde conseguir este producto". Lectura:
+  // `select * from v_proveedores;`
+  | "vio_proveedores"
+  | "click_proveedor";
 
 /** Pantallas donde se muestra la oferta de packs. */
 export const ORIGENES_PACKS = ["resultado", "dashboard", "analizar"] as const;

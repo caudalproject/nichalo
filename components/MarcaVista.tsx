@@ -10,12 +10,21 @@ import { useEffect, useRef, type ReactNode } from "react";
  * Una vez por pestaña (sessionStorage) para no repetir el POST; la base igual
  * deduplica por usuario + origen.
  */
-export function MarcaVista({ origen, children }: { origen: string; children: ReactNode }) {
+export function MarcaVista({
+  origen,
+  evento = "vio_packs",
+  children,
+}: {
+  origen: string;
+  /** TAB 8: tambien marca "vio_proveedores" (bloque "Donde conseguirlo"). */
+  evento?: "vio_packs" | "vio_proveedores";
+  children: ReactNode;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = ref.current;
-    const clave = `nichalo:vio_packs:${origen}`;
+    const clave = `nichalo:${evento}:${origen}`;
     if (!el || typeof IntersectionObserver === "undefined") return;
     try {
       if (sessionStorage.getItem(clave)) return;
@@ -31,7 +40,7 @@ export function MarcaVista({ origen, children }: { origen: string; children: Rea
         fetch("/api/eventos", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ evento: "vio_packs", origen }),
+          body: JSON.stringify({ evento, origen }),
           keepalive: true,
         }).catch(() => {});
       },
@@ -39,7 +48,7 @@ export function MarcaVista({ origen, children }: { origen: string; children: Rea
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [origen]);
+  }, [origen, evento]);
 
   return <div ref={ref}>{children}</div>;
 }

@@ -19,6 +19,8 @@ import { DesgloseScore } from "@/components/DesgloseScore";
 import { BotonSeguir } from "@/components/BotonSeguir";
 import { Acto, Plegable } from "@/components/Acto";
 import { QueHacer } from "@/components/QueHacer";
+import { DondeConseguirlo } from "@/components/DondeConseguirlo";
+import { proveedoresPara } from "@/lib/proveedores";
 
 export const dynamic = "force-dynamic";
 
@@ -1039,6 +1041,20 @@ export default async function ResultadoPage({ params }: Params) {
             {user && analysis.user_id === user.id && (
               <BotonSeguir analysisId={analysis.id} />
             )}
+
+            {/* TAB 8 (11/10): "Donde conseguir este producto". Links reales y
+                curados por categoria (lib/proveedores.ts) en lugar del rango
+                mayorista que inventaba el modelo. Busca con el termino que se
+                uso en ML si existe (el del usuario puede ser un link pegado o
+                una descripcion de 120 caracteres). Sin links para la
+                categoria, no aparece. */}
+            {(() => {
+              const bloque = proveedoresPara(
+                result.search_keyword || analysis.producto,
+                analysis.pais
+              );
+              return bloque ? <DondeConseguirlo bloque={bloque} /> : null;
+            })()}
 
             {/* INTUICION, no dato para los riesgos (TAB 4.1): se pliegan porque
                 son advertencias genericas de categoria, no del producto.
