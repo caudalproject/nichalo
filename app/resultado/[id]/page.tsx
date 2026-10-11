@@ -865,12 +865,11 @@ export default async function ResultadoPage({ params }: Params) {
                               <span className="text-muted-foreground">Precio</span>
                               <span>{formatLocalPrice(v.precio, moneda)}</span>
                             </div>
-                            {v.ventas > 0 && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-muted-foreground">Ventas</span>
-                                <span>{v.ventas.toLocaleString()}</span>
-                              </div>
-                            )}
+                            {/* TAB 3.6: aca habia una fila "Ventas" con un entero que
+                                escribia Gemini. soldQuantity no llego nunca (modo
+                                listado), asi que ese numero fue inventado en todos los
+                                analisis. Las ventas reales, en escalones y rotuladas,
+                                estan en el desglose del score. */}
                             <div className="flex items-center justify-between">
                               <span className="text-muted-foreground">Reputación</span>
                               {repValida ? (

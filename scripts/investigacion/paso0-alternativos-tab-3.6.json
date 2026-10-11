@@ -1,0 +1,41 @@
+{
+  "medidoEl": "2026-10-11T17:47:53.519Z",
+  "urls": [
+    "https://articulo.mercadolibre.com.ar/MLA-3480623498-_JM",
+    "https://articulo.mercadolibre.com.ar/MLA-2040884359-_JM",
+    "https://articulo.mercadolibre.com.ar/MLA-2104297683-_JM",
+    "https://articulo.mercadolibre.com.ar/MLA-1998865678-_JM",
+    "https://articulo.mercadolibre.com.ar/MLA-1430802562-_JM",
+    "https://articulo.mercadolibre.com.ar/MLA-1965883226-_JM",
+    "https://articulo.mercadolibre.com.ar/MLA-1676515919-_JM",
+    "https://articulo.mercadolibre.com.ar/MLA-3211281468-_JM",
+    "https://articulo.mercadolibre.com.ar/MLA-2797893552-_JM",
+    "https://articulo.mercadolibre.com.ar/MLA-2073581787-_JM"
+  ],
+  "resultados": [
+    {
+      "actor": "saswave~mercadolibre-product-scraper",
+      "runId": "Wcvqcr7F4r7R2YeR4",
+      "status": "FAILED",
+      "segundos": 34,
+      "usageTotalUsd": 0.00005,
+      "chargedEventCounts": {
+        "apify-actor-start": 1,
+        "apify-default-dataset-item": 0
+      },
+      "items": []
+    },
+    {
+      "actor": "gio21~mercadolivre-product-detail",
+      "runId": "WkSBJ42J5aB8IfjWn",
+      "status": "SUCCEEDED",
+      "segundos": 6,
+      "usageTotalUsd": 0.00005,
+      "chargedEventCounts": {
+        "apify-actor-start": 1,
+        "apify-default-dataset-item": 0
+      },
+      "items": []
+    }
+  ]
+}

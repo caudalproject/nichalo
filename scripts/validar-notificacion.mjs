@@ -42,9 +42,9 @@ const metricas = (vendedores, listings = 30) => ({
   vendedores_unicos: vendedores,
   ratio_vendedores: vendedores / listings,
   reviews_mediana_baratos: null,
-  listings_con_ventas: null,
-  pct_con_ventas: null,
-  mediana_unidades_vendidas: null,
+  ventas_productos_medidos: null,
+  ventas_pct_100: null,
+  ventas_escalon_max: null,
   pct_envio_gratis: null,
   spread_p90_p50: 1.4,
 });

@@ -30,9 +30,13 @@
  *    lo que se mide aca es *estructura dentro de la muestra* — proporciones y
  *    ratios — que es invariante al tamaño de la muestra.
  *
- * 2. UN BLOQUE SIN DATOS NO SUMA CERO: SALE DEL DENOMINADOR. Apify casi nunca
- *    devuelve `soldQuantity` (en los dos analisis con estadisticas guardadas es
- *    0 de 30). Si "demanda probada" valiera 0 por falta de dato, el sistema
+ * 2. UN BLOQUE SIN DATOS NO SUMA CERO: SALE DEL DENOMINADOR. Hasta el 11/10
+ *    `soldQuantity` llego null en 810 de 810 publicaciones. No porque Mercado
+ *    Libre lo publique "casi nunca": el actor de Apify corria solo en MODO
+ *    LISTADO, y la pagina de busqueda de ML no muestra vendidos. El dato esta
+ *    en la pagina de detalle de cada publicacion (TAB 3.5). Desde la v1.4 se
+ *    piden 10 detalles por analisis y el bloque corre; si esa consulta falla o
+ *    tarda de mas, se vuelve a omitir. Si "demanda probada" valiera 0 por falta de dato, el sistema
  *    deflacionaria a todos por algo que no es culpa del producto. Se
  *    renormaliza sobre los bloques con datos y se reporta cuales se usaron. La
  *    falta de dato se reporta, no se puntua.
@@ -56,6 +60,13 @@
  */
 
 import type { MLListing } from "./apify";
+import {
+  MIN_PRODUCTOS_MEDIDOS,
+  UMBRAL_VENTAS,
+  pisoVendidas,
+  resumirVentas,
+  type DetalleVentas,
+} from "./ventas";
 import { ETIQUETA_MOTIVO, type Confianza, type PrecioStats } from "./confianza";
 import {
   calcularCostosDeVenta,
@@ -100,11 +111,19 @@ export interface MetricasScrape {
   /** vendedores_unicos / n_con_vendedor. Nunca sobre n_listings: ver nota abajo. */
   ratio_vendedores: number | null;
   reviews_mediana_baratos: number | null;
-  /** null = ninguna publicacion expone unidades vendidas. Distinto de 0 = las
-   *  expone y ninguna vendio. Mismo criterio que pct_envio_gratis. */
-  listings_con_ventas: number | null;
-  pct_con_ventas: number | null;
-  mediana_unidades_vendidas: number | null;
+  /**
+   * v1.4 (TAB 3.6). Ventas acumuladas de las 10 publicaciones con detalle,
+   * deduplicadas por producto de catalogo. null = no se consulto o fallo la
+   * consulta. Reemplazan a `listings_con_ventas`, `pct_con_ventas` y
+   * `mediana_unidades_vendidas`, que no se llenaron nunca (modo listado) y que
+   * sobre pisos no tienen sentido: la mediana de "+100, +100, +1000" no es un
+   * numero de unidades.
+   */
+  ventas_productos_medidos: number | null;
+  /** De los medidos, fraccion con +100 acumuladas o mas. */
+  ventas_pct_100: number | null;
+  /** Escalon mas alto alcanzado por algun producto (piso: 1000 = "+1000"). */
+  ventas_escalon_max: number | null;
   /** null = ninguna publicacion expone el dato. Distinto de 0 = nadie ofrece
    *  envio gratis. El TAB 5 diffea este campo: confundirlos reportaba "sin
    *  cambios" sobre una metrica que nunca existio. */
@@ -150,6 +169,12 @@ export interface ScoreCalculado {
    * uno calculado sobre el costo entero.
    */
   unidad: UnidadDeVenta | null;
+  /**
+   * TAB 3.6. Las paginas de detalle sobre las que corrio el bloque C, para que
+   * la pagina de resultado muestre producto por producto ("+1.000 acumuladas,
+   * el producto, todos los vendedores"). null = no se consultaron.
+   */
+  ventas: DetalleVentas | null;
   /** Version de la formula. Sube cuando cambian pesos o cortes: sin esto, el
    *  seguimiento del TAB 5 compararia scores de formulas distintas. */
   formula: string;
@@ -166,8 +191,14 @@ export interface ScoreCalculado {
  * (envio, retenciones; default 10%, ver `lib/comisiones.ts`), y el tipo de
  * publicacion puede venir elegido por el usuario. El margen baja ~10 puntos
  * en todo el golden set: no comparable con v1.2.
+ *
+ * v1.4 (TAB 3.6, 11/10): el bloque C ("demanda probada") corre por primera vez.
+ * Sale de las ventas acumuladas en escalones de 10 paginas de detalle, no de
+ * `soldQuantity` del listado (que no llego nunca). Y las reseñas de esas
+ * mismas paginas reactivan el atrincheramiento, que tambien llegaba null.
+ * Dos bloques nuevos en el denominador: no comparable con v1.3.
  */
-export const FORMULA_VERSION = "score-v1.3-2026-10-01";
+export const FORMULA_VERSION = "score-v1.4-2026-10-11";
 
 /**
  * Percentil de entrada segun perfil.
@@ -308,7 +339,11 @@ function ordenCanonico(listings: MLListing[]): MLListing[] {
   });
 }
 
-export function calcularMetricas(listings: MLListing[], stats: PrecioStats): MetricasScrape {
+export function calcularMetricas(
+  listings: MLListing[],
+  stats: PrecioStats,
+  ventas?: DetalleVentas | null
+): MetricasScrape {
   const ordenados = ordenCanonico(listings);
   const conPrecio = ordenados.filter((l) => typeof l.price === "number" && (l.price ?? 0) > 0);
 
@@ -324,13 +359,23 @@ export function calcularMetricas(listings: MLListing[], stats: PrecioStats): Met
   // 100% de los casos (el endpoint de busqueda del actor no los trae; harian
   // falta las paginas de detalle). Tomar esos ceros como dato le regalaba
   // 10/10 puntos de "atrincheramiento" a todo el mundo.
+  //
+  // v1.4: el modo listado nunca trae reseñas. Si la barata tiene detalle (las 5
+  // mas baratas son la mitad de las 10 que se piden), se usan las de la pagina
+  // de detalle. En catalogo son las del producto: es la reputacion contra la
+  // que compite el que entra a ese precio.
+  const detalleOk = ventas?.estado === "ok" ? ventas.productos : [];
+  const reviewsDetalle = (l: MLListing): number | null => {
+    const d = detalleOk.find(
+      (p) => (l.itemId && p.itemId === l.itemId) || (l.catalogProductId && p.clave === l.catalogProductId)
+    );
+    return d?.reviews ?? null;
+  };
   const reviewsBaratas = baratas
-    .map((l) => l.reviewsCount)
+    .map((l) => l.reviewsCount ?? reviewsDetalle(l))
     .filter((r): r is number => typeof r === "number" && r > 0);
 
-  const exponenVentas = ordenados.filter((l) => l.soldQuantity !== null);
-  const conVentas = exponenVentas.filter((l) => (l.soldQuantity ?? 0) > 0);
-  const unidades = conVentas.map((l) => l.soldQuantity as number);
+  const resumen = ventas?.estado === "ok" ? resumirVentas(ventas.productos) : null;
 
   const exponenEnvio = ordenados.filter((l) => l.isFreeShipping !== null);
   const envioGratis = exponenEnvio.filter((l) => l.isFreeShipping === true).length;
@@ -348,12 +393,9 @@ export function calcularMetricas(listings: MLListing[], stats: PrecioStats): Met
     ratio_vendedores:
       conVendedor.length > 0 ? vendedores.size / conVendedor.length : null,
     reviews_mediana_baratos: mediana(reviewsBaratas),
-    listings_con_ventas: exponenVentas.length > 0 ? conVentas.length : null,
-    pct_con_ventas:
-      exponenVentas.length > 0 && conPrecio.length > 0
-        ? conVentas.length / conPrecio.length
-        : null,
-    mediana_unidades_vendidas: mediana(unidades),
+    ventas_productos_medidos: resumen ? resumen.medidos : null,
+    ventas_pct_100: resumen ? resumen.pct_100 : null,
+    ventas_escalon_max: resumen ? resumen.escalon_max : null,
     pct_envio_gratis:
       exponenEnvio.length > 0 ? envioGratis / exponenEnvio.length : null,
     spread_p90_p50: stats.p50 > 0 ? stats.p90 / stats.p50 : null,
@@ -380,10 +422,17 @@ export function calcularScore(args: {
   tipoPublicacion?: TipoPublicacion | null;
   /** TAB 3.4. Otros costos de venta en % del precio; sin el, el default (10%). */
   otrosCostosPct?: number | null;
+  /**
+   * TAB 3.6. Ventas acumuladas de las 10 publicaciones con detalle. `undefined`
+   * = este calculo no las consulta (el seguimiento del TAB 5, que sigue en modo
+   * listado). `estado: "omitido"` = se consultaron y fallo o tardo de mas.
+   * En los dos casos el bloque C se omite con su motivo: nunca vale cero.
+   */
+  ventas?: DetalleVentas | null;
 }): ScoreCalculado {
   const { producto, pais, costoLocal, stats, listings, confianza } = args;
   const perfil = PERCENTIL_POR_PERFIL[args.perfil] ? args.perfil : "principiante";
-  const metricas = calcularMetricas(listings, stats);
+  const metricas = calcularMetricas(listings, stats, args.ventas);
 
   const precioSugerido = stats[PERCENTIL_POR_PERFIL[perfil]] ?? stats.p25 ?? stats.p50;
   const tipo = args.tipoPublicacion ?? null;
@@ -540,27 +589,58 @@ export function calcularScore(args: {
   }
 
   // ---- C. Demanda probada (20) ---------------------------------------------
-  // Solo con evidencia real. Mercado Libre expone soldQuantity de forma
-  // irregular; inferir demanda cuando no hay dato es exactamente lo que hacia
-  // el modelo y lo que estamos sacando.
-  const pct = metricas.pct_con_ventas;
-  if ((metricas.listings_con_ventas ?? 0) >= 3 && pct != null) {
-    const porDensidad = 12 * Math.min(1, pct / 0.6);
-    const porVolumen = 8 * Math.min(1, (metricas.mediana_unidades_vendidas ?? 0) / 50);
+  // v1.4 (TAB 3.6). Sobre las ventas ACUMULADAS de 10 paginas de detalle, que
+  // ML muestra en escalones (+5, +25, +50, +100, +500, +1000...). Son pisos,
+  // no conteos, asi que no se promedian ni se saca mediana: se pregunta
+  // cuantos productos pasaron un escalon y cual es el mas alto alcanzado.
+  //
+  // Hasta la v1.3 este bloque leia `soldQuantity` del listado y no corrio
+  // nunca: la causa era el modo listado del actor, no que ML publique el dato
+  // "de forma irregular". Inferir demanda cuando no hay dato sigue prohibido:
+  // si la consulta de detalle falla, el bloque sale del denominador.
+  //
+  // - Densidad (12): fraccion de productos distintos con +100 acumuladas. 80%
+  //   ya es el maximo — las 5 primeras por relevancia tienden a vender por
+  //   construccion, asi que pedir 100% no discrimina.
+  // - Tope (8): el escalon mas alto, en escala logaritmica. +25 = 0, +1000 =
+  //   8. Dice si alguien en este nicho llego a vender en serio.
+  const rv = args.ventas;
+  const resumenVentas = rv?.estado === "ok" ? resumirVentas(rv.productos) : null;
+  if (resumenVentas && resumenVentas.medidos >= MIN_PRODUCTOS_MEDIDOS && resumenVentas.pct_100 != null) {
+    const porDensidad = rampa(resumenVentas.pct_100, [
+      [0, 0],
+      [0.8, 12],
+    ]);
+    const tope = resumenVentas.escalon_max ?? 0;
+    const porTope = rampa(Math.log10(Math.max(1, tope)), [
+      [Math.log10(25), 0],
+      [Math.log10(1000), 8],
+    ]);
+    const catalogo =
+      resumenVentas.de_catalogo > 0
+        ? ` ${resumenVentas.de_catalogo} de los ${resumenVentas.medidos} son de catálogo: ahí el número es del producto, todos los vendedores.`
+        : "";
     componentes.push({
       id: "demanda",
       nombre: "Demanda probada",
-      puntos: porDensidad + porVolumen,
+      puntos: porDensidad + porTope,
       maximo: MAX_DEMANDA,
-      metrica: `${metricas.listings_con_ventas} de ${metricas.n_con_precio} publicaciones con ventas registradas, mediana ${metricas.mediana_unidades_vendidas ?? 0} unidades`,
-      lectura: "Ventas efectivamente registradas en las publicaciones, no una estimación.",
+      metrica: `${resumenVentas.con_100} de ${resumenVentas.medidos} productos con ${pisoVendidas(
+        UMBRAL_VENTAS,
+        pais
+      )} vendidas acumuladas; el que más, ${pisoVendidas(tope, pais)}`,
+      lectura: `Ventas acumuladas desde que se publicó cada una, en los escalones que muestra Mercado Libre: son pisos, no conteos.${catalogo}`,
     });
   } else {
     omitidos.push({
       id: "demanda",
       nombre: "Demanda probada",
       motivo:
-        "menos de 3 publicaciones exponen unidades vendidas — Mercado Libre no siempre publica el dato",
+        rv === undefined || rv === null
+          ? "este cálculo no consulta las ventas de las publicaciones (solo lo hace el análisis inicial)"
+          : rv.estado === "omitido"
+            ? rv.motivo ?? "no se pudieron consultar las ventas de las publicaciones"
+            : `solo ${resumenVentas?.medidos ?? 0} productos distintos publican sus ventas acumuladas; hacen falta ${MIN_PRODUCTOS_MEDIDOS} para medir el mercado`,
     });
   }
 
@@ -674,6 +754,16 @@ export function calcularScore(args: {
     costos_venta: costosVenta,
     metricas,
     unidad: args.unidad ?? null,
+    // Orden canonico: el dataset de Apify no garantiza orden y el resultado
+    // tiene que ser identico byte a byte entre dos lecturas del mismo run.
+    ventas: args.ventas
+      ? {
+          ...args.ventas,
+          productos: [...args.ventas.productos].sort(
+            (a, b) => a.clave.localeCompare(b.clave) || (a.itemId ?? "").localeCompare(b.itemId ?? "")
+          ),
+        }
+      : null,
     formula: FORMULA_VERSION,
   };
 }

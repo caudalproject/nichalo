@@ -23,7 +23,12 @@ export interface UserRow {
 export interface TopVendedor {
   nombre: string;
   precio: number;
-  ventas: number;
+  /**
+   * Lo inventaba Gemini: `soldQuantity` no llego nunca (modo listado). Desde el
+   * TAB 3.6 el prompt ya no lo pide y la pagina no lo muestra; las ventas reales
+   * estan en `score_detalle.ventas`. Se conserva por los analisis viejos.
+   */
+  ventas?: number;
   reputacion: string;
   diferenciador: string;
 }
@@ -170,6 +175,22 @@ export interface AnalysisResult {
      * anterior: esos margenes solo descontaban la comision.
      */
     costos_venta?: import("./comisiones").CostosDeVenta | null;
+    /**
+     * Paginas de detalle detras del bloque C (TAB 3.6, 11/10): ventas
+     * acumuladas en escalones, producto por producto. `undefined` en todo
+     * analisis anterior — el bloque no corrio nunca antes de la v1.4.
+     */
+    ventas?: import("./ventas").DetalleVentas | null;
+  } | null;
+  /**
+   * Lo que Apify cobro por este analisis, run por run (TAB 3.6, 11/10). Para
+   * medir el costo real del detalle contra lo estimado.
+   */
+  apify_costo?: {
+    listado: import("./apify").CostoApifyRun | null;
+    fallback: import("./apify").CostoApifyRun | null;
+    detalle: import("./apify").CostoApifyRun | null;
+    usd_total: number | null;
   } | null;
   /** Metricas crudas del scrape. Es la serie que consume el seguimiento del TAB 5. */
   metricas?: import("./score").MetricasScrape | null;

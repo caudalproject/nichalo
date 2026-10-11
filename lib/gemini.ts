@@ -3,6 +3,7 @@ import type { ScrapeResult } from "./apify";
 import type { AnalysisResult } from "./supabase";
 import type { Confianza, PrecioStats } from "./confianza";
 import { explicarScore, type ScoreCalculado } from "./score";
+import { deduplicar, etiquetaTipo, textoVendidas } from "./ventas";
 
 const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-1.5-flash-latest"] as const;
 
@@ -311,7 +312,21 @@ export async function analizarConGemini(
 }
 
 function buildPrompt({ producto, pais, costoEstimadoUsd, scrape, imagenBase64, currency, exchangeRate, perfilVendedor, mlData, datosPro, precioStats, confianza, score }: AnalyzeArgs) {
-  const sample = scrape.listings.slice(0, 50);
+  // TAB 3.6: `soldQuantity` del listado no llego nunca (modo listado) y en el
+  // JSON solo le daba al modelo una columna de nulls para "interpretar". Las
+  // ventas reales van en su propio bloque, ya escritas como pisos. Los ids
+  // solo sirven para unir con el detalle: no se mandan.
+  const sample = scrape.listings
+    .slice(0, 50)
+    .map((l) => ({
+      title: l.title,
+      price: l.price,
+      seller: l.seller,
+      rating: l.rating,
+      reviewsCount: l.reviewsCount,
+      isFreeShipping: l.isFreeShipping,
+      url: l.url,
+    }));
   const currencyCode = currency?.code ?? "ARS";
   const perfil = perfilVendedor ?? "principiante";
   // La tasa resuelve a 1 desde la migracion a ARS-only del 13/9 (ver
@@ -331,7 +346,6 @@ ESTADÍSTICAS DE PRECIOS (calculadas del scrape — usá estos valores exactos, 
 - Percentiles: p10 ${precioStats.p10} · p25 ${precioStats.p25} · p50 ${precioStats.p50} · p65 ${precioStats.p65} · p90 ${precioStats.p90} ${currencyCode}
 - Listings con precio válido: ${precioStats.total_con_precio}
 - Listings descartados por estar fuera de rango: ${precioStats.total_descartados}
-- Listings con ventas registradas (soldQuantity > 0): ${precioStats.total_con_ventas}
 ` : '';
 
   // TAB 3.2 (22/9) — el unico cambio que este tab hace en el prompt, y existe
@@ -360,6 +374,24 @@ ${score.unidad.listings_ajustados > 0
 - En "top_vendedores" usá el precio REAL del JSON, nunca el dividido: ese precio va junto a un link a la publicación y tiene que coincidir.
 - No expliques esta diferencia al usuario ni menciones la palabra "normalización". Simplemente no te contradigas.
 ` : '';
+
+  // TAB 3.6 (11/10) — VENTAS ACUMULADAS. Van ya escritas ("+1.000
+  // acumuladas") para que el modelo no tenga un numero pelado que convertir en
+  // "vendio 1.000" o, peor, dividir por dias. Las de catalogo van rotuladas: ahi
+  // el contador suma a todos los vendedores del producto.
+  const ventasOk = score.ventas?.estado === "ok" ? deduplicar(score.ventas.productos) : [];
+  const bloqueVentas = ventasOk.length > 0 ? `
+VENTAS ACUMULADAS DE LA COMPETENCIA (${ventasOk.length} productos con la página de detalle consultada):
+${ventasOk.map((p) => `- "${p.titulo.slice(0, 80)}": ${textoVendidas(p.vendidas, pais)} (${etiquetaTipo(p.tipo)})`).join("\n")}
+
+REGLAS OBLIGATORIAS SOBRE VENTAS:
+- Mercado Libre muestra las ventas en escalones: "+1.000" significa "por lo menos mil". Escribilas SIEMPRE con "+" y la palabra "acumuladas", tal como aparecen arriba.
+- Son acumuladas desde que se publicó cada una. NUNCA escribas ventas por día, por semana ni por mes, ni las estimes. NUNCA escribas "vendió 1.000" sin el "+".
+- Si el rótulo dice "el producto, todos los vendedores", ese número NO es de un vendedor: es del producto sumando a todos los que lo venden. No se lo atribuyas a nadie.
+- No uses ninguna otra cifra de ventas que no esté en esta lista.
+` : `
+VENTAS DE LA COMPETENCIA: no hay datos de ventas acumuladas para este análisis${score.ventas?.motivo ? ` (${score.ventas.motivo})` : ""}. No inventes ni estimes cifras de ventas en ningún campo.
+`;
 
   const bloqueConfianza = confianza && confianza.nivel !== "alta" ? `
 CONFIANZA DE LOS DATOS: ${confianza.nivel.toUpperCase()}
@@ -426,14 +458,14 @@ ${mlData.trends.related?.length ? `- Búsquedas relacionadas: ${mlData.trends.re
 Usá estos datos SOLO para la sección de tendencia. No entran en el veredicto.
 
 ` : ''}${bloqueVeredicto}
-${preciosCalculados}${bloqueUnidad}${bloqueConfianza}
+${preciosCalculados}${bloqueVentas}${bloqueUnidad}${bloqueConfianza}
 PERFIL DEL VENDEDOR: ${perfil}
 - principiante: publicación Clásica, entra por el percentil 10. La recomendación tiene que incluir cómo construir reputación desde cero (primeras ventas, precio de lanzamiento, envío gratis inicial).
 - intermedio: publicación Premium, entra por el percentil 25. Recomendación enfocada en diferenciación.
 - experto: publicación Premium, entra por el percentil 65. Recomendación enfocada en escala y volumen.
 
 Datos del scrape (${sample.length} publicaciones de ML):
-Cada item tiene: title, price (en ${currencyCode}), soldQuantity (unidades vendidas — null si no hay datos), seller, rating, reviewsCount, isFreeShipping, url.
+Cada item tiene: title, price (en ${currencyCode}), seller, rating, reviewsCount, isFreeShipping, url. Las ventas NO están acá: están en el bloque de ventas acumuladas de arriba.
 ${JSON.stringify(sample)}
 
 ${score.score <= 74 ? `PRODUCTOS ALTERNATIVOS (obligatorio: el score es ${score.score}):
@@ -442,15 +474,16 @@ Para cada uno: nombre específico (no genérico), razón en una frase, y nicho: 
 Ejemplo: "Auriculares TWS genéricos" (saturado) → "Auriculares TWS con cancelación de ruido ANC" (específico), "Auriculares óseos deportivos" (adyacente), "Auriculares TWS para niños con limitador de volumen" (segmento).` : `PRODUCTOS ALTERNATIVOS: devolvé "productos_alternativos": [] — el score es ${score.score} y el producto se sostiene solo.`}
 
 Respondé SOLO con JSON válido (sin markdown). No incluyas score, veredicto, margen ni comisión: esos ya están calculados.
-{"resumen":"Arranca DIRECTO con la conclusión principal (ej: 'El costo es competitivo pero la competencia es alta'). Sin introducción ni contexto genérico. Máximo 3-4 líneas. Tiene que ser coherente con el veredicto ${score.veredicto} y apoyarse en el componente que más pesó.","competencia":{"top_vendedores":[{"nombre":"","precio":${currencyCode},"ventas":int,"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"tendencia":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"Exactamente 3 bullets separados por ' | '. Cada bullet: acción concreta + por qué. Ordenados de mayor a menor impacto. Ejemplo: 'Entrá al percentil 10 de precios para las primeras 10 ventas — la reputación inicial es más valiosa que el margen | Ofrecé envío gratis los primeros 30 días — mejora conversión 30-40% | Armá combo funda + vidrio templado — diferenciás sin bajar precio'","titulo_sugerido_publicacion":"≤60 chars","productos_alternativos":[{"nombre":"","razon":"","nicho":"específico"|"adyacente"|"segmento"}]}
+{"resumen":"Arranca DIRECTO con la conclusión principal (ej: 'El costo es competitivo pero la competencia es alta'). Sin introducción ni contexto genérico. Máximo 3-4 líneas. Tiene que ser coherente con el veredicto ${score.veredicto} y apoyarse en el componente que más pesó.","competencia":{"top_vendedores":[{"nombre":"","precio":${currencyCode},"reputacion":"ALTA|MEDIA|BAJA","diferenciador":""}],"palabras_clave_titulos":["","","","",""],"distribucion_precios":[{"rango":"","cantidad":int}]},"tendencia":"","diferenciadores_oportunidad":["","",""],"riesgos":["","",""],"recomendacion":"Exactamente 3 bullets separados por ' | '. Cada bullet: acción concreta + por qué. Ordenados de mayor a menor impacto. Ejemplo: 'Entrá al percentil 10 de precios para las primeras 10 ventas — la reputación inicial es más valiosa que el margen | Ofrecé envío gratis los primeros 30 días — mejora conversión 30-40% | Armá combo funda + vidrio templado — diferenciás sin bajar precio'","titulo_sugerido_publicacion":"≤60 chars","productos_alternativos":[{"nombre":"","razon":"","nicho":"específico"|"adyacente"|"segmento"}]}
 
 REGLA DE TENDENCIA:
-- Si no hay datos de ventas en el scraping, inferí la tendencia basándote en: a) la categoría del producto b) el país c) el contexto general del e-commerce latinoamericano
+- La tendencia NUNCA se deriva de las ventas acumuladas: son totales históricos, no dicen si el mercado sube o baja
+- Inferí la tendencia basándote en: a) la categoría del producto b) el país c) el contexto general del e-commerce latinoamericano
 - NUNCA devuelvas "No hay datos suficientes" — siempre inferí algo útil
 - NO inventes estacionalidad ni rangos de precio mayorista: no hay ninguna serie temporal ni ninguna fuente de precios de proveedor conectada al sistema, y esos dos bloques se sacaron del producto el 21/9 por eso mismo (TAB 4)
 
 Reglas generales:
-- top_vendedores: los 3 mejores por ventas; distribucion_precios: al menos 2 rangos
+- top_vendedores: 3 vendedores destacados del scrape (por relevancia y reputación; no inventes ventas); distribucion_precios: al menos 2 rangos
 - Todos los precios que escribas van en ${currencyCode}${datosPro ? `
 
 DATOS ADICIONALES DEL VENDEDOR (usar para personalizar el análisis):

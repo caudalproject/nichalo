@@ -1,0 +1,1647 @@
+{
+  "medidoEl": "2026-10-11T17:45:08.752Z",
+  "valores": {
+    "5": 4,
+    "25": 2,
+    "50": 3,
+    "100": 12,
+    "500": 1,
+    "1000": 4,
+    "undefined": 2
+  },
+  "resumen": [
+    {
+      "query": "escurridor vajilla 2 niveles con drenaje",
+      "urls": "articulo",
+      "pedidas": 10,
+      "devueltas": 10,
+      "catalogo": 0,
+      "mlau": 3,
+      "conSold": 9,
+      "conReviews": 7,
+      "distintosTrasDedup": 10,
+      "segundos": 110,
+      "usd": 0.25005
+    },
+    {
+      "query": "Jbl Go4 Generico",
+      "urls": "permalink",
+      "pedidas": 10,
+      "devueltas": 9,
+      "catalogo": 0,
+      "mlau": 1,
+      "conSold": 9,
+      "conReviews": 8,
+      "distintosTrasDedup": 9,
+      "segundos": 165,
+      "usd": 0.22505
+    },
+    {
+      "query": "Tabla de pilates plegable bandas elásticas",
+      "urls": "articulo",
+      "pedidas": 10,
+      "devueltas": 9,
+      "catalogo": 0,
+      "mlau": 1,
+      "conSold": 8,
+      "conReviews": 7,
+      "distintosTrasDedup": 9,
+      "segundos": 176,
+      "usd": 0.22505
+    }
+  ],
+  "resultados": [
+    {
+      "query": "escurridor vajilla 2 niveles con drenaje",
+      "dataset": "73GaNcijg9gFki0Ia",
+      "urls": "articulo",
+      "totalListado": 30,
+      "sel": [
+        {
+          "motivo": "barata",
+          "posicion": 3,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-3480623498-_JM",
+          "itemId": "MLA3480623498",
+          "catalogProductId": null,
+          "price": 19000
+        },
+        {
+          "motivo": "barata",
+          "posicion": 16,
+          "tipo": "p",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-2040884359-_JM",
+          "itemId": "MLA2040884359",
+          "catalogProductId": "MLA2023327651",
+          "price": 19973
+        },
+        {
+          "motivo": "barata",
+          "posicion": 29,
+          "tipo": "p",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-2104297683-_JM",
+          "itemId": "MLA2104297683",
+          "catalogProductId": "MLA2101940000",
+          "price": 21532
+        },
+        {
+          "motivo": "barata",
+          "posicion": 10,
+          "tipo": "up",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-1998865678-_JM",
+          "itemId": "MLA1998865678",
+          "catalogProductId": null,
+          "price": 22499
+        },
+        {
+          "motivo": "barata",
+          "posicion": 26,
+          "tipo": "p",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-1430802562-_JM",
+          "itemId": "MLA1430802562",
+          "catalogProductId": "MLA22850105",
+          "price": 23469
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 1,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-1965883226-_JM",
+          "itemId": "MLA1965883226",
+          "catalogProductId": null,
+          "price": 82771
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 2,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-1676515919-_JM",
+          "itemId": "MLA1676515919",
+          "catalogProductId": null,
+          "price": 43999
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 4,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-3211281468-_JM",
+          "itemId": "MLA3211281468",
+          "catalogProductId": null,
+          "price": 38426
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 5,
+          "tipo": "p",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-2797893552-_JM",
+          "itemId": "MLA2797893552",
+          "catalogProductId": "MLA43202459",
+          "price": 29449
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 6,
+          "tipo": "up",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-2073581787-_JM",
+          "itemId": "MLA2073581787",
+          "catalogProductId": null,
+          "price": 32990
+        }
+      ],
+      "runId": "sy4lblrXYaMf96yWX",
+      "status": "SUCCEEDED",
+      "segundos": 110,
+      "usageTotalUsd": 0.25005,
+      "chargedEventCounts": {
+        "product-listing": 0,
+        "item-detail": 10,
+        "apify-actor-start": 1
+      },
+      "items": [
+        {
+          "permalink": "https://www.mercadolibre.com.ar/secadores-de-platos-tazas-cubiertos-vasos-vajillas-con-bande/up/MLAU2972111456",
+          "siteId": "MLA",
+          "title": "Secadores De Platos Tazas Cubiertos Vasos Vajillas Con Bande",
+          "description": "Lugar recomendado de colocación: de mesa. | Posee 2 niveles. | Con seca vasos. | Con cubiertero. | Dimensiones: 25cm de ancho x 45cm de largo x 26cm de alto.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_767023-MLA80688584807_112024-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_767023-MLA80688584807_112024-O.webp",
+          "id": "MLAU2972111456",
+          "price": 22499,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Newtek",
+            "Marca": "Newtek",
+            "Línea": "2865",
+            "Largo x Ancho x Altura": "45 cm x 25 cm x 26 cm",
+            "Tipo de producto": "Secaplatos",
+            "Lugar de colocación": "De mesa",
+            "Materiales del escurridor de platos": "Acero inoxidable",
+            "Cantidad de niveles": "2",
+            "Con secavasos": "Sí",
+            "Con cubiertero": "Sí"
+          },
+          "ratingAverage": 4.4,
+          "reviewCount": 135,
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "trtek",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1998865678",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:26.598Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/2-alfombrillas-de-silicona-for-lavar-platos-en-la-cocina/p/MLA2101940000",
+          "siteId": "MLA",
+          "title": "2 Alfombrillas De Silicona For Lavar Platos En La Cocina",
+          "description": "",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_987250-CBT114748067767_072026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_987250-CBT114748067767_072026-O.webp",
+          "id": "MLA2101940000",
+          "price": 21565.08,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Generic",
+            "Marca": "Generic",
+            "Modelo": "Alfombrilla escurridora",
+            "Largo x Ancho": "25 cm x 13 cm",
+            "Con agujeros de drenaje": "Sí",
+            "Con dosificador": "No",
+            "Con superficie antideslizante": "Sí"
+          },
+          "condition": "new",
+          "seller": {
+            "nickname": "Tienda Bai Ying Shan",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA2104297683",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:29.596Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/secaplatos-dunia-acero-inoxidable-2-niveles-con-cubiertero-gris/p/MLA43768106",
+          "siteId": "MLA",
+          "title": "Secaplatos Dunia Acero Inoxidable 2 Niveles con Cubiertero Gris",
+          "description": "Capacidad para 16 platos en el nivel superior. | Dimensiones de 55 cm de largo, 24 cm de ancho y 40 cm de alto. | Diseño de 2 niveles para optimizar el espacio. | Incluye porta cubiertos para mantener utensilios organizados. | Bandeja colectora de agua que evita derrames y mantiene la cocina limpia.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_852332-MLA80684362110_112024-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_852332-MLA80684362110_112024-O.webp",
+          "id": "MLA43768106",
+          "price": 78633.1,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Dunia",
+            "Marca": "Dunia",
+            "Modelo": "DR-4643",
+            "Color": "Gris",
+            "Largo x Ancho x Altura": "55 cm x 55 cm x 40 cm",
+            "Tipo de producto": "Secaplatos",
+            "Lugar de colocación": "Mesada",
+            "Materiales del escurridor de platos": "Acero",
+            "Capacidad de platos": "16",
+            "Cantidad de niveles": "2",
+            "Con secavasos": "Sí",
+            "Con cubiertero": "Sí",
+            "Es extensible": "No"
+          },
+          "ratingAverage": 4.3,
+          "reviewCount": 58,
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "EBAZAR",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1965883226",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:56.301Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/secaplatos-escurridor-cocina-2-niveles-we-glam-organizador-vajilla-platos-vasos-tazas-cubiertos-bandeja-removible-porta-vasos-porta-cubiertos-39x24x37-cm-metalico-cromado-ahorra-espacio/p/MLA67888411",
+          "siteId": "MLA",
+          "title": "Secaplatos Escurridor Cocina 2 Niveles We Glam Organizador Vajilla Platos Vasos Tazas Cubiertos Bandeja Removible Porta Vasos Porta Cubiertos 39x24x37 cm Metálico Cromado Ahorra Espacio",
+          "description": "Lugar recomendado de colocación: de mesa. | Tiene capacidad para 10 platos. | Posee 2 niveles. | Con seca vasos. | Con cubiertero. | Dimensiones: 24cm de ancho x 39cm de largo x 37cm de alto.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_765517-MLA110320345275_042026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_765517-MLA110320345275_042026-O.webp",
+          "id": "MLA67888411",
+          "price": 38426,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "We Glam",
+            "Marca": "We Glam",
+            "Modelo": "CCN003",
+            "Color": "Cromado",
+            "Largo x Ancho x Altura": "39 cm x 24 cm x 37 cm",
+            "Tipo de producto": "Secaplatos",
+            "Lugar de colocación": "De mesa",
+            "Materiales del escurridor de platos": "Acero cromado",
+            "Capacidad de platos": "10",
+            "Cantidad de niveles": "2",
+            "Con secavasos": "Sí",
+            "Con cubiertero": "Sí",
+            "Es extensible": "No"
+          },
+          "ratingAverage": 4.5,
+          "reviewCount": 39,
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "We Glam",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA3211281468",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:58.086Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/escurridor-doble-seca-platos-metal-vajilla-dos-niveles/up/MLAU5112210719",
+          "siteId": "MLA",
+          "title": "Escurridor Doble Seca Platos Metal Vajilla Dos Niveles",
+          "description": "Lugar recomendado de colocación: cocina. | Posee 2 niveles. | Con cubiertero.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_673788-MLA115903442110_092026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_673788-MLA115903442110_092026-O.webp",
+          "id": "MLAU5112210719",
+          "price": 32990,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Home Up",
+            "Marca": "Home Up",
+            "Modelo": "Genérico",
+            "Color": "Negro",
+            "Ancho x Altura": "42 cm x 41 cm",
+            "Tipo de producto": "Secaplatos",
+            "Lugar de colocación": "Cocina",
+            "Materiales del escurridor de platos": "Metal",
+            "Cantidad de niveles": "2",
+            "Con cubiertero": "Sí",
+            "Es extensible": "No"
+          },
+          "condition": "new",
+          "soldQuantity": 5,
+          "seller": {
+            "nickname": "Home Up",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA2073581787",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:05.697Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/escurridor-platos-vajilla-secaplatos-2-niveles-metal-cromado-cocina-mesada-bandeja-drenaje-vasos-tazas-cubiertos-organizador-secador-vajillas-soporte-plato-rack-almacenamiento-hogar-newtek/p/MLA43202459",
+          "siteId": "MLA",
+          "title": "Escurridor Platos Vajilla Secaplatos 2 Niveles Metal Cromado Cocina Mesada Bandeja Drenaje Vasos Tazas Cubiertos Organizador Secador Vajillas Soporte Plato Rack Almacenamiento Hogar NEWTEK",
+          "description": "La estructura de 2 niveles permite secar platos y vajilla aprovechando el espacio vertical de la mesada de cocina. | La bandeja recolectora desmontable retiene el agua de drenaje manteniendo la superficie de la mesada seca. | El soporte lateral para cubiertos integrado permite organizar y separar los utensilios durante el proceso de secado. | El diseño de metal cromado con dimensiones de 45 cm de largo y 25 cm de ancho admite el almacenamiento de diversos bowls. | La configuración incluye un accesorio específico para secar vasos y tazas de manera estable sobre la estructura. | El material de acero inoxidable en la estructura asegura la estabilidad mecánica para el soporte de vajilla cargada.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_690368-MLA97653986278_112025-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_690368-MLA97653986278_112025-O.webp",
+          "id": "MLA43202459",
+          "price": 29449.05,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Newtek",
+            "Marca": "Newtek",
+            "Línea": "2865",
+            "Largo x Ancho x Altura": "45 cm x 25 cm x 26 cm",
+            "Tipo de producto": "Secaplatos",
+            "Lugar de colocación": "De mesa",
+            "Materiales del escurridor de platos": "Acero inoxidable",
+            "Cantidad de niveles": "2",
+            "Con secavasos": "Sí",
+            "Con cubiertero": "Sí"
+          },
+          "ratingAverage": 4.4,
+          "reviewCount": 135,
+          "condition": "new",
+          "soldQuantity": 1000,
+          "seller": {
+            "nickname": "Newtek",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA2797893552",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:07.380Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/secaplatos-escurridor-vajilla-acero-2-pisos-doble-bandeja/up/MLAU3784727613",
+          "siteId": "MLA",
+          "title": "Secaplatos Escurridor Vajilla Acero 2 Pisos Doble Bandeja",
+          "description": "Lugar recomendado de colocación: mesada. | Tiene capacidad para 16 platos. | Posee 2 niveles. | Con cubiertero. | Dimensiones: 25cm de ancho x 42cm de largo x 40cm de alto.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_958940-MLA107451512170_032026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_958940-MLA107451512170_032026-O.webp",
+          "id": "MLAU3784727613",
+          "price": 43999,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Sabo Smart",
+            "Marca": "Sabo Smart",
+            "Modelo": "2 pisos",
+            "Color": "Negro",
+            "Largo x Ancho x Altura": "42 cm x 25 cm x 40 cm",
+            "Tipo de producto": "Secaplatos",
+            "Lugar de colocación": "Mesada",
+            "Materiales del escurridor de platos": "Acero y Plástico",
+            "Capacidad de platos": "16",
+            "Cantidad de niveles": "2",
+            "Con cubiertero": "Sí",
+            "Es extensible": "No"
+          },
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "SABO SMART",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1676515919",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:09.579Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/escurridor-de-vajilla-seca-platos-cubiertos-vasos-2-pisos-vasos-con-bandeja-cocina-color-gris/p/MLA22850105",
+          "siteId": "MLA",
+          "title": "Escurridor De Vajilla Seca Platos Cubiertos Vasos 2 Pisos Vasos Con Bandeja Cocina Color Gris",
+          "description": "Lugar recomendado de colocación: de mesa. | Tiene capacidad para 12 platos. | Posee 2 niveles. | Dimensiones: 23cm de ancho x 36cm de largo x 37cm de alto.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_847960-MLA96640580067_102025-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_847960-MLA96640580067_102025-O.webp",
+          "id": "MLA22850105",
+          "price": 23469,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Levys Bazar",
+            "Marca": "Levys Bazar",
+            "Modelo": "Seca Platos",
+            "Color": "Gris",
+            "Largo x Ancho x Altura": "36 cm x 23 cm x 37 cm",
+            "Tipo de producto": "Secaplatos",
+            "Lugar de colocación": "De mesa",
+            "Materiales del escurridor de platos": "Acero cromado",
+            "Capacidad de platos": "12",
+            "Cantidad de niveles": "2"
+          },
+          "ratingAverage": 4.3,
+          "reviewCount": 191,
+          "condition": "new",
+          "soldQuantity": 1000,
+          "seller": {
+            "nickname": "Levys Bazar",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1430802562",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:17.786Z"
+        },
+        {
+          "permalink": "https://articulo.mercadolibre.com.ar/MLA-3480623498-escurridor-de-vajilla-plastico-negro-2-niveles-negro-_JM",
+          "siteId": "MLA",
+          "title": "Escurridor De Vajilla Plástico Negro 2 Niveles Negro",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_957842-MLA112304032338_062026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_957842-MLA112304032338_062026-O.webp",
+          "id": "MLA3480623498",
+          "price": 19000,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Genérico",
+            "Marca": "Genérico",
+            "Modelo": "Simil ratan",
+            "Color": "Negro",
+            "Largo x Ancho x Altura": "26 cm x 41 cm x 38 cm",
+            "Tipo de producto": "Secaplatos",
+            "Materiales del escurridor de platos": "Plástico",
+            "Capacidad de platos": "11",
+            "Cantidad de niveles": "2",
+            "Con secavasos": "Sí",
+            "Con cubiertero": "Sí",
+            "Es extensible": "No",
+            "Material de la bandeja": "Plástico"
+          },
+          "ratingAverage": 5,
+          "reviewCount": 6,
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "TIENDA ARMAR",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA3480623498",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:22.295Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/estante-para-secar-platos-de-2-niveles-con-escurridor-y-sopo-negro/p/MLA2023327651",
+          "siteId": "MLA",
+          "title": "Estante Para Secar Platos De 2 Niveles Con Escurridor Y Sopo Negro",
+          "description": "Este portaplatos de 2 niveles ofrece una solución práctica y elegante para secar sus platos y utensilios de manera eficiente. Su marco de metal negro proporciona durabilidad y un aspecto moderno que encaja bien en cualquier cocina.\n\nCARACTERÍSTICAS\n- El diseño de dos niveles maximiza el espacio de secado para placas, boles, tazas y más.\n- Incluye un soporte utensilio para el secado conveniente de cubiertos y herramientas de cocina.\n- Equipado con un tablero de drenaje para coger el exceso de agua y mantener su encimera seca.\n\nRECOMENDACIONES\nIdeal para cocinas con espacio limitado en el mostrador, este portaplatos ayuda a organizar y secar sus platos rápidamente después de lavar. Fácil de limpiar y mantener, es perfecto para el uso diario.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_787615-CBT115387362508_082026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_787615-CBT115387362508_082026-O.webp",
+          "id": "MLA2023327651",
+          "price": 20003.59,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Genérica",
+            "Marca": "Genérica",
+            "Modelo": "organizador-de-cozinha",
+            "Color": "Negro",
+            "Tipo de producto": "Secaplatos",
+            "Lugar de colocación": "De mesa",
+            "Materiales del escurridor de platos": "Metal",
+            "Cantidad de niveles": "2",
+            "Con secavasos": "Sí",
+            "Con cubiertero": "Sí",
+            "Es extensible": "No"
+          },
+          "ratingAverage": 4.3,
+          "reviewCount": 24,
+          "condition": "new",
+          "soldQuantity": 50,
+          "seller": {
+            "nickname": "Luck Deer Online",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA2040884359",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:48.792Z"
+        }
+      ]
+    },
+    {
+      "query": "Jbl Go4 Generico",
+      "dataset": "kSgbXVh79a9lnVsuk",
+      "urls": "permalink",
+      "totalListado": 30,
+      "sel": [
+        {
+          "motivo": "barata",
+          "posicion": 24,
+          "tipo": "p",
+          "url": "https://www.mercadolibre.com.ar/altavoz-portatil-inalambrico-go4-para-exteriores-waterpr/p/MLA2062100314",
+          "itemId": "MLA1666421813",
+          "catalogProductId": "MLA2062100314",
+          "price": 14459
+        },
+        {
+          "motivo": "barata",
+          "posicion": 20,
+          "tipo": "p",
+          "url": "https://www.mercadolibre.com.ar/altavoz-de-bocina-de-rango-completo-de-8-ohmios-y-15-w-4580/p/MLA2059459906",
+          "itemId": "MLA4023334994",
+          "catalogProductId": "MLA2059459906",
+          "price": 15791
+        },
+        {
+          "motivo": "barata",
+          "posicion": 12,
+          "tipo": "p",
+          "url": "https://www.mercadolibre.com.ar/funda-protectora-bocinas-para-jbl-go4-con-accesoriosnegro/p/MLA2051641800",
+          "itemId": "MLA3958685700",
+          "catalogProductId": "MLA2051641800",
+          "price": 16235
+        },
+        {
+          "motivo": "barata",
+          "posicion": 25,
+          "tipo": "up",
+          "url": "https://www.mercadolibre.com.ar/parlante-portatil-go4-rgb-bluetooth-v53-negro/up/MLAU4342546619",
+          "itemId": "MLA3854747078",
+          "catalogProductId": null,
+          "price": 18050
+        },
+        {
+          "motivo": "barata",
+          "posicion": 21,
+          "tipo": "p",
+          "url": "https://www.mercadolibre.com.ar/04-js-for-altavoz-bluetooth-portatil-for-exteriores-go4-jaju/p/MLA2028151306",
+          "itemId": "MLA1993601247",
+          "catalogProductId": "MLA2028151306",
+          "price": 20759
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 1,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-2715178920-_JM",
+          "itemId": "MLA2715178920",
+          "catalogProductId": null,
+          "price": 70429
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 2,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-2093591452-_JM",
+          "itemId": "MLA2093591452",
+          "catalogProductId": null,
+          "price": 69999
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 3,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-2039115769-_JM",
+          "itemId": "MLA2039115769",
+          "catalogProductId": null,
+          "price": 89500
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 4,
+          "tipo": "p",
+          "url": "https://www.mercadolibre.com.ar/parlantes-portatil-jbl-go-4-speaker-color-azul/p/MLA44831552",
+          "itemId": "MLA4020001988",
+          "catalogProductId": "MLA44831552",
+          "price": 79999
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 5,
+          "tipo": "p",
+          "url": "https://www.mercadolibre.com.ar/parlante-jbl-go4-portatil-con-bluetooth-waterproof-rojo/p/MLA44714005",
+          "itemId": "MLA1483200915",
+          "catalogProductId": "MLA44714005",
+          "price": 114091
+        }
+      ],
+      "runId": "bGKETiR1em5isXurh",
+      "status": "SUCCEEDED",
+      "segundos": 165,
+      "usageTotalUsd": 0.22505,
+      "chargedEventCounts": {
+        "product-listing": 0,
+        "item-detail": 9,
+        "apify-actor-start": 1
+      },
+      "items": [
+        {
+          "permalink": "https://www.mercadolibre.com.ar/rx3c-for-altavoz-bluetooth-portatil-for-exteriores-go4-zy/p/MLA2028151306",
+          "siteId": "MLA",
+          "title": "Rx3c For Altavoz Bluetooth Portátil For Exteriores Go4 /zy",
+          "description": "Escenarios aplicables: automóvil, escritorio, fitness.\nMétodo de conexión: conexión Bluetooth\nNúmero de hablantes: 2\nDistancia efectiva: 8 10M\nMaterial de la caja: plástico\nModo de energía: USB\nNivel de impermeabilidad: no impermeable\nVersión de Bluetooth: 5.3\nSi hay una batería incorporada: batería incorporada",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_930327-CBT109749762036_042026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_930327-CBT109749762036_042026-O.webp",
+          "id": "MLA2028151306",
+          "price": 20743.24,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Generic",
+            "Marca": "Generic",
+            "Modelo": "Generic",
+            "Voltaje": "5V",
+            "Con Bluetooth": "Sí",
+            "Es portátil": "Sí",
+            "Es inalámbrico": "Sí",
+            "Es a prueba de agua": "No"
+          },
+          "ratingAverage": 5,
+          "reviewCount": 1,
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "Baibao Bag",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1993601247",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:29.111Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/rx3c-dg-altavoz-inalambrico-portatil-go4-impermeable-for-/p/MLA2062100314",
+          "siteId": "MLA",
+          "title": "Rx3c @ Dg Altavoz Inalámbrico Portátil Go4 Impermeable For @",
+          "description": "**Compacto pero Potente**El altavoz GO4 ofrece calidad de sonido excepcional en un tamaño pequeño, ideal for interiores y exteriores.**Impermeable y Resistente**Su construcción robusta lo protege de lluvia, derrames y piscinasperfecto for fiestas al aire libre, playas o excursiones.**Inalámbrico Bluetooth y Portátil**Conecta fácilmente a tu teléfono/tablet for reproducir tus listas favoritas desde cualquier lugar dentro del rango.**Versátil: Batería o Enchufado**Usa como portátil (batería) o enchufado en tu escritorionunca te quedas sin música en momentos clave.**Sonido Mejorado**Disfruta de graves profundos y claridad en los agudos for sentir el ritmo con intensidad.**Detalles**- Color: Rojo- Material: ABS**Contenido del Paquete**1 unidad de altavoz portátil GO4",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_698262-CBT104191655374_012026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_698262-CBT104191655374_012026-O.webp",
+          "id": "MLA2062100314",
+          "price": 14727.37,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Generic"
+          },
+          "ratingAverage": 4.7,
+          "reviewCount": 9,
+          "condition": "new",
+          "soldQuantity": 25,
+          "seller": {
+            "nickname": "Baibao Bag",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1993661595",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:32.189Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/parlante-portatil-bluetooth-jbl-go-essential-2-rojo/p/MLA63541246",
+          "siteId": "MLA",
+          "title": "Parlante Portátil Bluetooth JBL Go Essential 2 Rojo",
+          "description": "Voltaje: 5V. | Profundidad de 3.2 cm para un diseño compacto. | Con protección IPX7 resistente al agua. | Conectores de entrada auxiliar y USB. | Autonomía máxima de la batería de 5 horas. | Compatible con tecnología Bluetooth. | Apto para uso en exteriores e inalámbrico.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_737033-MLA102143183458_122025-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_737033-MLA102143183458_122025-O.webp",
+          "id": "MLA63541246",
+          "price": 70429.28,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "JBL",
+            "Marca": "JBL",
+            "Modelo": "Essential 2",
+            "Modelo alfanumérico": "JBLGOES2REDAM",
+            "Color": "Rojo",
+            "Voltaje": "5V",
+            "Con base": "No",
+            "Con micrófono": "No",
+            "Incluye soporte": "No",
+            "Lugares de colocación": "Portátil",
+            "Es a prueba de agua": "Sí",
+            "Es apto para uso en exteriores": "Sí",
+            "Incluye ruedas": "No",
+            "Incluye manija": "No",
+            "Con Bluetooth": "Sí",
+            "Con Wi-Fi": "No",
+            "Conectores de entrada": "Auxiliar, USB",
+            "Tipos de alimentación": "Batería",
+            "Es resistente al polvo": "Sí",
+            "Clasificación de IP": "IPX7",
+            "Tipos de parlante": "Rango completo",
+            "Configuración de canales": "MONO",
+            "Autonomía máxima de la batería": "5 h",
+            "Incluye batería recargable": "Sí",
+            "Cantidad de parlantes": "1",
+            "Con luces LED": "No",
+            "Con modo manos libres": "No",
+            "Con controladores DJ integrados": "No",
+            "Con función karaoke": "No",
+            "Con efecto de voz": "No",
+            "Con radio": "No",
+            "Es portátil": "Sí",
+            "Es inalámbrico": "Sí",
+            "Es gamer": "No",
+            "Ancho x Profundidad x Altura": "8.6 cm x 3.2 cm x 7.1 cm",
+            "Peso": "184 g"
+          },
+          "ratingAverage": 4.8,
+          "reviewCount": 12,
+          "condition": "new",
+          "soldQuantity": 50,
+          "seller": {
+            "nickname": "Tienda Prego",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA2715178920",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:51.391Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/parlante-portatil-jbl-go-4-bluetooth-waterproof-ip67/up/MLAU4942497839",
+          "siteId": "MLA",
+          "title": "Parlante Portatil Jbl Go 4 Bluetooth Waterproof Ip67",
+          "description": "Voltaje: 5V | Tipo de parlante: full-range. | Es a prueba de agua. | Con conectividad bluetooth. | Batería recargable. | Potencia de 4.2W.  | Lugar de colocación:  portable y indoor y outdoor.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_930694-MLA116770199595_082026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_930694-MLA116770199595_082026-O.webp",
+          "id": "MLAU4942497839",
+          "price": 89500,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "JBL",
+            "Marca": "JBL",
+            "Modelo": "JBLGO4BLK",
+            "Color": "Rojo",
+            "Voltaje": "5V",
+            "Cantidad de parlantes": "1",
+            "Formato del parlante": "Portable Bluetooth speaker",
+            "Con luces LED": "No",
+            "Con modo manos libres": "No",
+            "Con controladores DJ integrados": "No",
+            "Con función karaoke": "No",
+            "Con efecto de voz": "No",
+            "Con radio": "No",
+            "Es portátil": "Sí",
+            "Es inalámbrico": "Sí",
+            "Es gamer": "No",
+            "Potencia de salida (RMS)": "4,2 W",
+            "Tipos de parlante": "Full-range",
+            "Configuración de canales": "MONO",
+            "Autonomía máxima de la batería": "7 h",
+            "Incluye batería recargable": "Sí",
+            "Con base": "No",
+            "Con micrófono": "No",
+            "Incluye soporte": "No",
+            "Lugares de colocación": "Portable, indoor, outdoor",
+            "Es a prueba de agua": "Sí",
+            "Con Bluetooth": "Sí",
+            "Con Wi-Fi": "No",
+            "Tipos de alimentación": "5v usb",
+            "Tipo de pila": "Lithium-ion"
+          },
+          "condition": "new",
+          "soldQuantity": 5,
+          "seller": {
+            "nickname": "roseventas",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA2039115769",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:56.488Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/altavoz-bluetooth-impermeable-jbl-go-essential-color-rojo-rojo/p/MLA44742141",
+          "siteId": "MLA",
+          "title": "Altavoz Bluetooth Impermeable Jbl Go Essential, Color Rojo Rojo",
+          "description": "Potencia de salida de 3.1 W para un sonido claro y preciso. | Batería recargable con hasta 5 horas de autonomía. | Función manos libres para responder llamadas fácilmente. | Diseño portátil, ideal para uso en exteriores. | Clasificación IPX7 para resistencia al agua. | Conectividad vía Bluetooth para una fácil reproducción de música.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_764171-MLA99582810904_122025-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_764171-MLA99582810904_122025-O.webp",
+          "id": "MLA44742141",
+          "price": 69999,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "JBL",
+            "Marca": "JBL",
+            "Línea": "Portátil",
+            "Modelo": "Jbl Go Essential",
+            "Modelo alfanumérico": "JBLGOESRED",
+            "Color": "Rojo",
+            "Modelo detallado": "Jbl Go Essential Vermelho",
+            "Autonomía máxima de la batería": "5 h",
+            "Incluye batería recargable": "Sí",
+            "Voltaje de la batería": "3V",
+            "Incluye cargador": "Sí",
+            "Cantidad de micrófonos": "1",
+            "Con base": "No",
+            "Con micrófono": "No",
+            "Incluye soporte": "No",
+            "Incluye control remoto": "No",
+            "Lugares de colocación": "Mesa, Piso",
+            "Es a prueba de agua": "No",
+            "Es apto para uso en exteriores": "Sí",
+            "Incluye ruedas": "No",
+            "Incluye manija": "No",
+            "Con Bluetooth": "Sí",
+            "Con Wi-Fi": "No",
+            "Conectores de entrada": "USB",
+            "Tipos de alimentación": "Batería, USB",
+            "Tiempo de carga": "2,5 h",
+            "Es resistente al polvo": "No",
+            "Tipo de batería": "Polímero de litio",
+            "Con NFC": "No",
+            "Clasificación de IP": "IPX7",
+            "Potencia de salida (RMS)": "3,1 W",
+            "Tipos de parlante": "Medio, Woofer",
+            "Tipos de filtros del parlante": "Activo",
+            "Configuración de canales": "1",
+            "Respuesta mínima en frecuencia - Respuesta máxima en frecuencia": "180 Hz - 20 kHz",
+            "Distorsión": "0 %",
+            "Cantidad de parlantes": "1",
+            "Formato del parlante": "Rectángulo redondeado",
+            "Con luces LED": "No",
+            "Con modo manos libres": "Sí",
+            "Con controladores DJ integrados": "No",
+            "Con función karaoke": "No",
+            "Con efecto de voz": "No",
+            "Con radio": "No",
+            "Es portátil": "Sí",
+            "Es inalámbrico": "No",
+            "Es gamer": "No",
+            "Es profesional": "Sí",
+            "Es un monitor de escenario": "No",
+            "Con pantalla": "No",
+            "Sistemas operativos compatibles": "Android",
+            "Ancho x Profundidad x Altura": "8.6 cm x 3.16 cm x 7.12 cm",
+            "Peso": "117 g"
+          },
+          "ratingAverage": 4.7,
+          "reviewCount": 67,
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "Tienda Prego",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA2093591452",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:58.907Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/parlante-jbl-go4-portatil-con-bluetooth-waterproof-rojo/p/MLA44714005",
+          "siteId": "MLA",
+          "title": "Parlante JBL go4 portátil con bluetooth waterproof rojo",
+          "description": "Potencia de salida de 4.2 W para un sonido claro y potente. | Autonomía máxima de 7 horas para disfrutar sin interrupciones. | Clasificación IP67 para resistencia al agua y al polvo. | Diseño portátil y ligero para llevar a cualquier lugar. | Conexión Bluetooth para reproducción inalámbrica sencilla. | Carga rápida de batería en solo 3 horas.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_818033-MLA99936483237_112025-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_818033-MLA99936483237_112025-O.webp",
+          "id": "MLA44714005",
+          "price": 95620,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "JBL",
+            "Marca": "JBL",
+            "Modelo": "go4",
+            "Color": "Rojo",
+            "Modelo detallado": "go4",
+            "Autonomía máxima de la batería": "7 h",
+            "Incluye batería recargable": "Sí",
+            "Voltaje de la batería": "5V",
+            "Incluye cargador": "No",
+            "Cantidad de micrófonos": "0",
+            "Con base": "No",
+            "Con micrófono": "No",
+            "Incluye soporte": "No",
+            "Incluye control remoto": "No",
+            "Lugares de colocación": "Mesa, Portátil o sea, Bolsillo, Lo colocas donde quieras",
+            "Es a prueba de agua": "Sí",
+            "Es apto para uso en exteriores": "Sí",
+            "Incluye ruedas": "No",
+            "Incluye manija": "Sí",
+            "Con Bluetooth": "Sí",
+            "Con Wi-Fi": "No",
+            "Conectores de entrada": "Plug, USB",
+            "Tipos de alimentación": "USB",
+            "Tiempo de carga": "3 h",
+            "Es resistente al polvo": "Sí",
+            "Tipo de batería": "Ion de litio",
+            "Con NFC": "No",
+            "Clasificación de IP": "IP67",
+            "Potencia de salida (RMS)": "4,2 W",
+            "Tipos de parlante": "Tweeter",
+            "Tipos de filtros del parlante": "Activo",
+            "Respuesta mínima en frecuencia - Respuesta máxima en frecuencia": "180 Hz - 20 kHz",
+            "Distorsión": "0 %",
+            "Cantidad de parlantes": "1",
+            "Formato del parlante": "Caja",
+            "Con luces LED": "No",
+            "Con modo manos libres": "No",
+            "Con controladores DJ integrados": "No",
+            "Con función karaoke": "No",
+            "Con efecto de voz": "No",
+            "Con radio": "No",
+            "Es portátil": "Sí",
+            "Es inalámbrico": "Sí",
+            "Es gamer": "No",
+            "Es profesional": "No",
+            "Es un monitor de escenario": "No",
+            "Con pantalla": "No",
+            "Sistemas operativos compatibles": "Android",
+            "Ancho x Profundidad x Altura": "9.43 cm x 4.22 cm x 7.57 cm",
+            "Peso": "190 g"
+          },
+          "ratingAverage": 4.9,
+          "reviewCount": 54,
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "TECNO CITI",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA3908064494",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:12.203Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/clear-sound-reproduction-loudspeaker-45x80mm-4-ohm-10w-4nb607827/p/MLA2059459906",
+          "siteId": "MLA",
+          "title": "Clear Sound Reproduction Loudspeaker 45x80mm 4 Ohm 10w 4nb607827",
+          "description": "Características: sonido claro con nuestros altavoces internos de 45x80mm, eliminando la distorsión en volúmenes para la transmisión de sonido superior en cualquier configuración. Construido con una carcasa de metal fuerte y 4 potencia de salida 10W, este altavoces portátiles aseguran bajo robusto y estable para un uso duradero. Ideal para audiofilos, usuarios de hogares y entusiastas al aire libre que buscan sonido premium sin complexidad, atendiendo a aquellos que valoran el sonido Perfecto para escenarios versátiles como teatros de casas, viajes de camping, fiestas y reuniones, proporcionando sonido poderoso en gran medida o entornos móviles. Disfrute de la instalación sin esfuerzo con la herramienta fácil de instalar y amplia compatibilidad del dispositivo, haciendo es una adición sin costuras a sus sistemas de sonido para la conveniencia cotidiana. Especificaciones: Componente: metal Parámetros: Potencia 10W Ó Impedancia 4 ohms Tamaño: sobre El paquete de 45x80mm/2x3,2 pulgadas incluye: Compatible con configuraciones fáciles de 4 Ohm 10W para múltiples Nota de los dispositivos: 1.Por favor, permita errores de 1-2cm debido a la medición manual, asegúrese de que no le importa antes del pedido. 2.Debido a la diferencia entre diferentes monitores, la imagen puede no reflejar el color real del elemento.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_687103-CBT117312251264_102026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_687103-CBT117312251264_102026-O.webp",
+          "id": "MLA2059459906",
+          "price": 15828.64,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Generic",
+            "Marca": "Generic",
+            "Modelo": "4NB607827",
+            "Color": "4NB607827"
+          },
+          "ratingAverage": 3.4,
+          "reviewCount": 2,
+          "condition": "new",
+          "soldQuantity": 25,
+          "seller": {
+            "nickname": "Jiang Qin Wei Jiu 12 Global",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA2160539329",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:19.093Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/parlantes-portatil-jbl-go-4-speaker-color-azul/p/MLA44831552",
+          "siteId": "MLA",
+          "title": "Parlantes Portatil Jbl Go 4 Speaker Color Azul",
+          "description": "Bocina portátil a prueba de agua con clasificación IP67. | Autonomía de batería de hasta 7 horas. | Carga completa en solo 3 horas. | Equipado con un único parlante tweeter. | Portátil y liviana, ideal para exteriores. | Conexión Bluetooth para reproducción inalámbrica.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_941525-MLA99454632006_112025-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_941525-MLA99454632006_112025-O.webp",
+          "id": "MLA44831552",
+          "price": 79999,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "JBL"
+          },
+          "ratingAverage": 4.9,
+          "reviewCount": 299,
+          "condition": "new",
+          "soldQuantity": 1000,
+          "seller": {
+            "nickname": "CROVARA SHOP2",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA4020001988",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:36.094Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/funda-protectora-bocinas-for-go4-con-accesoriosnegro-sdld/p/MLA2051641800",
+          "siteId": "MLA",
+          "title": "Funda Protectora Bocinas For Go4 Con Accesorios,negro Sdld",
+          "description": "Estimado comprador, ¡bienvenido a nuestra tienda! Consejos de compra: Envío gratis en pedidos superiores a 299 pesos. Esto le permitirá ver otros listados de nuestra tienda y agregarlos a su carrito de compras. Hagan una verificación final y paguen juntos. ¡Esto le ahorra dinero en el envío! ¡feliz compra!AJUSTE PERSONALIZADO: Este estuche rígido de EVA está diseñado meticulosamente for ajustarse perfectamente a su altavoz Bluetooth GO 4. El ajuste personalizado garantiza que su altavoz permanezca seguro e inmóvil dentro del estuche, lo que proporciona una protección óptima contra caídas, golpes y cualquier impacto físico, mejorando así la longevidad de su dispositivo.PROTECCIÓN DEL ESTUCHE RÍGIDO ANTI-RAYAS: El exterior resistente y anti-rayaduras de este estuche rígido actúa como un escudo robusto, salvaguardando su GO 4 de arañazos antiestéticos y daños en la superficie. Combinado con un forro interior de felpa, crea un sistema de protección de doble capa que preserva la apariencia y funcionalidad impecables de sus altavoces.ALMACENAMIENTO DE ACCESORIOS: Con un pequeño bolsillo dedicado, este estuche de transporte ofrece un amplio espacio for almacenar su cable de carga u otros accesorios pequeños. Esta adición pensada garantiza que todos sus elementos esenciales se mantengan organizados y al alcance, lo que contribuye a una solución de transporte eficiente y sin desorden.PORTABILIDAD Y CONVENIENCIA: Compacto y liviano, este estuche de transporte está diseñado teniendo en cuenta la portabilidad. La correa de mano incluida permite un transporte fácil, ya sea que te dirijas a la playa, a una caminata o simplemente a tu trabajo. Su comodidad portátil garantiza que puedas llevar tu GO 4 y sus accesorios contigo dondequiera que vayas.DISEÑO ELEGANTE Y CON ESTILO: Con su diseño simple pero elegante, este estuche de transporte es el accesorio perfecto for tu GO 4. El exterior elegante no solo se ve bien, sino que también complementa la estética moderna de tu altavoz. Es un accesorio que combina estilo y funcionalidad a la perfección, lo que lo convierte en una opción ideal for cualquier propietario de GO 4.Estimado cliente, le enviaremos su paquete puntualmente.* Si hay un problema con el producto, no se queje de inmediato, contáctenos al realizar un pedido, ¡haremos todo lo posible for resolver el problema por usted! ¡Gracias por su cooperación!A",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_854659-CBT111963034519_052026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_854659-CBT111963034519_052026-O.webp",
+          "id": "MLA2051641800",
+          "price": 16223.12,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Generic",
+            "Marca": "Generic",
+            "Modelo": "Genérico",
+            "Tipo de producto": "Funda"
+          },
+          "ratingAverage": 5,
+          "reviewCount": 7,
+          "condition": "new",
+          "soldQuantity": 5,
+          "seller": {
+            "nickname": "Huaye Store",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA3958685700",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:44:39.990Z"
+        }
+      ]
+    },
+    {
+      "query": "Tabla de pilates plegable bandas elásticas",
+      "dataset": "0puQr3bwGCA0mWZEN",
+      "urls": "articulo",
+      "totalListado": 30,
+      "sel": [
+        {
+          "motivo": "barata",
+          "posicion": 28,
+          "tipo": "p",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-3227402298-_JM",
+          "itemId": "MLA3227402298",
+          "catalogProductId": "MLA68106887",
+          "price": 2199
+        },
+        {
+          "motivo": "barata",
+          "posicion": 22,
+          "tipo": "p",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-1775663265-_JM",
+          "itemId": "MLA1775663265",
+          "catalogProductId": "MLA68909968",
+          "price": 3088
+        },
+        {
+          "motivo": "barata",
+          "posicion": 15,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-2472201354-_JM",
+          "itemId": "MLA2472201354",
+          "catalogProductId": null,
+          "price": 6479
+        },
+        {
+          "motivo": "barata",
+          "posicion": 30,
+          "tipo": "p",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-2781509144-_JM",
+          "itemId": "MLA2781509144",
+          "catalogProductId": "MLA2023294670",
+          "price": 13537
+        },
+        {
+          "motivo": "barata",
+          "posicion": 26,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-1735692418-_JM",
+          "itemId": "MLA1735692418",
+          "catalogProductId": null,
+          "price": 18380
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 1,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-1737904077-_JM",
+          "itemId": "MLA1737904077",
+          "catalogProductId": null,
+          "price": 91794
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 2,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-3286971746-_JM",
+          "itemId": "MLA3286971746",
+          "catalogProductId": null,
+          "price": 69999
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 3,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-1102288361-_JM",
+          "itemId": "MLA1102288361",
+          "catalogProductId": null,
+          "price": 68550
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 4,
+          "tipo": "click1",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-2215887762-_JM",
+          "itemId": "MLA2215887762",
+          "catalogProductId": null,
+          "price": 113519
+        },
+        {
+          "motivo": "relevancia",
+          "posicion": 5,
+          "tipo": "p",
+          "url": "https://articulo.mercadolibre.com.ar/MLA-1854373519-_JM",
+          "itemId": "MLA1854373519",
+          "catalogProductId": "MLA70111248",
+          "price": 71990
+        }
+      ],
+      "runId": "54J5FyBVcWpy5M1N0",
+      "status": "SUCCEEDED",
+      "segundos": 176,
+      "usageTotalUsd": 0.22505,
+      "chargedEventCounts": {
+        "product-listing": 0,
+        "item-detail": 9,
+        "apify-actor-start": 1
+      },
+      "items": [
+        {
+          "permalink": "https://www.mercadolibre.com.ar/banda-elastica-circular-de-latex-amarillo-resistencia-media-amarillo/p/MLA68106887",
+          "siteId": "MLA",
+          "title": "Banda Elástica Circular De Látex Amarillo Resistencia Media Amarillo",
+          "description": "Cantidad de bandas: 1. | Intensidades de resistencia: media baja. | Largo: 30cm.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_822905-MLA110515489727_042026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_822905-MLA110515489727_042026-O.webp",
+          "id": "MLA68106887",
+          "price": 2300,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "2M Sports",
+            "Marca": "2M Sports",
+            "Modelo": "Banda Elástica",
+            "Color": "Amarillo",
+            "Formato de venta": "Unidad",
+            "Largo": "30 cm",
+            "Intensidades de resistencia": "Media Baja",
+            "Con manijas": "No"
+          },
+          "ratingAverage": 4.6,
+          "reviewCount": 158,
+          "condition": "new",
+          "soldQuantity": 100,
+          "itemId": "MLA3227402298",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:26.268Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/mxg-tabla-giratoria-de-ballet-for-bailarines-tabla/p/MLA2023294670",
+          "siteId": "MLA",
+          "title": "Mxg * Tabla Giratoria De Ballet For Bailarines, Tabla",
+          "description": ".\nEsta tabla de girar es una herramienta de entrenamiento profesional que ayuda a los bailarines a dominar su equilibrio y sus giros. \n\n\nCaracterísticas: \nconstrucción de plástico duradero con curva ergonómica. \nLa almohadilla de espuma suave es antideslizante y cómoda for los pies descalzos. La \nsuperficie de baja fricción funciona en suelos lisos como madera dura o marley. \nMejora tu visión y encuentra el centro, ideal for detectar, girar, mantener el equilibrio y la técnica del ballet. \nLigera y portátil, ideal for usar en un estudio de baile, hogar u oficina. \n\n\nEspecificaciones del \nmaterial:: Plástico y espuma de \ncolor : Naranja/Rosa/Púrpura (opcional) \nMax. Carga: 100 kg/220 libras \nTamaño: 28 x 7,5 x 1,3 cm/11,0 * 3,0 * 0,5 pulgadas \nPeso: aproximadamente 140 g/4,9 oz \n\nLista de paquetes: \n1 * Tabla giratoria",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_875278-MLA104200914268_012026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_875278-MLA104200914268_012026-O.webp",
+          "id": "MLA2023294670",
+          "price": 13461.74,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Generic",
+            "Marca": "Generic",
+            "Modelo": "Generic"
+          },
+          "condition": "new",
+          "seller": {
+            "nickname": "Motopulsion Shop",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA2781509144",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:29.570Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/banda-elastica-circular-de-latex-azul-resistencia-baja-azul/p/MLA68909968",
+          "siteId": "MLA",
+          "title": "Banda Elástica Circular De Látex Azul Resistencia Baja Azul",
+          "description": "Cantidad de bandas: 1. | Intensidades de resistencia: baja. | Largo: 30cm.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_645397-MLA111085176331_042026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_645397-MLA111085176331_042026-O.webp",
+          "id": "MLA68909968",
+          "price": 3099,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "2M Sports",
+            "Marca": "2M Sports",
+            "Modelo": "Banda Elástica",
+            "Color": "Azul",
+            "Formato de venta": "Unidad",
+            "Largo": "30 cm",
+            "Intensidades de resistencia": "Baja",
+            "Con manijas": "No"
+          },
+          "ratingAverage": 4.6,
+          "reviewCount": 158,
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "2M Sports",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1775663265",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:31.275Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/colchoneta-plegable-libro-gimnasia-fitness-para-abdominales-color-negro/p/MLA35509374",
+          "siteId": "MLA",
+          "title": "Colchoneta Plegable Libro Gimnasia Fitness Para Abdominales Color Negro",
+          "description": "Material: pvc. | Es antideslizante. | Es a prueba de agua. | Es plegable. | Dimensiones: 40cm x 1 m x 3cm.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_797644-MLA116178353738_092026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_797644-MLA116178353738_092026-O.webp",
+          "id": "MLA35509374",
+          "price": 18380,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Fitnesas",
+            "Marca": "Fitnesas",
+            "Modelo": "Colchoneta plegable",
+            "Tipo de producto": "Colchoneta",
+            "Color": "Negro",
+            "Largo x Ancho": "100 cm x 40 cm",
+            "Espesor": "3 cm",
+            "Material": "PVC",
+            "Es antideslizante": "Sí",
+            "Es a prueba de agua": "Sí",
+            "Es plegable": "Sí",
+            "Es biodegradable": "No"
+          },
+          "ratingAverage": 4.6,
+          "reviewCount": 105,
+          "condition": "new",
+          "soldQuantity": 1000,
+          "seller": {
+            "nickname": "Fitnesas",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1735692418",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:42:33.273Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/tabla-pilates-reformer-plegable-premium-gym-maquina-para-casa-lila/p/MLA53451179",
+          "siteId": "MLA",
+          "title": "Tabla Pilates Reformer Plegable Premium Gym Maquina Para Casa - Lila",
+          "description": "Dimensiones: 10cm de altura x 40cm de ancho x 1.2m de largo. | Es plegable.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_855073-MLA113094690359_062026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_855073-MLA113094690359_062026-O.webp",
+          "id": "MLA53451179",
+          "price": 112663,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "COMPACT FIT",
+            "Marca": "COMPACT FIT",
+            "Modelo": "PR-01",
+            "Color": "Lila",
+            "Largo x Ancho": "1.2 m x 40 cm",
+            "Altura": "10 cm",
+            "Material del tapizado": "Plástico PP",
+            "Es plegable": "Sí"
+          },
+          "ratingAverage": 4.6,
+          "reviewCount": 349,
+          "condition": "new",
+          "soldQuantity": 500,
+          "seller": {
+            "nickname": "COMPACT FIT",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA2215887762",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:00.667Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/tabla-de-pilates-plegable-para-casa-con-bandas-elasticas/p/MLA69320938",
+          "siteId": "MLA",
+          "title": "Tabla De Pilates Plegable Para Casa Con Bandas Elásticas",
+          "description": "Sistema plegable que permite almacenar el equipo en espacios reducidos tras completar la rutina de entrenamiento. | Superficie de 1.05 m de largo y 40 cm de ancho que proporciona estabilidad durante los movimientos de cuerpo completo. | Temporizador digital integrado para medir con exactitud los tiempos de ejecución y descanso en cada serie. | Estructura fabricada en ABS reforzado con base antideslizante para mantener la posición fija durante el ejercicio. | Kit multifunción con bandas elásticas y manijas de agarre para trabajar brazos, abdomen y tren inferior.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_675836-MLA110793179550_052026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_675836-MLA110793179550_052026-O.webp",
+          "id": "MLA69320938",
+          "price": 99999,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Jazak",
+            "Marca": "Jazak",
+            "Modelo": "1938",
+            "Color": "Violeta",
+            "Largo x Ancho": "1.05 m x 40 cm",
+            "Altura": "3 cm",
+            "Materiales de la cama": "Goma",
+            "Es plegable": "Sí"
+          },
+          "ratingAverage": 4.1,
+          "reviewCount": 47,
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "Jazak",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA3286971746",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:01.578Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/tabla-pilates-mtl-multifuncion-fitness-plegable-bandas-elasticas-base-antideslizante-entrenamiento-abdomen-brazos-gluteos-espalda-flexiones-estiramiento-ejercicio-hogar/p/MLA70111248",
+          "siteId": "MLA",
+          "title": "Tabla Pilates Mtl Multifuncion Fitness Plegable Bandas Elasticas Base Antideslizante Entrenamiento Abdomen Brazos Gluteos Espalda Flexiones Estiramiento Ejercicio Hogar",
+          "description": "Plataforma Pilates MTL multifunción diseñada para entrenamiento físico integral fortalecimiento muscular ejercicios funcionales tonificación corporal estiramiento flexibilidad coordinación equilibrio y rutinas fitness desde el hogar. Su estructura moderna compacta plegable y resistente permite realizar múltiples ejercicios utilizando un solo equipo práctico portátil y fácil de guardar.\n\nLa estructura plegable facilita almacenamiento transporte organización y guardado ocupando menos espacio luego de cada sesión de entrenamiento. Ideal para departamentos habitaciones gimnasios domésticos estudios fitness oficinas espacios reducidos o personas que buscan equipamiento compacto funcional y versátil.\n\nFabricada con estructura resistente y superficie plástica PP ofrece excelente durabilidad estabilidad resistencia al uso diario y larga vida útil. Sus materiales brindan soporte firme seguro y cómodo durante entrenamientos intensivos ejercicios funcionales rutinas cardiovasculares fortalecimiento muscular yoga pilates elongación abdominales flexiones y entrenamiento corporal completo.\n\nEl kit multifunción incorpora bandas elásticas y agarres especiales para flexiones permitiendo trabajar distintos grupos musculares mediante ejercicios variados dinámicos y progresivos. Resulta ideal para fortalecer abdomen brazos piernas glúteos espalda hombros pecho cintura y zona lumbar desde diferentes posiciones y niveles de intensidad.\n\nLa base antideslizante ayuda a mantener estabilidad firmeza y seguridad durante cada movimiento evitando desplazamientos mientras se realizan ejercicios exigentes rutinas rápidas movimientos de fuerza estiramientos o trabajos funcionales. Esta característica brinda mayor confianza comodidad y control corporal durante toda la rutina.\n\nLos apoyos acolchados permiten sostener brazos piernas rodillas y extremidades cómodamente favoreciendo ejercicios de elongación flexibilidad resistencia movilidad y tonificación. Su revestimiento acolchado mejora la experiencia de uso ofreciendo mayor confort durante sesiones prolongadas.\n\nLa plataforma fitness multifunción MTL resulta adecuada tanto para principiantes como para usuarios avanzados entrenadores estudiantes deportistas aficionados personas activas o quienes desean incorporar actividad física diaria desde casa. Permite desarrollar rutinas completas sin necesidad de múltiples máquinas o accesorios adicionales.\n\nGracias a su diseño portátil puede transportarse fácilmente guardarse debajo camas muebles escritorios armarios o espacios reducidos. Su armado práctico y utilización sencilla permiten comenzar entrenamientos rápidamente sin instalaciones complejas herramientas especiales ni conocimientos técnicos avanzados.\n\nIdeal para entrenamiento funcional pilates yoga elongación abdominales fortalecimiento muscular flexiones ejercicios cardiovasculares tonificación glúteos coordinación motricidad recuperación física movilidad corporal y entrenamiento doméstico diario.\n\nCaracterísticas principales\n\nMarca MTL\nPlataforma fitness multifunción\nDiseño plegable portátil compacto\nEstructura resistente plástico PP\nBase antideslizante estable segura\nBandas elásticas incluidas\nAgarres para flexiones\nApoyos acolchados confortables\nEntrenamiento corporal completo\nIdeal hogar gimnasio oficina\nUso fitness pilates elongación\nFácil guardado transporte\nRutinas funcionales variadas\nFortalecimiento muscular integral\nSuperficie resistente duradera\nMedidas: 1.00m largo x 0.40cm ancho\n\nContenido del paquete\n\nPlataforma multifunción\nBandas elásticas\nAgarres flexiones\nApoyos acolchados\nAccesorios entrenamiento\nManual usuario",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_784218-MLA113781635868_072026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_784218-MLA113781635868_072026-O.webp",
+          "id": "MLA70111248",
+          "price": 71990,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "MTL",
+            "Marca": "MTL",
+            "Modelo": "MR5266",
+            "Color": "Negro",
+            "Largo x Ancho": "1 m x 40 cm",
+            "Material del tapizado": "Eco cuero",
+            "Materiales de la cama": "Metal reforzado, PVC",
+            "Es plegable": "No"
+          },
+          "ratingAverage": 4.3,
+          "reviewCount": 10,
+          "condition": "new",
+          "soldQuantity": 50,
+          "seller": {
+            "nickname": "MTL",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1854373519",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:43:10.375Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/set-de-pilates-portatil-plegable--bandas-elasticas--gaiam/up/MLAU216106833",
+          "siteId": "MLA",
+          "title": "Set De Pilates Portátil Plegable / Bandas Elásticas / Gaiam",
+          "description": "Barra para pilates de GAIAM, una de las marcas líderes en USA.\n\nCompacta y desmontable / Ideal para transportar / Correas para los pies / Para un entrenamiento corporal completo.\n\nMedidas:\n2 bandas elásticas de 76 cms con correas para los pies\nBarra de 46 cms de largo\n\n-----------------------------------------------------\n\nEn Kinemed somos importadores de insumos médicos habilitados por ANMAT con 10 años de experiencia en el sector. Trabajamos a nivel nacional con las mayores cadenas de farmacias, droguerías y todo el alto rendimiento deportivo ( AFA, UAR, River Plate, Boca Juniors, etc ).\n\n-----------------------------------------------------\n\nPodemos emitir factura A o B. \n\nPodés contactar con nuestro equipo de atención de Lunes a viernes de 9 a 18 por teléfono, Whatsapp o mensaje interno de Mercado Libre. \n\nEnvíos a todo el país a través de Mercado Envíos. Después de la compra vas a recibir un e-mail con los datos para seguir tu pedido durante el viaje.\n\nEl horario de entrega de Mercado Envíos Flex es de 14:00hs a 21:00hs.\n\n-----------------------------------------------------\n\nPodés encontrar todos nuestros productos disponibles en el siguiente link https://eshops.mercadolibre.com.ar/kinemed%20pro-shop\n\nGarantía de fábrica: 6 meses",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_753226-MLA118698252085_102026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_753226-MLA118698252085_102026-O.webp",
+          "id": "MLAU216106833",
+          "price": 68550,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Gaiam",
+            "Marca": "Gaiam",
+            "Modelo": "Barra pilates"
+          },
+          "condition": "new",
+          "soldQuantity": 5,
+          "seller": {
+            "nickname": "KINEMED PRO-SHOP",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1102288361",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:44:10.070Z"
+        },
+        {
+          "permalink": "https://www.mercadolibre.com.ar/tabla-pilates-reformer-plegable-gym-maquina-ejercicios-casa-rosa/p/MLA67680284",
+          "siteId": "MLA",
+          "title": "Tabla Pilates Reformer Plegable Gym Maquina Ejercicios Casa Rosa",
+          "description": "Dimensiones: 10cm de altura x 40cm de ancho x 1.2m de largo. | Es plegable.",
+          "images": [
+            "https://http2.mlstatic.com/D_NQ_NP_845843-MLA119043187879_102026-O.webp"
+          ],
+          "thumbnailUrl": "https://http2.mlstatic.com/D_NQ_NP_845843-MLA119043187879_102026-O.webp",
+          "id": "MLA67680284",
+          "price": 109381,
+          "currency": "ARS",
+          "attributes": {
+            "brand": "Giopetra",
+            "Marca": "Giopetra",
+            "Modelo": "Reformer",
+            "Color": "Rosa",
+            "Largo x Ancho": "1.2 m x 40 cm",
+            "Altura": "10 cm",
+            "Materiales de la cama": "Plastico Resistente",
+            "Es plegable": "Sí"
+          },
+          "ratingAverage": 4.7,
+          "reviewCount": 69,
+          "condition": "new",
+          "soldQuantity": 100,
+          "seller": {
+            "nickname": "Giopetra",
+            "isOfficialStore": false,
+            "storeName": null,
+            "reputation": null,
+            "powerSellerStatus": null
+          },
+          "itemId": "MLA1737904077",
+          "location": {
+            "city": null,
+            "state": null,
+            "country": "Argentina"
+          },
+          "scrapedAt": "2026-10-11T17:44:14.073Z"
+        }
+      ]
+    }
+  ]
+}

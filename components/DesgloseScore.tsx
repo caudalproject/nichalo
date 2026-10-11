@@ -1,4 +1,5 @@
 import type { AnalysisResult } from "@/lib/supabase";
+import { deduplicar, etiquetaTipo, textoVendidas, type DetalleVentas } from "@/lib/ventas";
 
 /**
  * De que se compone el score. TAB 4 del plan de tabs (21/9/2026).
@@ -39,6 +40,40 @@ function barraColor(p: number): string {
   if (p >= 70) return "bg-[#16A34A]";
   if (p >= 40) return "bg-yellow-400";
   return "bg-red-400";
+}
+
+/**
+ * TAB 3.6. Producto por producto, las ventas detras del bloque C. Siempre
+ * "+N acumuladas" (son pisos en escalones, desde que se publico), nunca "por
+ * dia". Las de catalogo llevan su rotulo: el numero es del producto, sumando a
+ * todos los vendedores, y no de la publicacion que se ve en el link.
+ */
+function ListaVentas({ ventas }: { ventas: DetalleVentas }) {
+  const productos = deduplicar(ventas.productos).sort(
+    (a, b) => (b.vendidas ?? -1) - (a.vendidas ?? -1) || a.titulo.localeCompare(b.titulo)
+  );
+  if (productos.length === 0) return null;
+  return (
+    <ul className="mt-2.5 space-y-1.5">
+      {productos.map((p) => (
+        <li key={p.clave} className="flex items-baseline justify-between gap-3 text-xs">
+          <span className="min-w-0 truncate text-gray-500">
+            {p.url ? (
+              <a href={p.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                {p.titulo}
+              </a>
+            ) : (
+              p.titulo
+            )}
+            <span className="text-gray-400"> · {etiquetaTipo(p.tipo)}</span>
+          </span>
+          <span className="shrink-0 font-mono tabular-nums text-gray-700">
+            {textoVendidas(p.vendidas)}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 export function DesgloseScore({
@@ -95,6 +130,9 @@ export function DesgloseScore({
                   minutos mirando Mercado Libre. Va visible, no plegada. */}
               <p className="mt-2 text-xs text-gray-600">{c.metrica}</p>
               <p className="mt-0.5 text-xs text-gray-400">{c.lectura}</p>
+              {c.id === "demanda" && detalle.ventas?.estado === "ok" && (
+                <ListaVentas ventas={detalle.ventas} />
+              )}
             </div>
           );
         })}

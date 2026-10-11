@@ -17,17 +17,43 @@
  * 3. TABLA DE CALIBRACION. Imprime el desglose de cada producto para poder
  *    discutir los pesos con numeros en la mano y no de memoria.
  *
+ * 4. TABLA DE VEREDICTOS QUE CAMBIAN (TAB 3.6). Con --comparar-con=<ref de git>
+ *    corre tambien la formula de ese commit sobre los mismos fixtures y
+ *    muestra que scores y veredictos se movieron y por que bloque.
+ *
+ * Fixtures con detalle (TAB 3.6): los `*-detalle.json` traen ademas `ventas`
+ * (las 10 paginas de detalle reales del paso 0, ver
+ * scripts/crear-fixtures-detalle.mjs). Son los unicos que prueban el bloque C:
+ * los 10 originales son de modo listado y no tienen vendidos.
+ *
  * Uso:
  *   npx tsx --env-file=.env.local scripts/validar-score.mjs          (usa fixtures)
  *   npx tsx --env-file=.env.local scripts/validar-score.mjs --scrape (paga y scrapea lo que falte)
+ *   npx tsx --env-file=.env.local scripts/validar-score.mjs --comparar-con=HEAD
  */
 
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
+import { execSync } from "node:child_process";
 
 const { startApifyRun, checkApifyRun, getApifyResults } = await import("../lib/apify.ts");
 const { calcularPrecioStats } = await import("../lib/confianza.ts");
 const { calcularScore } = await import("../lib/score.ts");
+const { resumirVentas } = await import("../lib/ventas.ts");
+
+// Formula anterior, para la tabla de cambios. Se extrae de git a un archivo
+// temporal al lado del original (asi resuelve los mismos imports relativos).
+const REF = process.argv.find((a) => a.startsWith("--comparar-con="))?.split("=")[1];
+let calcularScoreAnterior = null;
+const TMP_ANTERIOR = "lib/.score-anterior.tmp.ts";
+if (REF) {
+  writeFileSync(TMP_ANTERIOR, execSync(`git show ${REF}:lib/score.ts`));
+  try {
+    ({ calcularScore: calcularScoreAnterior } = await import(`../${TMP_ANTERIOR}`));
+  } finally {
+    unlinkSync(TMP_ANTERIOR);
+  }
+}
 
 const DIR = "scripts/fixtures";
 const SCRAPEAR = process.argv.includes("--scrape");
@@ -46,6 +72,10 @@ const SET = [
   { q: "mancuernas ajustables 20kg", costo: 60000, perfil: "experto", nota: "caro, fitness" },
   { q: "camiseta deportiva dry fit", costo: 5000, perfil: "principiante", nota: "ropa, alta rotacion" },
   { q: "mini lavadora portatil", costo: 45000, perfil: "intermedio", nota: "margen negativo historico" },
+  // TAB 3.6 — con las 10 paginas de detalle reales del paso 0 (11/10).
+  { q: "escurridor vajilla 2 niveles", costo: 12000, perfil: "principiante", nota: "detalle: hogar generico", archivo: "escurridor-vajilla-2-niveles-detalle" },
+  { q: "jbl go4 generico", costo: 15000, perfil: "principiante", nota: "detalle: 8 de 9 catalogo", archivo: "jbl-go4-generico-detalle" },
+  { q: "tabla de pilates plegable", costo: 30000, perfil: "principiante", nota: "detalle: deporte", archivo: "tabla-de-pilates-plegable-detalle" },
 ];
 
 const slug = (q) => q.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
@@ -74,12 +104,13 @@ function barajar(xs, semilla = 12345) {
   return a;
 }
 
-function evaluar(scrape, costo, perfil, producto) {
+function evaluar(scrape, costo, perfil, producto, fn = calcularScore) {
   const precios = scrape.listings.map((l) => l.price).filter((p) => p != null && p > 0);
-  const conVentas = scrape.listings.filter((l) => (l.soldQuantity ?? 0) > 0).length;
+  // Igual que produccion desde el 3.6: productos distintos que publican ventas.
+  const conVentas = scrape.ventas?.estado === "ok" ? resumirVentas(scrape.ventas.productos).medidos : 0;
   const calc = calcularPrecioStats(precios, conVentas, costo);
   if (!calc) return null;
-  return calcularScore({
+  return fn({
     producto,
     pais: "AR",
     perfil,
@@ -87,6 +118,9 @@ function evaluar(scrape, costo, perfil, producto) {
     listings: scrape.listings,
     stats: calc.stats,
     confianza: calc.confianza,
+    // Analisis inicial: siempre consulta ventas. Sin detalle en el fixture,
+    // simula una consulta que no devolvio nada (el bloque C se omite).
+    ventas: scrape.ventas ?? { estado: "omitido", motivo: "fixture de modo listado, sin detalle", pedidas: 0, productos: [] },
   });
 }
 
@@ -94,7 +128,7 @@ let fallos = 0;
 const filas = [];
 
 for (const caso of SET) {
-  const ruta = join(DIR, `${slug(caso.q)}.json`);
+  const ruta = join(DIR, `${caso.archivo ?? slug(caso.q)}.json`);
   let scrape;
 
   if (existsSync(ruta)) {
@@ -111,7 +145,11 @@ for (const caso of SET) {
 
   const a = evaluar(scrape, caso.costo, caso.perfil, caso.q);
   const b = evaluar(
-    { ...scrape, listings: barajar(scrape.listings) },
+    {
+      ...scrape,
+      listings: barajar(scrape.listings),
+      ventas: scrape.ventas ? { ...scrape.ventas, productos: barajar(scrape.ventas.productos, 777) } : undefined,
+    },
     caso.costo,
     caso.perfil,
     caso.q
@@ -128,7 +166,8 @@ for (const caso of SET) {
     console.log(`\n✗ NO REPRODUCIBLE: ${caso.q} → ${a.score} vs ${b.score} (listings barajados)`);
   }
 
-  filas.push({ caso, s: a, igual });
+  const antes = calcularScoreAnterior ? evaluar(scrape, caso.costo, caso.perfil, caso.q, calcularScoreAnterior) : null;
+  filas.push({ caso, s: a, igual, antes });
 }
 
 console.log("\n=== SCORES ===\n");
@@ -138,12 +177,35 @@ for (const { caso, s, igual } of filas) {
   );
   console.log(
     `   n=${s.metricas.n_listings} vendedores=${s.metricas.vendedores_unicos} ` +
-      `conVentas=${s.metricas.listings_con_ventas} reviews5+baratas=${s.metricas.reviews_mediana_baratos} ` +
+      `ventasMedidos=${s.metricas.ventas_productos_medidos} con+100=${s.metricas.ventas_pct_100 == null ? null : Math.round(s.metricas.ventas_pct_100 * 100) + "%"} ` +
+      `escalonMax=${s.metricas.ventas_escalon_max} reviews5+baratas=${s.metricas.reviews_mediana_baratos} ` +
       `spread=${s.metricas.spread_p90_p50?.toFixed(2)} envioGratis=${Math.round(s.metricas.pct_envio_gratis * 100)}%`
   );
   console.log(`   precio=${s.precio_sugerido} margen=${s.margen_neto_pct}% bruto=${s.score_bruto}`);
   for (const c of s.componentes) console.log(`   · ${c.nombre}: ${c.puntos}/${c.maximo} — ${c.metrica}`);
   for (const o of s.omitidos) console.log(`   · (omitido) ${o.nombre}: ${o.motivo}`);
+  console.log("");
+}
+
+if (calcularScoreAnterior) {
+  console.log(`=== QUE CAMBIA CONTRA ${REF} ===\n`);
+  console.log("producto                         antes            ahora            bloques que cambian");
+  for (const { caso, s, antes } of filas) {
+    if (!antes) continue;
+    const ids = new Set([...antes.componentes, ...s.componentes].map((c) => c.id));
+    const mov = [...ids]
+      .map((id) => {
+        const x = antes.componentes.find((c) => c.id === id);
+        const y = s.componentes.find((c) => c.id === id);
+        if (x && y && x.puntos === y.puntos) return null;
+        return `${id} ${x ? x.puntos : "omitido"}→${y ? y.puntos : "omitido"}`;
+      })
+      .filter(Boolean);
+    const marca = antes.veredicto !== s.veredicto ? "  ◀ CAMBIA VEREDICTO" : "";
+    console.log(
+      `${caso.q.padEnd(32)} ${String(antes.score).padStart(3)} ${antes.veredicto.padEnd(9)}    ${String(s.score).padStart(3)} ${s.veredicto.padEnd(9)}    ${mov.join(", ") || "—"}${marca}`
+    );
+  }
   console.log("");
 }
 

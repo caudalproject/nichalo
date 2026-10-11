@@ -32,8 +32,8 @@ const stats = (m) => ({
 const metricas = (v) => ({
   n_listings: 30, n_con_precio: 30, n_con_vendedor: 30,
   vendedores_unicos: v, ratio_vendedores: v / 30,
-  reviews_mediana_baratos: null, listings_con_ventas: null, pct_con_ventas: null,
-  mediana_unidades_vendidas: null, pct_envio_gratis: null, spread_p90_p50: 1.4,
+  reviews_mediana_baratos: null, ventas_productos_medidos: null, ventas_pct_100: null,
+  ventas_escalon_max: null, pct_envio_gratis: null, spread_p90_p50: 1.4,
 });
 const corrida = (diasAtras, mediano, vendedores, nombres) => ({
   fetched_at: new Date(Date.now() - diasAtras * 86_400_000).toISOString(),

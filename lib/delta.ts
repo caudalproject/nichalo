@@ -13,6 +13,7 @@
 
 import type { PrecioStats } from "./confianza";
 import type { MetricasScrape } from "./score";
+import { MIN_PRODUCTOS_MEDIDOS } from "./ventas";
 
 export interface CorridaComparable {
   fetched_at: string;
@@ -223,26 +224,23 @@ export function calcularDelta(
       bueno_si: "sube",
       esMaterial: porAbs(UMBRAL.ratio),
     }),
-    // Las tres de abajo dependen de campos que Mercado Libre no siempre expone.
-    // Hasta el fix del 21/9 llegaban como ceros y el delta decia "sin cambios"
-    // sobre datos que no existian. Ahora, si faltan, se marcan `sin_dato`.
+    // Las de abajo dependen de datos que no siempre estan. Hasta el fix del
+    // 21/9 llegaban como ceros y el delta decia "sin cambios" sobre datos que
+    // no existian. Ahora, si faltan, se marcan `sin_dato`.
+    //
+    // TAB 3.6 (11/10): las ventas salen de paginas de detalle que solo paga el
+    // analisis inicial. El re-chequeo sigue en modo listado, asi que contra el
+    // esto da `sin_dato` — que es lo correcto. Las metricas viejas
+    // (`listings_con_ventas`, `mediana_unidades_vendidas`) no se llenaron nunca
+    // y se sacaron: no habia nada que comparar.
     campo({
-      id: "listings_con_ventas",
-      etiqueta: "Publicaciones con ventas declaradas",
-      antes: ma?.listings_con_ventas,
-      ahora: mb?.listings_con_ventas,
-      formato: "entero",
-      bueno_si: "neutro",
-      esMaterial: porAbs(UMBRAL.listings),
-    }),
-    campo({
-      id: "mediana_unidades_vendidas",
-      etiqueta: "Unidades vendidas (mediana)",
-      antes: ma?.mediana_unidades_vendidas,
-      ahora: mb?.mediana_unidades_vendidas,
-      formato: "entero",
+      id: "ventas_pct_100",
+      etiqueta: "Productos con +100 vendidas acumuladas",
+      antes: ma?.ventas_pct_100,
+      ahora: mb?.ventas_pct_100,
+      formato: "porcentaje",
       bueno_si: "sube",
-      esMaterial: porPct(UMBRAL.precio_pct),
+      esMaterial: porAbs(UMBRAL.puntos_pct),
     }),
     campo({
       id: "pct_envio_gratis",
@@ -279,17 +277,26 @@ export function calcularDelta(
   // --- Score: solo si las dos corridas usan la MISMA formula ---------------
   const mismaFormula =
     !!anterior.formula && !!actual.formula && anterior.formula === actual.formula;
+  // Misma formula no alcanza desde la v1.4: el bloque C entra solo si se
+  // consultaron las ventas (analisis inicial) y sale del denominador si no
+  // (re-chequeo en modo listado). Dos scores con distinto denominador no se
+  // restan.
+  const conDemanda = (m: MetricasScrape | null) =>
+    (m?.ventas_productos_medidos ?? 0) >= MIN_PRODUCTOS_MEDIDOS;
+  const mismosBloques = conDemanda(anterior.metricas) === conDemanda(actual.metricas);
   const scoreDif = dif(anterior.score, actual.score);
   const score = {
     antes: scoreDif.antes,
     ahora: scoreDif.ahora,
-    delta: mismaFormula ? scoreDif.delta : null,
-    comparable: mismaFormula && !scoreDif.sin_dato,
+    delta: mismaFormula && mismosBloques ? scoreDif.delta : null,
+    comparable: mismaFormula && mismosBloques && !scoreDif.sin_dato,
     motivo: !anterior.formula || !actual.formula
       ? "Falta la versión de fórmula en alguna de las dos mediciones."
       : !mismaFormula
         ? "La fórmula del score cambió entre las dos mediciones: el número no es comparable."
-        : null,
+        : !mismosBloques
+          ? "Una de las dos mediciones incluye las ventas acumuladas de la competencia y la otra no: el número no es comparable."
+          : null,
   };
 
   const hayMateriales =

@@ -2,7 +2,17 @@ import { NonRetriableError } from "inngest";
 import { createClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { inngest } from "./inngest";
-import { startApifyRun, checkApifyRun, getApifyResults } from "./apify";
+import {
+  startApifyRun,
+  checkApifyRun,
+  getApifyResults,
+  elegirParaDetalle,
+  startDetalleRun,
+  getDetalleResults,
+  getRunCosto,
+  abortarRun,
+} from "./apify";
+import type { DetalleVentas } from "./ventas";
 import { analizarConGemini } from "./gemini";
 import { PLAN_CONFIG } from "./plans";
 import { getCurrencyForCountry, getExchangeRate } from "./currency";
@@ -14,6 +24,23 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+/**
+ * TAB 3.6 — cuanto se espera el detalle de las 10 publicaciones antes de
+ * seguir sin el. Medido el 11/10 con 5 en paralelo: 110-176 s para 10. Con 10
+ * en paralelo deberia andar en ~60-90 s. Pasado este tope el run se aborta y
+ * el bloque C se omite con su motivo: el analisis no se rompe ni espera mas.
+ */
+const DETALLE_TIMEOUT_MS = 180_000;
+const DETALLE_ESPERA_ENTRE_CHEQUEOS = "10s";
+const DETALLE_MAX_CHEQUEOS = 30;
+
+const ventasOmitidas = (motivo: string, pedidas = 0): DetalleVentas => ({
+  estado: "omitido",
+  motivo,
+  pedidas,
+  productos: [],
+});
 
 const updateJob = async (job_id: string, fields: Record<string, unknown>) => {
   await supabase
@@ -152,6 +179,37 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         return fallbackScrape;
       });
 
+      // Step 3: TAB 3.6 — pedir el detalle de 10 publicaciones (ventas
+      // acumuladas). Arranca apenas hay listado y corre en Apify mientras aca
+      // se piden las tendencias; se espera recien antes del score.
+      //
+      // La eleccion corre sobre el listado YA pasado por el filtro de palabras
+      // de `lib/relevancia.ts` (sin LLM, instantaneo): en el paso 0 las 5 mas
+      // baratas del scrape crudo traian una funda y un repuesto. El filtro
+      // semantico corre despues, adentro del step de Gemini, y lo que ese
+      // descarte tambien sale del bloque C.
+      //
+      // Nunca tira: si no se puede arrancar, el bloque C se omite con motivo.
+      const detalleRun = await step.run("start-apify-detalle", async () => {
+        try {
+          const { filtrarRelevantes } = await import("./relevancia");
+          const prefiltro = filtrarRelevantes({
+            producto,
+            searchKeyword: search_keyword,
+            listings: finalScrape.listings,
+          });
+          const elegidas = elegirParaDetalle(prefiltro.listings, pais);
+          if (elegidas.length === 0) {
+            return { runId: null, elegidas, inicio: Date.now(), error: "ninguna publicación trajo un identificador para consultar sus ventas" };
+          }
+          const id = await startDetalleRun(elegidas, pais, Math.ceil(DETALLE_TIMEOUT_MS / 1000) + 60);
+          return { runId: id, elegidas, inicio: Date.now(), error: null };
+        } catch (err) {
+          console.error("[apify-detalle] no arranco, el bloque C se omite:", err);
+          return { runId: null, elegidas: [], inicio: Date.now(), error: "no se pudo iniciar la consulta de ventas de la competencia" };
+        }
+      });
+
       // Step 4: Tendencias de Google Trends.
       // Antes tambien pedia "total de publicaciones" y "tendencias" a la API
       // publica de Mercado Libre (api.mercadolibre.com/sites/*/search y
@@ -172,6 +230,55 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
         }
         return { trends };
       });
+
+      // Step 4b: esperar el detalle. Loop de step.sleep y no reintentos de
+      // Inngest: los reintentos tienen backoff exponencial, y aca hace falta un
+      // tope de tiempo predecible. null nunca es 0: si falla o se pasa del
+      // tope, el bloque C se omite con su motivo, como antes del 3.6.
+      let ventas: DetalleVentas;
+      if (!detalleRun.runId) {
+        ventas = ventasOmitidas(detalleRun.error ?? "no se consultaron las ventas de la competencia");
+      } else {
+        const detalleRunId = detalleRun.runId;
+        let resuelto: DetalleVentas | null = null;
+        for (let i = 0; i < DETALLE_MAX_CHEQUEOS && !resuelto; i++) {
+          const chequeo = await step.run(`wait-apify-detalle-${i}`, async () => {
+            if (i === 0) {
+              await updateJob(job_id, { step_message: "Consultando las ventas de la competencia..." });
+            }
+            const pedidas = detalleRun.elegidas.length;
+            try {
+              const { status } = await checkApifyRun(detalleRunId);
+              if (status === "SUCCEEDED") {
+                return { listo: true, ventas: await getDetalleResults(detalleRunId, detalleRun.elegidas) };
+              }
+              if (["FAILED", "ABORTED", "TIMED-OUT"].includes(status)) {
+                return { listo: true, ventas: ventasOmitidas(`la consulta de ventas de la competencia falló (${status})`, pedidas) };
+              }
+              if (Date.now() - detalleRun.inicio > DETALLE_TIMEOUT_MS) {
+                await abortarRun(detalleRunId);
+                return {
+                  listo: true,
+                  ventas: ventasOmitidas(
+                    `la consulta de ventas de la competencia tardó más de ${Math.round(DETALLE_TIMEOUT_MS / 60000)} minutos y se cortó`,
+                    pedidas
+                  ),
+                };
+              }
+              return { listo: false, ventas: null };
+            } catch (err) {
+              console.error("[apify-detalle] error leyendo el run, el bloque C se omite:", err);
+              return { listo: true, ventas: ventasOmitidas("no se pudo leer la consulta de ventas de la competencia", pedidas) };
+            }
+          });
+          if (chequeo.listo && chequeo.ventas) {
+            resuelto = chequeo.ventas as DetalleVentas;
+          } else {
+            await step.sleep(`sleep-apify-detalle-${i}`, DETALLE_ESPERA_ENTRE_CHEQUEOS);
+          }
+        }
+        ventas = resuelto ?? ventasOmitidas("la consulta de ventas de la competencia no terminó a tiempo", detalleRun.elegidas.length);
+      }
 
       // Step 5: Análisis con Gemini
       const analysis = await step.run(
@@ -255,7 +362,27 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           const precios = listingsNormalizados
             .map(l => l.price)
             .filter((p): p is number => p !== null && p > 0);
-          const totalConVentas = listingsNormalizados.filter(l => (l.soldQuantity ?? 0) > 0).length;
+
+          // TAB 3.6: del detalle quedan solo las publicaciones que sobrevivieron
+          // a los dos filtros de relevancia. Si el filtro semantico decidio que
+          // una no es este producto, sus ventas tampoco prueban su demanda.
+          const sobreviven = new Set(
+            listingsNormalizados.map((l) => l.itemId).filter((x): x is string => !!x)
+          );
+          const ventasRelevantes: DetalleVentas =
+            ventas.estado === "ok"
+              ? (() => {
+                  const productos = ventas.productos.filter((p) => p.itemId && sobreviven.has(p.itemId));
+                  return productos.length > 0
+                    ? { ...ventas, productos }
+                    : ventasOmitidas("ninguna de las publicaciones consultadas resultó ser este producto", ventas.pedidas);
+                })()
+              : ventas;
+          const { resumirVentas } = await import("./ventas");
+          // Antes contaba `soldQuantity > 0` del listado, que no llego nunca
+          // (modo listado). Ahora: productos distintos que publican sus ventas.
+          const totalConVentas =
+            ventasRelevantes.estado === "ok" ? resumirVentas(ventasRelevantes.productos).medidos : 0;
 
           const calculado = calcularPrecioStats(precios, totalConVentas, costoLocal, {
             n_descartados: relevanciaFinal.n_descartados,
@@ -307,6 +434,7 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
                 unidad: normalizado.unidad,
                 tipoPublicacion: tipo_publicacion ?? null,
                 otrosCostosPct: otros_costos_pct ?? null,
+                ventas: ventasRelevantes,
               })
             : null;
 
@@ -376,6 +504,10 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
               // costos que la pagina muestra, y que tipo de publicacion se uso
               // (y si lo eligio el usuario o se asumio por perfil).
               costos_venta: scoreCalculado.costos_venta,
+              // TAB 3.6 (11/10): las paginas de detalle detras del bloque C,
+              // producto por producto, para que la pagina las muestre con su
+              // rotulo ("el producto, todos los vendedores").
+              ventas: scoreCalculado.ventas,
             },
             metricas: scoreCalculado.metricas,
           };
@@ -409,6 +541,27 @@ Ejemplo: "difusor aromas" en vez de "difusor de aromas ultrasónico"`;
           total_publicaciones_ml: 0,
           google_trends_interest: mlData?.trends?.interest ?? 0,
           google_trends_trending: mlData?.trends?.trending ?? false,
+          // TAB 3.6 (11/10): lo que Apify cobro por este analisis, run por run,
+          // para medir el costo real contra los ~USD 0,27 estimados (listado
+          // 30 x 0,002 + detalle 10 x 0,025). Se lee aca, al final, porque
+          // `usageTotalUsd` tarda unos segundos en asentarse.
+          apify_costo: await (async () => {
+            const [listado, fallback, detalle] = await Promise.all([
+              getRunCosto(runId),
+              fallbackRunId ? getRunCosto(fallbackRunId) : Promise.resolve(null),
+              detalleRun.runId ? getRunCosto(detalleRun.runId) : Promise.resolve(null),
+            ]);
+            const runs = [listado, fallback, detalle].filter((r) => r != null);
+            return {
+              listado,
+              fallback,
+              detalle,
+              usd_total:
+                runs.length > 0 && runs.every((r) => r.usd != null)
+                  ? Math.round(runs.reduce((a, r) => a + (r.usd as number), 0) * 10000) / 10000
+                  : null,
+            };
+          })(),
         };
 
         const { data: insertData, error: insertErr } = await supabase

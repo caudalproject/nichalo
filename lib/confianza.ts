@@ -240,7 +240,9 @@ function peor(a: NivelConfianza, b: NivelConfianza): NivelConfianza {
  * Calcula percentiles y confianza a partir de los precios crudos del scrape.
  *
  * @param precios       precios en moneda local, sin filtrar ni ordenar
- * @param totalConVentas cuantos listings traian soldQuantity > 0
+ * @param totalConVentas cuantos productos publican sus ventas acumuladas. En
+ *   el analisis inicial sale de las 10 paginas de detalle (TAB 3.6); en modo
+ *   listado (seguimiento, tests viejos) es 0 siempre.
  */
 export function calcularPrecioStats(
   precios: number[],
@@ -370,10 +372,14 @@ export function calcularPrecioStats(
   // LA AUSENCIA DE DATOS DE VENTA YA NO DEGRADA LA CONFIANZA (24/9).
   //
   // Degradaba a "media", y "media" capea el score en 75. El problema es
-  // cuantas veces pasa: Mercado Libre no publica `soldQuantity` NUNCA. Esta
-  // medido y documentado en `lib/apify.ts` — 300 publicaciones, 100% en null —
-  // y se ve en los 11 fixtures del golden set: los 11 levantan este motivo,
-  // sin excepcion.
+  // cuantas veces pasaba: `soldQuantity` llegaba null en el 100% de las
+  // publicaciones (810 de 810 entre junio y octubre; los 11 fixtures del
+  // golden set levantan este motivo sin excepcion). Correccion del 11/10 (TAB
+  // 3.6): no era que Mercado Libre no lo publicara — el actor de Apify corria
+  // solo en MODO LISTADO, y la pagina de busqueda no muestra vendidos. El dato
+  // esta en la pagina de detalle. Desde la v1.4 el analisis inicial pide 10
+  // detalles y `totalConVentas` cuenta los productos que si lo publican; el
+  // seguimiento (TAB 5) sigue en modo listado y sigue levantando el motivo.
   //
   // Un castigo que se aplica al 100% de los casos no es un castigo: es una
   // constante. Lo que producia era que NINGUN analisis pudiera pasar de 75
